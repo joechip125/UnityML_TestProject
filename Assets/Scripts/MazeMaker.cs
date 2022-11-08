@@ -11,6 +11,7 @@ public class MazeMaker : MonoBehaviour
     public int sizeX, sizeZ;
 	
     public MazeCell cellPrefab;
+    public Pellet pelletPrefab;
 
     private MazeCell[,] cells;
     
@@ -37,11 +38,15 @@ public class MazeMaker : MonoBehaviour
     private void CreateCell (int x, int z) 
     {
         MazeCell newCell = Instantiate(cellPrefab) as MazeCell;
+        var pellet = Instantiate(pelletPrefab);
+        var pos = new 
+            Vector3(x - sizeX * 0.5f + 0.5f, 0f, z - sizeZ * 0.5f + 0.5f);
         cells[x, z] = newCell;
         newCell.name = "Maze Cell " + x + ", " + z;
+        pellet.transform.parent = transform;
         newCell.transform.parent = transform;
-        newCell.transform.localPosition = new 
-            Vector3(x - sizeX * 0.5f + 0.5f, 0f, z - sizeZ * 0.5f + 0.5f);
+        pellet.transform.localPosition = pos + new Vector3(0,0.5f,0);
+        newCell.transform.localPosition = pos;
     }
     
     void SpawnTiles()

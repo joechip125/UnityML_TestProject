@@ -49,4 +49,5 @@ MonoBehaviour:
   sizeX: 10
   sizeZ: 10
   cellPrefab: {fileID: 8511179736261907689, guid: 7326321e326bdf94985a3bc6a796f699, type: 3}
+  pelletPrefab: {fileID: 193689140373941350, guid: 218248d46209dad4e8806b17a9d7bc7b, type: 3}
   mazePrefab: {fileID: 2401909723287616378}

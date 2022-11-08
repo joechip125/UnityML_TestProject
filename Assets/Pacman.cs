@@ -24,7 +24,6 @@ public class Pacman : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        
         sensor.AddObservation(target.localPosition);
         sensor.AddObservation(transform.localPosition);
 
