@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3370359610244503638}
-  - component: {fileID: 2401909723287616378}
+  - component: {fileID: 4484059598714232438}
   m_Layer: 0
   m_Name: MazeMaker
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2401909723287616378
+--- !u!114 &4484059598714232438
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,13 +41,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 574335918523903343}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e2868cc97f44914bbc211d81e9d2b1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1592517cf81484424a60f86dfcafc7eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  floorTile: {fileID: 709792345635360809, guid: 7326321e326bdf94985a3bc6a796f699, type: 3}
-  numberTiles: 10
-  sizeX: 10
-  sizeZ: 10
-  cellPrefab: {fileID: 8511179736261907689, guid: 7326321e326bdf94985a3bc6a796f699, type: 3}
-  pelletPrefab: {fileID: 193689140373941350, guid: 218248d46209dad4e8806b17a9d7bc7b, type: 3}
-  mazePrefab: {fileID: 2401909723287616378}
+  size:
+    x: 10
+    z: 10
+  cellPrefab: {fileID: 2093062019840055693, guid: 436dda9d27a9ff84da7b46cb497866a4, type: 3}
+  generationStepDelay: 0
+  passagePrefab: {fileID: 140774350398173142, guid: 5f637152174320e4baddd1d7a91b2705, type: 3}
+  wallPrefab: {fileID: 2841352194012812370, guid: 30ea2f6c0220fde4ba70b37c20b5236e, type: 3}

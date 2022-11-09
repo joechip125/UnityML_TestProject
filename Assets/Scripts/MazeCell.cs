@@ -1,41 +1,40 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[Serializable]
-public struct IntVector2 
-{
-    public int x, z;
-	
-    public IntVector2 (int x, int z) 
-    {
-        this.x = x;
-        this.z = z;
-    }
-    
-    public static IntVector2 operator + (IntVector2 a, IntVector2 b) 
-    {
-        a.x += b.x;
-        a.z += b.z;
-        return a;
-    }
-}
+public class MazeCell : MonoBehaviour {
 
-public class MazeCell : MonoBehaviour
-{
-    
-    public IntVector2 Coordinates;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	public IntVector2 coordinates;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	private MazeCellEdge[] edges = new MazeCellEdge[MazeDirections.Count];
+
+	private int initializedEdgeCount;
+
+	public bool IsFullyInitialized {
+		get {
+			return initializedEdgeCount == MazeDirections.Count;
+		}
+	}
+
+	public MazeDirection RandomUninitializedDirection {
+		get {
+			int skips = Random.Range(0, MazeDirections.Count - initializedEdgeCount);
+			for (int i = 0; i < MazeDirections.Count; i++) {
+				if (edges[i] == null) {
+					if (skips == 0) {
+						return (MazeDirection)i;
+					}
+					skips -= 1;
+				}
+			}
+			throw new System.InvalidOperationException("MazeCell has no uninitialized directions left.");
+		}
+	}
+
+	public MazeCellEdge GetEdge (MazeDirection direction) {
+		return edges[(int)direction];
+	}
+
+	public void SetEdge (MazeDirection direction, MazeCellEdge edge) {
+		edges[(int)direction] = edge;
+		initializedEdgeCount += 1;
+	}
 }

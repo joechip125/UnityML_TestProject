@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5940144543359328603}
-  - component: {fileID: 1533957881307686406}
+  - component: {fileID: 7059428157021446062}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1533957881307686406
+--- !u!114 &7059428157021446062
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5550312594026242215}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8ef0a253b5fb0d41b8bfc950feb1ac2, type: 3}
+  m_Script: {fileID: 11500000, guid: cae0fcacd7d8c464bb488d4784e2d893, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mazePrefab: {fileID: 2401909723287616378, guid: ff9cce35dcb041142aa8c60106e4d735, type: 3}
+  mazePrefab: {fileID: 4484059598714232438, guid: ff9cce35dcb041142aa8c60106e4d735, type: 3}
