@@ -48,6 +48,6 @@ MonoBehaviour:
     x: 10
     z: 10
   cellPrefab: {fileID: 2093062019840055693, guid: 436dda9d27a9ff84da7b46cb497866a4, type: 3}
-  generationStepDelay: 0
+  pelletPrefab: {fileID: 193689140373941350, guid: 218248d46209dad4e8806b17a9d7bc7b, type: 3}
   passagePrefab: {fileID: 140774350398173142, guid: 5f637152174320e4baddd1d7a91b2705, type: 3}
   wallPrefab: {fileID: 2841352194012812370, guid: 30ea2f6c0220fde4ba70b37c20b5236e, type: 3}

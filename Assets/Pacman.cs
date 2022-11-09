@@ -11,45 +11,32 @@ public class Pacman : Agent
      public Transform target;
      public Rigidbody rBody;
      public Transform startTrans;
-     public int xMove;
-     public int zMove;
+     public Transform ghostTrans;
+     
+     public int moveDir;
+
+     
     
     public override void OnEpisodeBegin()
     {
         if (transform.localPosition.y < 0)
         {
-            transform.localPosition = startTrans.position;
+            transform.localPosition = new Vector3(0,1,0);
         }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(target.localPosition);
-        sensor.AddObservation(transform.localPosition);
-
+        
         // Agent movement
-        sensor.AddObservation(xMove);
-        sensor.AddObservation(zMove);
-     
+        sensor.AddObservation(moveDir);
     }
 
     public float speed = 10;
     public override void OnActionReceived(ActionBuffers actions)
     {
-        xMove =  actions.DiscreteActions[0];
-        zMove = actions.DiscreteActions[1];
-
-        transform.position += new Vector3(xMove, 0, zMove);
+        MoveAgent(actions);
         
-        float distanceToTarget = Vector3.Distance(transform.localPosition, target.localPosition);
-        
-        if (distanceToTarget < 1.42f)
-        {
-            SetReward(1.0f);
-            EndEpisode();
-        }
-
-        // Fell off platform
         if (transform.localPosition.y < 0)
         {
             EndEpisode();
@@ -69,12 +56,21 @@ public class Pacman : Agent
         }
     }
 
+    public void MoveAgent(ActionBuffers actions)
+    {
+        moveDir =  Mathf.Clamp(actions.DiscreteActions[0], 0, 3);
+        var moveChoice = MazeDirections.ToIntVector2((MazeDirection) moveDir);
+        Debug.Log($"{moveDir}"); 
+
+        transform.position += new Vector3(moveChoice.x, 0, moveChoice.z);
+    }
+    
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var act = actionsOut.ContinuousActions;
-
-        act[0] = Input.GetAxis("Horizontal");
-        act[1] = Input.GetAxis("Vertical");
+        var act = actionsOut.DiscreteActions;
+         Debug.Log($"{act[0]}, {act[1]}"); 
+        //act[0] = Input.GetAxis("Horizontal");
+        //act[1] = Input.GetAxis("Vertical");
     }
     
     void Start()
