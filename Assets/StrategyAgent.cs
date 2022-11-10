@@ -69,7 +69,7 @@ public class StrategyAgent : Agent
          
          if (dist < 0.5f)
          {
-             AddReward(2.0f);
+             SetReward(1.0f);
              EndEpisode();
          }
          
