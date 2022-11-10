@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size:
-    x: 10
-    z: 10
+    x: 5
+    z: 5
   cellPrefab: {fileID: 2093062019840055693, guid: 436dda9d27a9ff84da7b46cb497866a4, type: 3}
   pelletPrefab: {fileID: 193689140373941350, guid: 218248d46209dad4e8806b17a9d7bc7b, type: 3}
   passagePrefab: {fileID: 140774350398173142, guid: 5f637152174320e4baddd1d7a91b2705, type: 3}

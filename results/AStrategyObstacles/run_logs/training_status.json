@@ -1,0 +1,29 @@
+{
+    "Strategy": {
+        "checkpoints": [
+            {
+                "steps": 107206,
+                "file_path": "results\\AStrategyObstacles\\Strategy\\Strategy-107206.onnx",
+                "reward": 10.690320852302737,
+                "creation_time": 1668105298.5707786,
+                "auxillary_file_paths": [
+                    "results\\AStrategyObstacles\\Strategy\\Strategy-107206.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 107206,
+            "file_path": "results\\AStrategyObstacles\\Strategy.onnx",
+            "reward": 10.690320852302737,
+            "creation_time": 1668105298.5707786,
+            "auxillary_file_paths": [
+                "results\\AStrategyObstacles\\Strategy\\Strategy-107206.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.13.0+cu117"
+    }
+}

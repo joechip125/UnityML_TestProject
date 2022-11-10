@@ -1,0 +1,38 @@
+{
+    "Strategy": {
+        "checkpoints": [
+            {
+                "steps": 499977,
+                "file_path": "results\\StrategyObstacles\\Strategy\\Strategy-499977.onnx",
+                "reward": 29.43135874379765,
+                "creation_time": 1668107155.4468193,
+                "auxillary_file_paths": [
+                    "results\\StrategyObstacles\\Strategy\\Strategy-499977.pt"
+                ]
+            },
+            {
+                "steps": 754540,
+                "file_path": "results\\StrategyObstacles\\Strategy\\Strategy-754540.onnx",
+                "reward": 37.26916032036146,
+                "creation_time": 1668107556.7218704,
+                "auxillary_file_paths": [
+                    "results\\StrategyObstacles\\Strategy\\Strategy-754540.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 754540,
+            "file_path": "results\\StrategyObstacles\\Strategy.onnx",
+            "reward": 37.26916032036146,
+            "creation_time": 1668107556.7218704,
+            "auxillary_file_paths": [
+                "results\\StrategyObstacles\\Strategy\\Strategy-754540.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.13.0+cu117"
+    }
+}

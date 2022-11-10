@@ -12,11 +12,8 @@ public class Pacman : Agent
      public Rigidbody rBody;
      public Transform startTrans;
      public Transform ghostTrans;
-     
      public int moveDir;
-
      
-    
     public override void OnEpisodeBegin()
     {
         if (transform.localPosition.y < 0)
@@ -27,7 +24,6 @@ public class Pacman : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        
         // Agent movement
         sensor.AddObservation(moveDir);
     }
