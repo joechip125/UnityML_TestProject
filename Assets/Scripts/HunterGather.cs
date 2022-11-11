@@ -18,7 +18,13 @@ public class HunterGather : Agent
     private bool _haveCollect;
     public Transform dropOff;
     private RayPerceptionSensorComponent3D _perception;
-    
+
+
+    public override void OnEpisodeBegin()
+    {
+        transform.localPosition = dropOff.localPosition + new Vector3(0, 0.3f, 0);
+    }
+
     private void Start()
     {
         _bufferComponent = GetComponent<BufferSensorComponent>();
@@ -29,12 +35,14 @@ public class HunterGather : Agent
         _heldCollect.SetActive(false);
         _haveCollect = false;
         _perception = GetComponent<RayPerceptionSensorComponent3D>();
+
+        transform.localPosition = dropOff.localPosition + new Vector3(0, 0.3f, 0);
     }
 
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.TryGetComponent<Collectable>(out var obstacle))
+        if (collision.gameObject.CompareTag("Collectable"))
         {
             AddReward(0.5f);
             _haveCollect = true;
@@ -46,6 +54,7 @@ public class HunterGather : Agent
     {
         sensor.AddObservation(_rBody.velocity.x);
         sensor.AddObservation(_rBody.velocity.z);
+        sensor.AddObservation(dropOff.localPosition);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -57,7 +66,7 @@ public class HunterGather : Agent
         controlSignal.z = actions.ContinuousActions[1];
         transform.localPosition += controlSignal / 40;
 
-        if (transform.localPosition.y < -1)
+        if (transform.localPosition.y < 0)
         {
             SetReward(-1f);
             EndEpisode();
