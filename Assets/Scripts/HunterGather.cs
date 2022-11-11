@@ -18,11 +18,13 @@ public class HunterGather : Agent
     private bool _haveCollect;
     public Transform dropOff;
     private RayPerceptionSensorComponent3D _perception;
+    public CollectSpawner spawner;
 
 
     public override void OnEpisodeBegin()
     {
         transform.localPosition = dropOff.localPosition + new Vector3(0, 0.3f, 0);
+        spawner.Respawn(6, 6);
     }
 
     private void Start()
@@ -44,27 +46,26 @@ public class HunterGather : Agent
     {
         if (collision.gameObject.CompareTag("Collectable"))
         {
-            AddReward(0.5f);
+            collision.gameObject.GetComponent<Collectable>().Deactivate();
+            SetReward(1f);
             _haveCollect = true;
-            _heldCollect.SetActive(true);
+            EndEpisode();
+           // _heldCollect.SetActive(true);
         }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(_rBody.velocity.x);
-        sensor.AddObservation(_rBody.velocity.z);
-        sensor.AddObservation(dropOff.localPosition);
+        sensor.AddObservation(transform.forward);
+        sensor.AddObservation(transform.localRotation.y);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        
         AddReward(-0.005f);
         Vector3 controlSignal = Vector3.zero;
-        controlSignal.x =  actions.ContinuousActions[0];
-        controlSignal.z = actions.ContinuousActions[1];
-        transform.localPosition += controlSignal / 40;
+        transform.localPosition += transform.forward *Mathf.Clamp(actions.ContinuousActions[0], 0 ,1) / 40;
+        transform.Rotate(Vector3.up,actions.ContinuousActions[1], Space.Self);
 
         if (transform.localPosition.y < 0)
         {
