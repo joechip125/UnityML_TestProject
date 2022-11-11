@@ -19,69 +19,79 @@ public class HunterGather : Agent
     public Transform dropOff;
     private RayPerceptionSensorComponent3D _perception;
     public CollectSpawner spawner;
-
-
+    
     public override void OnEpisodeBegin()
     {
-        transform.localPosition = dropOff.localPosition + new Vector3(0, 0.3f, 0);
+        transform.localPosition = dropOff.localPosition;
+        Debug.Log(dropOff.localPosition);
+        Debug.Log(transform.localPosition);
         spawner.Respawn(6, 6);
+        _haveCollect = false;
     }
 
     private void Start()
     {
-        _bufferComponent = GetComponent<BufferSensorComponent>();
         _rBody = GetComponent<Rigidbody>();
-        _heldCollect = Instantiate(collectProto, 
-            transform.localPosition +  new Vector3(0, 0.7f, 0), Quaternion.identity,
-            transform);
-        _heldCollect.SetActive(false);
         _haveCollect = false;
-        _perception = GetComponent<RayPerceptionSensorComponent3D>();
-
-        transform.localPosition = dropOff.localPosition + new Vector3(0, 0.3f, 0);
     }
 
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            SetReward(-1f);
+            EndEpisode();
+        }
         if (collision.gameObject.CompareTag("Collectable"))
         {
-            collision.gameObject.GetComponent<Collectable>().Deactivate();
+            Destroy(collision.gameObject);
             SetReward(1f);
             _haveCollect = true;
             EndEpisode();
-           // _heldCollect.SetActive(true);
-        }
+        }   
     }
+    
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(transform.forward);
-        sensor.AddObservation(transform.localRotation.y);
+        var localVelocity = transform.InverseTransformDirection(_rBody.velocity);
+        sensor.AddObservation(localVelocity.x);
+        sensor.AddObservation(localVelocity.z);
     }
 
+    private float moveSpeed = 0.4f;
+    private float turnSpeed = 0.4f;
     public override void OnActionReceived(ActionBuffers actions)
     {
         AddReward(-0.005f);
-        Vector3 controlSignal = Vector3.zero;
-        transform.localPosition += transform.forward *Mathf.Clamp(actions.ContinuousActions[0], 0 ,1) / 40;
-        transform.Rotate(Vector3.up,actions.ContinuousActions[1], Space.Self);
-
-        if (transform.localPosition.y < 0)
+        
+        var forward = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
+        var right = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+        var rotate = Mathf.Clamp(actions.ContinuousActions[2], -1f, 1f);
+        
+        var dirToGo = transform.forward * forward;
+        dirToGo += transform.right * right;
+        var rotateDir = -transform.up * rotate;
+        
+        
+        _rBody.AddForce(dirToGo * moveSpeed, ForceMode.VelocityChange);
+        transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed); 
+       
+        if (transform.localPosition.y < -1)
         {
             SetReward(-1f);
             EndEpisode();
         }
 
-        if (_haveCollect)
-        {
-            var dist = Vector3.Distance(transform.localPosition, dropOff.localPosition);
-            if (dist < 0.5f)
-            {
-                _heldCollect.SetActive(false);
-                SetReward(1f);
-                EndEpisode();
-            }
-        }
+       // if (_haveCollect)
+       // {
+       //     var dist = Vector3.Distance(transform.localPosition, dropOff.localPosition);
+       //     if (dist < 0.5f)
+       //     {
+       //         SetReward(1f);
+       //         EndEpisode();
+       //     }
+       // }
     }
 }
