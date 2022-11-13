@@ -23,7 +23,10 @@ public class HunterGather : Agent
     public float totalRotation;
     public float rotateDiff;
     public float lastRot;
-    private Vector3 lastForward;
+    private float _oldDistance;
+    private bool haveObject;
+    public Transform endZone;
+    
     
     public override void OnEpisodeBegin()
     {
@@ -52,8 +55,20 @@ public class HunterGather : Agent
         if (collision.gameObject.CompareTag("Collectable"))
         {
             Destroy(collision.gameObject);
-            SetReward(1f);
-            EndEpisode();
+            _haveCollect = true;
+            SetReward(1.0f);
+        }   
+        if (collision.gameObject.CompareTag("EndZone"))
+        {
+            if (_haveCollect)
+            {
+                SetReward(1f);
+                EndEpisode();
+            }
+            else
+            {
+                AddReward(-0.02f);
+            }
         }   
     }
 
@@ -63,6 +78,14 @@ public class HunterGather : Agent
         {
             AddReward(-0.02f);
         }
+        
+        if (collisionInfo.gameObject.CompareTag("EndZone"))
+        {
+            if (!_haveCollect)
+            {
+                AddReward(-0.02f);
+            }
+        }   
     }
 
 
@@ -71,16 +94,16 @@ public class HunterGather : Agent
         var localVelocity = transform.InverseTransformDirection(_rBody.velocity);
         sensor.AddObservation(localVelocity.x);
         sensor.AddObservation(localVelocity.z);
+        sensor.AddObservation(transform.rotation);
     }
 
-    private float moveSpeed = 0.1f;
+    private float moveSpeed = 0.05f;
     private float turnSpeed = 8f;
     public override void OnActionReceived(ActionBuffers actions)
     {
         AddReward(-0.005f);
-        var dot = Vector3.Dot(lastForward, transform.forward);
 
-        var forward = Mathf.Clamp(actions.ContinuousActions[0], 0, 1f);
+        var forward = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
         var right = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
         var rotate = Mathf.Clamp(actions.ContinuousActions[2], -1f, 1f);
 
@@ -89,25 +112,11 @@ public class HunterGather : Agent
         var rotateDir = -transform.up * rotate;
 
         transform.localPosition += dirToGo * moveSpeed;
-
-
+        
+        
         //_rBody.AddForce(dirToGo * moveSpeed, ForceMode.VelocityChange);
         transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed, Space.Self);
-        
-        rotateDiff =Mathf.DeltaAngle(transform.rotation.eulerAngles.y, lastRot);
 
-        if (Math.Abs(rotateDiff) > 0.5f)
-        {
-            //AddReward(-0.05f);
-            Debug.Log(dot);
-        }
-        if (rotateDir.y != 0)
-        {
-            totalRotation += Time.fixedDeltaTime * turnSpeed;
-            //Debug.Log(totalRotation);
-            //Debug.Log((transform.rotation.eulerAngles));
-        }
-        
         if (transform.localPosition.y < -1)
         {
             SetReward(-1f);
@@ -115,16 +124,12 @@ public class HunterGather : Agent
         }
 
         lastRot = transform.rotation.eulerAngles.y;
-        lastForward = transform.forward;
-
-        // if (_haveCollect)
-        // {
-        //     var dist = Vector3.Distance(transform.localPosition, dropOff.localPosition);
-        //     if (dist < 0.5f)
-        //     {
-        //         SetReward(1f);
-        //         EndEpisode();
-        //     }
-        // }
+        var dist = Vector3.Distance(transform.localPosition, endZone.localPosition);
+        
+        if (dist < _oldDistance)
+        {
+            if(_haveCollect) AddReward(0.008f);
+        }
+        _oldDistance = dist;
     }
 }
