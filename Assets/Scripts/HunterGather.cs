@@ -53,8 +53,6 @@ public class HunterGather : Agent
         {
             Destroy(collision.gameObject);
             SetReward(1f);
-            HitCount++;
-            _haveCollect = true;
             EndEpisode();
         }   
     }
@@ -75,8 +73,8 @@ public class HunterGather : Agent
         sensor.AddObservation(localVelocity.z);
     }
 
-    private float moveSpeed = 0.3f;
-    private float turnSpeed = 0.2f;
+    private float moveSpeed = 0.1f;
+    private float turnSpeed = 8f;
     public override void OnActionReceived(ActionBuffers actions)
     {
         AddReward(-0.005f);
@@ -90,15 +88,17 @@ public class HunterGather : Agent
         dirToGo += transform.right * right;
         var rotateDir = -transform.up * rotate;
 
+        transform.localPosition += dirToGo * moveSpeed;
 
-        _rBody.AddForce(dirToGo * moveSpeed, ForceMode.VelocityChange);
-        transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed);
 
+        //_rBody.AddForce(dirToGo * moveSpeed, ForceMode.VelocityChange);
+        transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed, Space.Self);
+        
         rotateDiff =Mathf.DeltaAngle(transform.rotation.eulerAngles.y, lastRot);
 
         if (Math.Abs(rotateDiff) > 0.5f)
         {
-            AddReward(-0.05f);
+            //AddReward(-0.05f);
             Debug.Log(dot);
         }
         if (rotateDir.y != 0)
@@ -106,11 +106,6 @@ public class HunterGather : Agent
             totalRotation += Time.fixedDeltaTime * turnSpeed;
             //Debug.Log(totalRotation);
             //Debug.Log((transform.rotation.eulerAngles));
-        }
-        
-        if (totalRotation > 400)
-        {
-            AddReward(-0.005f);
         }
         
         if (transform.localPosition.y < -1)

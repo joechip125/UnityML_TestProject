@@ -12,21 +12,17 @@ public class CollectSpawner : MonoBehaviour
     private List<GameObject> _spawnedObjeccts = new List<GameObject>(); 
     public int spawnAmount;
     public Transform owner;
-    public List<Transform> Locations = new List<Transform>();
     public Vector3 spawnLoc;
-
-    public void Init()
-    {
-        GetNewLocation();
-    }
+    public float xRange;
+    public float zRange;
+    
     public void SpawnSingle(int hitCount, int hitInterval)
     {
         DestroyAll();
-        if (hitCount % hitInterval == 0)
-        {
-         //   GetNewLocation();
-        }
-        _spawnedObjeccts.Add(Instantiate(spawnPrototype, Locations[hitCount].localPosition, Quaternion.identity, owner));
+        var local = owner.localPosition + new Vector3(Random.Range(-xRange, xRange), 
+            0.2f,Random.Range(-zRange, zRange));
+       
+        _spawnedObjeccts.Add(Instantiate(spawnPrototype, local, Quaternion.identity, owner));
     }
 
     public void DestroyAll()
@@ -50,15 +46,7 @@ public class CollectSpawner : MonoBehaviour
             _spawnedObjeccts.Add(Instantiate(spawnPrototype, local, Quaternion.identity, owner));
         }
     }
-
-    public Vector3 GetNewLocation()
-    {
-        var vec = Locations[0].localPosition;
-        spawnLoc = vec;
-        Locations.RemoveAt(0);
-        return vec;
-    }
-
+    
     public void DestroyThis(GameObject toDestroy)
     {
         var someObject = _spawnedObjeccts
