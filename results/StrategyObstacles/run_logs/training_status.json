@@ -2,22 +2,22 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 3823,
-                "file_path": "results\\StrategyObstacles\\Strategy\\Strategy-3823.onnx",
-                "reward": -2.7267855554819107,
-                "creation_time": 1668198687.7616138,
+                "steps": 7635,
+                "file_path": "results\\StrategyObstacles\\Strategy\\Strategy-7635.onnx",
+                "reward": -71.46124732494354,
+                "creation_time": 1668367141.6613865,
                 "auxillary_file_paths": [
-                    "results\\StrategyObstacles\\Strategy\\Strategy-3823.pt"
+                    "results\\StrategyObstacles\\Strategy\\Strategy-7635.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 3823,
+            "steps": 7635,
             "file_path": "results\\StrategyObstacles\\Strategy.onnx",
-            "reward": -2.7267855554819107,
-            "creation_time": 1668198687.7616138,
+            "reward": -71.46124732494354,
+            "creation_time": 1668367141.6613865,
             "auxillary_file_paths": [
-                "results\\StrategyObstacles\\Strategy\\Strategy-3823.pt"
+                "results\\StrategyObstacles\\Strategy\\Strategy-7635.pt"
             ]
         }
     },
