@@ -10,7 +10,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Vector3 _goal;
     private bool _moveToGoal;
     private float _goalT;
-    public float moveSpeed = 0.0002f;
+    public float moveSpeed = 0.2f;
 
     private int _unitScore;
     
@@ -20,6 +20,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         set
         {
             if (value == _goal) return;
+            if (_moveToGoal) return;
             _goal = value;
             _goalT = 0;
             _moveToGoal = true;
@@ -68,6 +69,6 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
 
     public int GetUnitScore()
     {
-        throw new System.NotImplementedException();
+        return _unitScore;
     }
 }

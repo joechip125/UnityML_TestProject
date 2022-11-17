@@ -6,11 +6,13 @@ using UnityEngine;
 public class SpawnArea : MonoBehaviour
 {
     public GameObject spawnPrototype;
+    public int xTiles;
+    public int zTiles;
     
     
     void Start()
     {
-        SpawnAreas(5, 5);
+        SpawnAreas(xTiles, zTiles);
     }
 
     void SpawnAreas(int numX, int numZ)

@@ -26,7 +26,7 @@ public class UnitSpawner : MonoBehaviour
     public IUnitControlInterface SpawnNewUnit()
     {
         var inter = (IUnitControlInterface)Instantiate(unitsList[0].theUnit, 
-            transform.localPosition, Quaternion.identity).
+            transform.localPosition + new Vector3(0, 0.5f,0), Quaternion.identity).
             GetComponent(typeof(IUnitControlInterface));
         
         return inter;
