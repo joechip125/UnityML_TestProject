@@ -9,6 +9,7 @@ using UnityEngine;
 public class RTSAgent : Agent
 {
     public UnitSpawner unitSpawner;
+    public AssetSpawner assetSpawner;
     private int _unitScore;
     private IUnitControlInterface _controlInterface;
     private Vector3 _unitLocation;
@@ -22,18 +23,19 @@ public class RTSAgent : Agent
     public override void OnEpisodeBegin()
     {
         _controlInterface?.DestroyUnit();
-        
-        _controlInterface = unitSpawner.SpawnNewUnit();
+        assetSpawner.SpawnCollect();
+        _controlInterface = unitSpawner.SpawnNewUnit(transform.position, transform);
         _unitScore = 0;
     }
 
+    public float range = 1;
     public override void OnActionReceived(ActionBuffers actions)
     {
         AddReward(-0.005f);
         Vector3 controlSignal = Vector3.zero;
         
-        controlSignal.x =  actions.ContinuousActions[0] * 10;
-        controlSignal.z = actions.ContinuousActions[1] * 10;
+        controlSignal.x =  actions.ContinuousActions[0] * range;
+        controlSignal.z = actions.ContinuousActions[1] * range;
         controlSignal.y = 0.5f;
         _unitLocation = _controlInterface.GetLocation();
         

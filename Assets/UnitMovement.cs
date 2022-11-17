@@ -48,6 +48,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         Goal = newLocation;
     }
 
+    public void AddVector(Vector3 addAmount)
+    {
+        
+    }
+
     public Vector3 GetLocation()
     {
         return transform.localPosition;

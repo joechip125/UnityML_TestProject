@@ -7,18 +7,24 @@ using UnityEngine;
 public class AssetSpawner : MonoBehaviour
 {
     public GameObject spawnObject;
-
+    private GameObject _keepObject;
 
     public void SpawnCollect()
     {
+        if (_keepObject) Destroy(_keepObject);
+        
         var random = transform.localPosition   
-                     + new Vector3(Random.Range(0, 12), 0.15f, Random.Range(0, 12));
-        Instantiate(spawnObject, random, Quaternion.identity);
+                     + new Vector3(Random.Range(0, 6), 0.15f, Random.Range(0, 6));
+        _keepObject  = Instantiate(spawnObject,
+            transform, false);
+        _keepObject.transform.localPosition = random;
     }
+    
+    
     
     void Start()
     {
-        SpawnCollect();
+        
     }
 
     // Update is called once per frame

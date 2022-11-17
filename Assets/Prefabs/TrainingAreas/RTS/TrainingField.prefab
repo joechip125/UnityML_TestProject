@@ -263,6 +263,8 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 10000
   unitSpawner: {fileID: 3011171279041476631}
+  assetSpawner: {fileID: 2481796909266437297}
+  range: 1
 --- !u!114 &2481796909618089314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,8 +293,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 2481796909365855950}
   m_SensorName: CameraSensor
-  m_Width: 32
-  m_Height: 32
+  m_Width: 54
+  m_Height: 54
   m_Grayscale: 0
   m_ObservationType: 0
   m_ObservationStacks: 1

@@ -23,11 +23,13 @@ public class UnitSpawner : MonoBehaviour
 {
     public List<Units> unitsList;
     
-    public IUnitControlInterface SpawnNewUnit()
+    public IUnitControlInterface SpawnNewUnit(Vector3 spawnPos, Transform parent)
     {
-        var inter = (IUnitControlInterface)Instantiate(unitsList[0].theUnit, 
-            transform.localPosition + new Vector3(0, 0.5f,0), Quaternion.identity).
-            GetComponent(typeof(IUnitControlInterface));
+        var gObj = Instantiate(unitsList[0].theUnit,
+            parent.parent, false);
+        gObj.transform.localScale = new Vector3(1, 1, 1);
+        
+           var inter = (IUnitControlInterface)gObj.GetComponent(typeof(IUnitControlInterface));
         
         return inter;
     }

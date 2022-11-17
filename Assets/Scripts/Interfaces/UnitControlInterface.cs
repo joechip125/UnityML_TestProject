@@ -6,6 +6,8 @@ namespace Interfaces
     {
         public void MoveToLocation(Vector3 newLocation);
         
+        public void AddVector(Vector3 addAmount);
+        
         public Vector3 GetLocation();
 
         public void DestroyUnit();
