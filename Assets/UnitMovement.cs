@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Google.Protobuf.WellKnownTypes;
@@ -9,7 +10,9 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Vector3 _goal;
     private bool _moveToGoal;
     private float _goalT;
-    public float moveSpeed = 10.0f;
+    public float moveSpeed = 0.0002f;
+
+    private int _unitScore;
     
     public Vector3 Goal
     {
@@ -18,19 +21,9 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         {
             if (value == _goal) return;
             _goal = value;
-            SetNewDestination();
+            _goalT = 0;
             _moveToGoal = true;
         }
-    }
-
-    void Start()
-    {
-        Goal = transform.localPosition + new Vector3(20, 0, 20);
-    }
-
-    public void SetNewDestination()
-    {
-        
     }
     
     void Update()
@@ -52,5 +45,29 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     public void MoveToLocation(Vector3 newLocation)
     {
         Goal = newLocation;
+    }
+
+    public Vector3 GetLocation()
+    {
+        return transform.localPosition;
+    }
+
+    public void DestroyUnit()
+    {
+        Destroy(gameObject);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.TryGetComponent<Collectable>(out var obstacle))
+        {
+            _unitScore++;
+            obstacle.Deactivate();
+        }
+    }
+
+    public int GetUnitScore()
+    {
+        throw new System.NotImplementedException();
     }
 }
