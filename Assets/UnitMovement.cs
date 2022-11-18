@@ -50,7 +50,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
 
     public void AddVector(Vector3 addAmount)
     {
-        
+        transform.localPosition += addAmount;
     }
 
     public Vector3 GetLocation()
