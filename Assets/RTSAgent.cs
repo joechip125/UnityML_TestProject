@@ -43,14 +43,25 @@ public class RTSAgent : Agent
 
         if (result)
         {
+            AddReward(0.05f);
+        }
+        else
+        {
+            AddReward(-0.05f);
+        }
+
+        if (GetCumulativeReward() >= 1)
+        {
             SetReward(1.0f);
             EndEpisode();
         }
-        else
+
+        if (GetCumulativeReward() <= -1)
         {
             SetReward(-1.0f);
             EndEpisode();
         }
+        
     }
     
     public void MoveAgent(ActionSegment<int> act)

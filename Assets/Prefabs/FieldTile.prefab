@@ -214,8 +214,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileMat: {fileID: 2100000, guid: 596442cae1d62a94ca1ca0e69dcc98db, type: 2}
-  collectValue: 0
-  spawnCollect: {fileID: 6823700463351245568, guid: d9dcaac88b1dcbb49915e08be9f3f425, type: 3}
+  spawnCollect: {fileID: 5018063002184240805, guid: 80892a7e85e00d24d834c8c9e2a94806, type: 3}
+  numberCollect: 0
+  range: 3
 --- !u!1 &7633059916603655504
 GameObject:
   m_ObjectHideFlags: 0

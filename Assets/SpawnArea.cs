@@ -5,7 +5,6 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-
 public class SpawnArea : MonoBehaviour
 {
     public GameObject spawnPrototype;
@@ -13,6 +12,8 @@ public class SpawnArea : MonoBehaviour
     public int zTiles;
     public List<FieldTile> tiles;
     public IntVector2 coordinates;
+    private int _rightChoice;
+    private int _totalScore;
     
     void Start()
     {
@@ -21,24 +22,33 @@ public class SpawnArea : MonoBehaviour
 
     public void RespawnCollect()
     {
+        var randChoice = Random.Range(0, 4);
+        var counter = 0;
+        
         foreach (var t in tiles)
         {
             t.ClearAllCollect();
-            t.SpawnRandomAmount();
+
+            if (counter == randChoice)
+            {
+                _rightChoice = counter;
+                t.SpawnSetAmount(1);
+            }
+            counter++;
         }
     }
 
     public bool CheckTile(int tileChoice)
     {
-        var num = tiles[tileChoice].numberCollect;
-
-        var high = tiles.OrderBy(x => x.numberCollect)
-            .ToList()[^1].collectValue;
-
-        Debug.Log($"Choice val:{num}, High val: {high}");
-        if (num > high)
+        if (tileChoice == _rightChoice)
+        {
+            tiles[tileChoice].CollectValue++;
+            tiles[tileChoice].UpdateTileStatus(TileStatus.Right);
             return true;
+        }
 
+        tiles[tileChoice].CollectValue = 0;
+        tiles[tileChoice].UpdateTileStatus(TileStatus.Wrong);
         return false;
     }
     

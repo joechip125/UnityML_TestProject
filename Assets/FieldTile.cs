@@ -9,7 +9,9 @@ using Random = UnityEngine.Random;
 public enum TileStatus
 {
     Blank,
-    Found
+    Found,
+    Wrong,
+    Right
 }
 
 public class FieldTile : MonoBehaviour
@@ -18,20 +20,22 @@ public class FieldTile : MonoBehaviour
 
     private TextMeshProUGUI _text;
 
-    public float collectValue;
+    private float _collectValue;
 
     public GameObject spawnCollect;
     
-    private List<GameObject> _collectRef;
+    private List<GameObject> _collectRef = new();
+
+    public TileStatus currentStatus;
 
     public int numberCollect;
 
     public float CollectValue
     {
-        get => collectValue;
+        get => _collectValue;
         set
         {
-            collectValue = value;
+            _collectValue = value;
             UpdateText();
         }
     }
@@ -39,7 +43,7 @@ public class FieldTile : MonoBehaviour
     
     private void UpdateText()
     {
-        _text.text = $"CS:{collectValue}";
+        _text.text = $":{_collectValue}";
     }
     
     
@@ -50,6 +54,7 @@ public class FieldTile : MonoBehaviour
 
     public void UpdateTileStatus(TileStatus newStatus)
     {
+        currentStatus = newStatus;
         switch (newStatus)
         {
             case TileStatus.Blank:
@@ -58,32 +63,54 @@ public class FieldTile : MonoBehaviour
             case TileStatus.Found:
                 tileMat.color = Color.white;
                 break;
+            case TileStatus.Wrong:
+                tileMat.color = Color.red;
+                break;
+            case TileStatus.Right:
+                tileMat.color = Color.green;
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newStatus), newStatus, null);
         }
     }
-    
+
+    public float range = 3;
     public void SpawnRandomAmount()
     {
-        var amount = Random.Range(1, 10);
+        var amount = Random.Range(0, 1);
         numberCollect = amount;
 
         for (int i = 0; i < amount; i++)
         {
-            var random = transform.localPosition   
-                         + new Vector3(Random.Range(-4, 4), 0.15f, Random.Range(-4, 4));
             var temp  = Instantiate(spawnCollect,
                 transform, false);
+            temp.transform.localPosition += new 
+                Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
             
             _collectRef.Add(temp);
         }
     }
 
+
+    public void SpawnSetAmount(int amount)
+    {
+        numberCollect = amount;
+        for (int i = 0; i < amount; i++)
+        {
+            var temp  = Instantiate(spawnCollect,
+                transform, false);
+            temp.transform.localPosition += new 
+                Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
+            
+            _collectRef.Add(temp);
+        }
+    }
+    
     public void ClearAllCollect()
     {
         foreach (var c in _collectRef)
         {
-            Destroy(c);
+            if(c) Destroy(c);
         }
         
         _collectRef.Clear();
@@ -92,6 +119,6 @@ public class FieldTile : MonoBehaviour
     void Start()
     {
         UpdateTileStatus(TileStatus.Found);
-        UpdateText();
+        //UpdateText();
     }
 }
