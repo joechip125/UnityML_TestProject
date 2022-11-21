@@ -14,19 +14,21 @@ public class RTSAgent : Agent
     private IUnitControlInterface _controlInterface;
     private Vector3 _unitLocation;
     public Transform start;
+    public SpawnArea spawnArea;
     
     
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(_unitLocation);
+      //  sensor.AddObservation(_unitLocation);
     }
 
     public override void OnEpisodeBegin()
     {
-        _controlInterface?.DestroyUnit();
-        assetSpawner.SpawnCollect();
-        _controlInterface = unitSpawner.SpawnNewUnit(transform.position, transform);
-        _unitScore = 0;
+        spawnArea.RespawnCollect();
+       // _controlInterface?.DestroyUnit();
+       // assetSpawner.SpawnCollect();
+       // _controlInterface = unitSpawner.SpawnNewUnit(transform.position, transform);
+       // _unitScore = 0;
     }
 
     public float range = 1;
@@ -35,31 +37,20 @@ public class RTSAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        AddReward(-0.005f);
-        Vector3 controlSignal = Vector3.zero;
-        
-        controlSignal.x =  actions.ContinuousActions[0] / 15;
-        controlSignal.z = actions.ContinuousActions[1] / 15;
-       // controlSignal.y = 0.5f;
-        _unitLocation = _controlInterface.GetLocation();
-        
-        _controlInterface.AddVector(controlSignal);
-        var tempScore = _controlInterface.GetUnitScore();
+        var choice = Mathf.Clamp(actions.DiscreteActions[0], 0, 3);
 
-        if (_unitLocation.y < -1)
+        var result = spawnArea.CheckTile(choice);
+
+        if (result)
         {
-            _controlInterface.DestroyUnit();
-            SetReward(-1f);
+            SetReward(1.0f);
             EndEpisode();
         }
-        
-        if (tempScore > _unitScore)
+        else
         {
-            SetReward(1f);
-            _controlInterface.DestroyUnit();
+            SetReward(-1.0f);
             EndEpisode();
         }
-        _unitScore = tempScore;
     }
     
     public void MoveAgent(ActionSegment<int> act)
