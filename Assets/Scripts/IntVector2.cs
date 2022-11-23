@@ -23,5 +23,9 @@ public struct IntVector2 {
 	{
 		return !(a == b);
 	}
-	
+
+	public override string ToString()
+	{
+		return $"X:{x},Z:{z}";
+	}
 }

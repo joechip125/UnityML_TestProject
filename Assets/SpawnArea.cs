@@ -14,6 +14,9 @@ public class SpawnArea : MonoBehaviour
     private IntVector2 _theRightChoice;
     private int _rightChoice;
     private int _totalScore;
+
+    private int _numWrong;
+    private int _numRight;
     
     void Start()
     {
@@ -61,10 +64,12 @@ public class SpawnArea : MonoBehaviour
     {
         if (tileChoice == _theRightChoice)
         {
-            tiles.Single(x => x.coordinates == tileChoice).CollectValue++;
+            Debug.Log($"Right{tileChoice} {_numRight++}");
+            //tiles.Single(x => x.coordinates == tileChoice).CollectValue++;
             return true;
         }
-        tiles.Single(x => x.coordinates == tileChoice).CollectValue--;
+        Debug.Log($"Wrong{tileChoice} {_numWrong++}");
+        //tiles.Single(x => x.coordinates == tileChoice).CollectValue--;
         return false;
     }
     

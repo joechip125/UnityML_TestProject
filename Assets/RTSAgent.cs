@@ -18,11 +18,12 @@ public class RTSAgent : Agent
     public float rewardRange = 0.05f;
     public float currentReward;
     public float rewardIncrement = 0.005f;
+    private int _hits;
     
     
     public override void CollectObservations(VectorSensor sensor)
     {
-       // sensor.AddObservation(currentReward);
+        sensor.AddObservation(_hits);
        // sensor.AddObservation(_unitLocation);
     }
 
@@ -46,29 +47,31 @@ public class RTSAgent : Agent
 
         _unitLocation += nextPos;
         
-        Debug.DrawLine(_unitLocation+ new Vector3(0, 1,0), 
-            nextPos, Color.green, 1f);
+      //  Debug.DrawLine(_unitLocation+ new Vector3(0, 1,0), 
+      //      nextPos, Color.green, 1f);
 
         if (result)
         {
             currentReward += rewardIncrement;
+            _hits++;
         }
         else
         {
             currentReward -= rewardIncrement;
+            _hits--;
         }
 
         currentReward = Mathf.Clamp(currentReward, -rewardRange, rewardRange);
         
-        AddReward(currentReward);
+        //AddReward(currentReward);
 
-        if (GetCumulativeReward() >= 1)
+        if (_hits > 50)
         {
             SetReward(1.0f);
             EndEpisode();
         }
 
-        if (GetCumulativeReward() <= -1)
+        else if(_hits < - 50)
         {
             SetReward(-1.0f);
             EndEpisode();
@@ -76,29 +79,23 @@ public class RTSAgent : Agent
     }
 
 
-    public IntVector2 ChooseMove(ActionSegment<int> act)
+    private IntVector2 ChooseMove(ActionSegment<int> act)
     {
         var action = act[0];
-        var action2 = act[1];
         var moveDir = new IntVector2();
-        
         switch (action)
         {
             case 1:
-                moveDir.x = 0;
+                moveDir = new IntVector2(0,0);
                 break;
             case 2:
-                moveDir.x = 1;
+                moveDir = new IntVector2(1,0);
                 break;
-        }
-        
-        switch (action2)
-        {
-            case 1:
-                moveDir.z = 0;
+            case 3:
+                moveDir = new IntVector2(0,1);
                 break;
-            case 2:
-                moveDir.z = 1;
+            case 4:
+                moveDir = new IntVector2(1,1);
                 break;
         }
         
@@ -136,9 +133,4 @@ public class RTSAgent : Agent
         
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

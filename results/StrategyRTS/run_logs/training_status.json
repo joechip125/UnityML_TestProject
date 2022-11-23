@@ -2,22 +2,22 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 4152,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-4152.onnx",
-                "reward": -1.001036397775813,
-                "creation_time": 1669057865.5427468,
+                "steps": 32247,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-32247.onnx",
+                "reward": -0.5095332018408941,
+                "creation_time": 1669231232.299867,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-4152.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-32247.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 4152,
+            "steps": 32247,
             "file_path": "results\\StrategyRTS\\Strategy.onnx",
-            "reward": -1.001036397775813,
-            "creation_time": 1669057865.5427468,
+            "reward": -0.5095332018408941,
+            "creation_time": 1669231232.299867,
             "auxillary_file_paths": [
-                "results\\StrategyRTS\\Strategy\\Strategy-4152.pt"
+                "results\\StrategyRTS\\Strategy\\Strategy-32247.pt"
             ]
         }
     },
