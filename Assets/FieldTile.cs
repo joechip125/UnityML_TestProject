@@ -19,7 +19,7 @@ public class FieldTile : MonoBehaviour
     public Material tileMat;
 
     private TextMeshProUGUI _text;
-
+    public IntVector2 coordinates;
     private float _collectValue;
 
     public GameObject spawnCollect;
@@ -43,7 +43,7 @@ public class FieldTile : MonoBehaviour
     
     private void UpdateText()
     {
-        _text.text = $":{_collectValue}";
+        _text.text = $"{_collectValue}";
     }
     
     

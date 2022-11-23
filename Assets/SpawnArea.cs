@@ -11,7 +11,7 @@ public class SpawnArea : MonoBehaviour
     public int xTiles;
     public int zTiles;
     public List<FieldTile> tiles;
-    public IntVector2 coordinates;
+    private IntVector2 _theRightChoice;
     private int _rightChoice;
     private int _totalScore;
     
@@ -32,6 +32,7 @@ public class SpawnArea : MonoBehaviour
             if (counter == randChoice)
             {
                 _rightChoice = counter;
+                _theRightChoice = t.coordinates;
                 t.SpawnSetAmount(1);
             }
             counter++;
@@ -43,12 +44,27 @@ public class SpawnArea : MonoBehaviour
         if (tileChoice == _rightChoice)
         {
             tiles[tileChoice].CollectValue++;
-            tiles[tileChoice].UpdateTileStatus(TileStatus.Right);
             return true;
         }
 
-        tiles[tileChoice].CollectValue = 0;
-        tiles[tileChoice].UpdateTileStatus(TileStatus.Wrong);
+        tiles[tileChoice].CollectValue--;
+        return false;
+    }
+
+    public Vector3 GetLocationAtTile(IntVector2 tileCoords)
+    {
+        return tiles.Single(x => x.coordinates == tileCoords)
+            .transform.localPosition;
+    }
+    
+    public bool CheckTile(IntVector2 tileChoice)
+    {
+        if (tileChoice == _theRightChoice)
+        {
+            tiles.Single(x => x.coordinates == tileChoice).CollectValue++;
+            return true;
+        }
+        tiles.Single(x => x.coordinates == tileChoice).CollectValue--;
         return false;
     }
     
@@ -58,11 +74,12 @@ public class SpawnArea : MonoBehaviour
         Vector3 spawnLoc = transform.localPosition;
         for (int x = 0; x < numX; x++)
         {
-            for (int z = 0; z < numX; z++)
+            for (int z = 0; z < numZ; z++)
             {
                 var temp = Instantiate(spawnPrototype, spawnLoc + new Vector3(0,0, z * 10), 
-                    quaternion.identity, transform);
-                tiles.Add(temp.GetComponent<FieldTile>());
+                    quaternion.identity, transform).GetComponent<FieldTile>();
+                tiles.Add(temp);
+                temp.coordinates = new IntVector2(x, z);
             }
 
             spawnLoc += new Vector3(10,0,0);
