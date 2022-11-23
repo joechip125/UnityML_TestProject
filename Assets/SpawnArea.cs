@@ -25,9 +25,9 @@ public class SpawnArea : MonoBehaviour
 
     public void RespawnCollect()
     {
-        var randChoice = Random.Range(0, 4);
+        var randChoice = Random.Range(1, 4);
         var counter = 0;
-        
+
         foreach (var t in tiles)
         {
             t.ClearAllCollect();
@@ -37,6 +37,12 @@ public class SpawnArea : MonoBehaviour
                 _rightChoice = counter;
                 _theRightChoice = t.coordinates;
                 t.SpawnSetAmount(1);
+                //t.UpdateTileStatus(TileStatus.Right);
+            }
+            
+            else if(counter != randChoice)
+            {
+               // t.UpdateTileStatus(TileStatus.Wrong);
             }
             counter++;
         }

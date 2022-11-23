@@ -12,6 +12,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private float _goalT;
     public float moveSpeed = 0.2f;
 
+    public Action FoundObjectAct;
     private int _unitScore;
     
     public Vector3 Goal
@@ -67,8 +68,15 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     {
         if (collision.gameObject.TryGetComponent<Collectable>(out var obstacle))
         {
-            _unitScore++;
-            obstacle.Deactivate();
+            FoundObjectAct?.Invoke();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<Collectable>(out var obstacle))
+        {
+            FoundObjectAct?.Invoke();
         }
     }
 
