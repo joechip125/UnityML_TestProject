@@ -13,6 +13,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     public float moveSpeed = 0.2f;
 
     public Action FoundObjectAct;
+    public Action CollideWithWall;
     private int _unitScore;
     
     public Vector3 Goal
@@ -77,6 +78,19 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         if (other.gameObject.TryGetComponent<Collectable>(out var obstacle))
         {
             FoundObjectAct?.Invoke();
+        }
+        
+        if (other.CompareTag("Wall"))
+        {
+            CollideWithWall?.Invoke();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Wall"))
+        {
+            CollideWithWall?.Invoke();
         }
     }
 

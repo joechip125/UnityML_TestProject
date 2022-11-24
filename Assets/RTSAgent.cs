@@ -36,6 +36,8 @@ public class RTSAgent : Agent
         _movement = spawnUnit.GetComponent<UnitMovement>();
         _movement.FoundObjectAct -= ObjectFound;
         _movement.FoundObjectAct += ObjectFound;
+        _movement.CollideWithWall -= CollideWithWall;
+        _movement.CollideWithWall += CollideWithWall;
         _rBody = spawnUnit.GetComponent<Rigidbody>();
     }
 
@@ -43,6 +45,10 @@ public class RTSAgent : Agent
     {
         SetReward(1.0f);
         EndEpisode();
+    }
+    private void CollideWithWall()
+    {
+        AddReward(-0.1f);
     }
 
     public override void OnEpisodeBegin()
@@ -55,13 +61,13 @@ public class RTSAgent : Agent
     public float speed = 0.01f;
     private Rigidbody _mAgentRb;
 
-    private float _agentRunSpeed = 0.2f;
+    private float _agentRunSpeed = 1f;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         AddReward(-0.005f);
         var choice = ChooseMove(actions.DiscreteActions);
-        
+        //MoveAgent(actions.DiscreteActions);
         spawnUnit.transform.localPosition += new Vector3(choice.x * speed, 0, choice.z * speed);
         
         if (spawnUnit.transform.localPosition.y < -1f)
@@ -79,22 +85,16 @@ public class RTSAgent : Agent
         switch (action)
         {
             case 1:
-                moveDir = new IntVector2(1,0);
-                break;
-            case 2:
-                moveDir = new IntVector2(-1,0);
-                break;
-            case 3:
-                moveDir = new IntVector2(0,1);
-                break;
-            case 4:
-                moveDir = new IntVector2(0,-1);
-                break;
-            case 5:
                 moveDir = new IntVector2(1,1);
                 break;
-            case 6:
+            case 2:
+                moveDir = new IntVector2(-1,1);
+                break;
+            case 3:
                 moveDir = new IntVector2(-1,-1);
+                break;
+            case 4:
+                moveDir = new IntVector2(1,-1);
                 break;
         }
         
@@ -105,24 +105,28 @@ public class RTSAgent : Agent
     {
         var dirToGo = Vector3.zero;
         var rotateDir = Vector3.zero;
+        Vector3 localForward = transform.worldToLocalMatrix.MultiplyVector(transform.forward);
 
         var action = act[0];
         switch (action)
         {
             case 1:
-                dirToGo = transform.forward * 1f;
+                dirToGo = new Vector3(-1,0,0);
                 break;
             case 2:
-                dirToGo = transform.forward * -1f;
+                dirToGo = new Vector3(1,0,0);
                 break;
             case 3:
-                rotateDir = transform.up * 1f;
+                dirToGo = new Vector3(0,0,-1);
                 break;
             case 4:
-                rotateDir = transform.up * -1f;
+                dirToGo = new Vector3(0,0,1);
                 break;
         }
-        spawnUnit.transform.Rotate(rotateDir, Time.deltaTime * 150f);
-        _rBody.AddForce(dirToGo * _agentRunSpeed, ForceMode.VelocityChange);
+        
+
+        _movement.Goal = transform.localPosition + new Vector3(0,0.5f,0) + dirToGo * _agentRunSpeed;
+        //spawnUnit.transform.Rotate(rotateDir, Time.deltaTime * 150f);
+        //_rBody.AddForce(dirToGo * _agentRunSpeed, ForceMode.VelocityChange);
     }
 }

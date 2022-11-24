@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 public class SpawnArea : MonoBehaviour
 {
     public GameObject spawnPrototype;
+    public GameObject wallPrototype;
     public int xTiles;
     public int zTiles;
     public List<FieldTile> tiles;
@@ -95,6 +96,29 @@ public class SpawnArea : MonoBehaviour
 
             spawnLoc += new Vector3(10,0,0);
         }
+
+        var placeX = (numX - 1) * 5;
+        
+        var temp2 = Instantiate(wallPrototype, 
+            transform.localPosition + new Vector3(placeX, 0, -5.5f), 
+            Quaternion.identity, transform);
+        temp2.transform.localScale = new Vector3(numX * 10, 1, 1);
+        
+        temp2 = Instantiate(wallPrototype, 
+            transform.localPosition + new Vector3(placeX, 0, numZ * 10 - 4.5f), 
+            Quaternion.identity, transform);
+        temp2.transform.localScale = new Vector3(numX * 10, 1, 1);
+        
+        temp2 = Instantiate(wallPrototype, 
+            transform.localPosition + new Vector3(-5.5f, 0, numZ * 5 - 5f), 
+            Quaternion.identity, transform);
+        temp2.transform.localScale = new Vector3(1, 1, numZ * 10);
+        
+        temp2 = Instantiate(wallPrototype, 
+            transform.localPosition + new Vector3(numX * 10 -4.5f, 0, numZ * 5 - 5f), 
+            Quaternion.identity, transform);
+        temp2.transform.localScale = new Vector3(1, 1, numZ * 10);
+
     }
     
  
