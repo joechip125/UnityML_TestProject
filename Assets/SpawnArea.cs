@@ -24,6 +24,19 @@ public class SpawnArea : MonoBehaviour
         SpawnAreas(xTiles, zTiles);
     }
 
+    public void RespawnCollection()
+    {
+        var counter = 0;
+        foreach (var t in tiles)
+        {
+            t.ClearAllCollect();
+
+            if(counter != 0)
+                t.SpawnSetAmount(Random.Range(2, 4));
+            counter++;
+        }
+    }
+    
     public void RespawnCollect()
     {
         var randChoice = Random.Range(1, 4);
@@ -102,22 +115,22 @@ public class SpawnArea : MonoBehaviour
         var temp2 = Instantiate(wallPrototype, 
             transform.localPosition + new Vector3(placeX, 0, -5.5f), 
             Quaternion.identity, transform);
-        temp2.transform.localScale = new Vector3(numX * 10, 1, 1);
+        temp2.transform.localScale = new Vector3(numX * 10, 5, 1);
         
         temp2 = Instantiate(wallPrototype, 
             transform.localPosition + new Vector3(placeX, 0, numZ * 10 - 4.5f), 
             Quaternion.identity, transform);
-        temp2.transform.localScale = new Vector3(numX * 10, 1, 1);
+        temp2.transform.localScale = new Vector3(numX * 10, 5, 1);
         
         temp2 = Instantiate(wallPrototype, 
             transform.localPosition + new Vector3(-5.5f, 0, numZ * 5 - 5f), 
             Quaternion.identity, transform);
-        temp2.transform.localScale = new Vector3(1, 1, numZ * 10);
+        temp2.transform.localScale = new Vector3(1, 5, numZ * 10);
         
         temp2 = Instantiate(wallPrototype, 
             transform.localPosition + new Vector3(numX * 10 -4.5f, 0, numZ * 5 - 5f), 
             Quaternion.identity, transform);
-        temp2.transform.localScale = new Vector3(1, 1, numZ * 10);
+        temp2.transform.localScale = new Vector3(1, 5, numZ * 10);
 
     }
     
