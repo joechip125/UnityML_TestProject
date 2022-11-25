@@ -2,49 +2,22 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 499980,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-499980.onnx",
-                "reward": -2.1588804210299877,
-                "creation_time": 1669325947.5043364,
+                "steps": 310791,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-310791.onnx",
+                "reward": null,
+                "creation_time": 1669414190.3350232,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-499980.pt"
-                ]
-            },
-            {
-                "steps": 999980,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-999980.onnx",
-                "reward": -1.8337331739068032,
-                "creation_time": 1669326679.1494145,
-                "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-999980.pt"
-                ]
-            },
-            {
-                "steps": 1499948,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-1499948.onnx",
-                "reward": -1.5477776701251666,
-                "creation_time": 1669327369.649203,
-                "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-1499948.pt"
-                ]
-            },
-            {
-                "steps": 1689625,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-1689625.onnx",
-                "reward": -1.675841156756949,
-                "creation_time": 1669327643.040128,
-                "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-1689625.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-310791.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 1689625,
+            "steps": 310791,
             "file_path": "results\\StrategyRTS\\Strategy.onnx",
-            "reward": -1.675841156756949,
-            "creation_time": 1669327643.040128,
+            "reward": null,
+            "creation_time": 1669414190.3350232,
             "auxillary_file_paths": [
-                "results\\StrategyRTS\\Strategy\\Strategy-1689625.pt"
+                "results\\StrategyRTS\\Strategy\\Strategy-310791.pt"
             ]
         }
     },

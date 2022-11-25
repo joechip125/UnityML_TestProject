@@ -23,6 +23,7 @@ public class FieldTile : MonoBehaviour
     private float _collectValue;
 
     public GameObject spawnCollect;
+    public GameObject spawnPoison;
     
     private List<GameObject> _collectRef = new();
 
@@ -74,7 +75,7 @@ public class FieldTile : MonoBehaviour
         }
     }
 
-    public float range = 3;
+    private float range = 2f;
     public void SpawnRandomAmount()
     {
         var amount = Random.Range(0, 1);
@@ -97,7 +98,8 @@ public class FieldTile : MonoBehaviour
         numberCollect = amount;
         for (int i = 0; i < amount; i++)
         {
-            var temp  = Instantiate(spawnCollect,
+            var temp  = Instantiate(Random.Range(0, 2) == 0 
+                    ? spawnCollect : spawnPoison,
                 transform, false);
             temp.transform.localPosition += new 
                 Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));

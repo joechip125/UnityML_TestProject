@@ -32,7 +32,7 @@ public class SpawnArea : MonoBehaviour
             t.ClearAllCollect();
 
             if(counter != 0)
-                t.SpawnSetAmount(Random.Range(2, 4));
+                t.SpawnSetAmount(Random.Range(1, 4));
             counter++;
         }
     }

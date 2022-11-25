@@ -8,6 +8,7 @@ TagManager:
   - Wall
   - DropOff
   - EndZone
+  - Poison
   layers:
   - Default
   - TransparentFX

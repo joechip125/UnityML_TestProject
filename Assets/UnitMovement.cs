@@ -10,11 +10,15 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Vector3 _goal;
     private bool _moveToGoal;
     private float _goalT;
+    private float _goalR;
     public float moveSpeed = 0.2f;
+    public float rotationSpeed = 0.001f;
 
     public Action FoundObjectAct;
     public Action CollideWithWall;
     private int _unitScore;
+    private Quaternion _nextRotation;
+    private Quaternion _currentRotation;
     
     public Vector3 Goal
     {
@@ -26,6 +30,9 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             _goal = value;
             _goalT = 0;
             _moveToGoal = true;
+            _currentRotation = transform.rotation;
+            _nextRotation = Quaternion.LookRotation(
+                _goal - transform.localPosition, Vector3.up);
         }
     }
     
@@ -35,6 +42,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         {
             var currentPos = transform.localPosition;
             transform.localPosition = Vector3.Lerp(currentPos, _goal, _goalT);
+            transform.rotation =Quaternion.Lerp(_currentRotation, _nextRotation, _goalR);
 
             if (Vector3.Distance(currentPos, _goal) < 0.5f)
             {
@@ -42,7 +50,19 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
                 _goalT = 0;
             }
             else _goalT += Time.deltaTime * moveSpeed;
+
+            _goalR += Time.deltaTime * rotationSpeed;
         }
+    }
+
+    public bool IsAtGoal(float tolerance)
+    {
+        return Vector3.Distance(transform.localPosition, Goal) < tolerance;
+    }
+    
+    public void SetGoal(Vector3 newPos)
+    {
+        _goal = newPos;
     }
 
     public void MoveToLocation(Vector3 newLocation)

@@ -214,7 +214,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileMat: {fileID: 2100000, guid: 596442cae1d62a94ca1ca0e69dcc98db, type: 2}
+  coordinates:
+    x: 0
+    z: 0
   spawnCollect: {fileID: 5018063002184240805, guid: 80892a7e85e00d24d834c8c9e2a94806, type: 3}
+  spawnPoison: {fileID: 7054502156461870213, guid: 32cb61fd28b2e934495db09d98c33c6d, type: 3}
+  currentStatus: 0
   numberCollect: 0
   range: 3
 --- !u!1 &7633059916603655504

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Integrations.Match3;
@@ -13,12 +14,17 @@ public class SingleAgent : Agent
      public Transform startTrans;
      public SpawnArea assetSpawner;
      private int _numberCollect;
+     private int _numberPoison;
      private int _wallHits;
+     private UnitMovement _movement;
+     private List<Vector3> _possibleVectors = new();
 
      public override void OnEpisodeBegin()
      {
          transform.localPosition = startTrans.localPosition;
+         _movement.SetGoal(startTrans.localPosition);
          _numberCollect = 0;
+         _numberPoison = 0;
          _wallHits = 0;
          assetSpawner.RespawnCollection();
      }
@@ -33,17 +39,37 @@ public class SingleAgent : Agent
      public override void OnActionReceived(ActionBuffers actions)
      {
          AddReward(-0.005f);
-         MoveAgent(actions.DiscreteActions);
-         
+         var con1 = Mathf.Clamp(actions.ContinuousActions[0], -1, 1);
+         var con2 = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
+         var next = transform.localPosition + new Vector3(con1, 0, con2);
+         if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
+         {
+             if (_movement.IsAtGoal(0.05f))
+             {
+                 
+                 _movement.Goal = transform.localPosition + 
+                                  GetAverageVector();
+             }
+             
+             else
+             {
+                _possibleVectors.Add(next);    
+             }
+         }
+         else
+         {
+             AddReward(-0.01f);
+         }
+
+
          if (transform.localPosition.y < -1f)
          {
              SetReward(-1.0f);
              EndEpisode();
          }
-
-         if (_wallHits > 1)
+         
+         if (_numberPoison >= 4)
          {
-             SetReward(-1.0f);
              EndEpisode();
          }
          
@@ -51,6 +77,25 @@ public class SingleAgent : Agent
          {
              EndEpisode();
          }
+     }
+
+     public Vector3 GetAverageVector()
+     {
+         var vec = _possibleVectors
+             .Aggregate(Vector3.zero, (acc, v) => acc + v) 
+                   / _possibleVectors.Count;
+         
+         _possibleVectors.Clear();
+         return vec;
+     }
+     
+     public void MoveCont(ActionSegment<float> actions)
+     {
+         var rotateDir = transform.up * Mathf.Clamp(actions[0], -1, 1);
+         var con1 = Mathf.Clamp(actions[1], -1, 1);
+         Vector3 dirToGo = transform.forward * con1;;
+         transform.Rotate(rotateDir, Time.deltaTime * 15f);
+         transform.localPosition += dirToGo / 15;
      }
 
      public void MoveAgent(ActionSegment<int> act)
@@ -74,20 +119,12 @@ public class SingleAgent : Agent
                  rotateDir = transform.up * -1f;
                  break;
          }
-         transform.Rotate(rotateDir, Time.deltaTime * 20f);
-         rBody.AddForce(dirToGo * 0.5f, ForceMode.VelocityChange);
+         transform.Rotate(rotateDir, Time.deltaTime * 5f);
+         transform.localPosition += dirToGo / 15;
+         //rBody.AddForce(dirToGo * 0.4f, ForceMode.VelocityChange);
      }
      
-
-     private void OnCollisionStay(Collision collisionInfo)
-     {
-         if (collisionInfo.gameObject.TryGetComponent<Obstacle>(out var obstacle))
-         {
-             AddReward(-0.3f);
-         }
-         
-     }
-
+     
      private void OnCollisionEnter(Collision collision)
      {
          if (collision.gameObject.CompareTag("Wall"))
@@ -99,14 +136,20 @@ public class SingleAgent : Agent
 
      private void OnTriggerEnter(Collider other)
      {
-         if (other.gameObject.TryGetComponent<Collectable>(out var obstacle))
+         if (other.CompareTag("Collectable"))
          {
              AddReward(1f/ 3f);
-             obstacle.Deactivate();
+             other.gameObject.GetComponent<Collectable>().Deactivate();
              _numberCollect++;
          }
-     }
 
+         if (other.CompareTag("Poison"))
+         {
+             AddReward(-1f/ 4f);
+             other.gameObject.GetComponent<Collectable>().Deactivate();
+             _numberPoison++;
+         }
+     }
 
      public override void Heuristic(in ActionBuffers actionsOut)
      {
@@ -119,5 +162,6 @@ public class SingleAgent : Agent
      void Start()
      {
          rBody = GetComponent<Rigidbody>();
+         _movement = GetComponent<UnitMovement>();
      }
 }
