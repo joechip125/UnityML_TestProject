@@ -18,6 +18,7 @@ public class SingleAgent : Agent
      private int _wallHits;
      private UnitMovement _movement;
      private List<Vector3> _possibleVectors = new();
+     private bool _canMove;
 
      public override void OnEpisodeBegin()
      {
@@ -44,17 +45,17 @@ public class SingleAgent : Agent
          var next = transform.localPosition + new Vector3(con1, 0, con2);
          if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
          {
-             if (_movement.IsAtGoal(0.05f))
+             if (_canMove && _possibleVectors.Count > 10)
              {
-                 
-                 _movement.Goal = transform.localPosition + 
+            
+                 _movement.Goal = transform.localPosition +
                                   GetAverageVector();
              }
-             
              else
              {
-                _possibleVectors.Add(next);    
+                 _possibleVectors.Add(next);    
              }
+             
          }
          else
          {
@@ -85,8 +86,9 @@ public class SingleAgent : Agent
              .Aggregate(Vector3.zero, (acc, v) => acc + v) 
                    / _possibleVectors.Count;
          
+         Debug.Log(vec.normalized);
          _possibleVectors.Clear();
-         return vec;
+         return vec.normalized;
      }
      
      public void MoveCont(ActionSegment<float> actions)
@@ -161,7 +163,11 @@ public class SingleAgent : Agent
      
      void Start()
      {
+         _canMove = true;
          rBody = GetComponent<Rigidbody>();
          _movement = GetComponent<UnitMovement>();
+         _movement.MoveComplete += () => _canMove = true;
+         _movement.MoveStarted += () => _canMove = false;
      }
+     
 }

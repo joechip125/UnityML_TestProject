@@ -19,6 +19,8 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private int _unitScore;
     private Quaternion _nextRotation;
     private Quaternion _currentRotation;
+    public Action MoveComplete;
+    public Action MoveStarted;
     
     public Vector3 Goal
     {
@@ -33,6 +35,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             _currentRotation = transform.rotation;
             _nextRotation = Quaternion.LookRotation(
                 _goal - transform.localPosition, Vector3.up);
+            MoveStarted?.Invoke();
         }
     }
     
@@ -44,10 +47,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             transform.localPosition = Vector3.Lerp(currentPos, _goal, _goalT);
             transform.rotation =Quaternion.Lerp(_currentRotation, _nextRotation, _goalR);
 
-            if (Vector3.Distance(currentPos, _goal) < 0.5f)
+            if (Vector3.Distance(currentPos, _goal) < 0.05f)
             {
                 _moveToGoal = false;
                 _goalT = 0;
+                MoveComplete?.Invoke();
             }
             else _goalT += Time.deltaTime * moveSpeed;
 
