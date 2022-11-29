@@ -28,8 +28,10 @@ public class SingleAgent : Agent
          _numberPoison = 0;
          _wallHits = 0;
          assetSpawner.RespawnCollection();
+         RequestDecision();
      }
    
+     
      public override void CollectObservations(VectorSensor sensor)
      {
          //sensor.AddObservation(_numberCollect);
@@ -37,29 +39,21 @@ public class SingleAgent : Agent
      }
    
      public float speed = 10;
+     private float _range = 3;
      public override void OnActionReceived(ActionBuffers actions)
      {
          AddReward(-0.005f);
-         var con1 = Mathf.Clamp(actions.ContinuousActions[0], -1, 1);
-         var con2 = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
+         var con1 = Mathf.Clamp(actions.ContinuousActions[0], -_range, _range);
+         var con2 = Mathf.Clamp(actions.ContinuousActions[1], -_range, _range);
          var next = transform.localPosition + new Vector3(con1, 0, con2);
          if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
          {
-             if (_canMove && _possibleVectors.Count > 10)
-             {
-            
-                 _movement.Goal = transform.localPosition +
-                                  GetAverageVector();
-             }
-             else
-             {
-                 _possibleVectors.Add(next);    
-             }
-             
+             _movement.Goal = next;
          }
          else
          {
              AddReward(-0.01f);
+             RequestDecision();
          }
 
 
@@ -160,14 +154,18 @@ public class SingleAgent : Agent
          act[0] = Input.GetAxis("Horizontal");
          act[1] = Input.GetAxis("Vertical");
      }
+
+     private void GoalReached()
+     {
+         RequestDecision();
+     }
      
      void Start()
      {
          _canMove = true;
          rBody = GetComponent<Rigidbody>();
          _movement = GetComponent<UnitMovement>();
-         _movement.MoveComplete += () => _canMove = true;
-         _movement.MoveStarted += () => _canMove = false;
+         _movement.MoveComplete += GoalReached;
      }
-     
+    
 }
