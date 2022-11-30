@@ -23,52 +23,47 @@ public class SingleAgent : Agent
      public override void OnEpisodeBegin()
      {
          transform.localPosition = startTrans.localPosition;
-         _movement.SetGoal(startTrans.localPosition);
+         //_movement.SetGoal(startTrans.localPosition);
          _numberCollect = 0;
          _numberPoison = 0;
          _wallHits = 0;
          assetSpawner.RespawnCollection();
-         RequestDecision();
+         //RequestDecision();
      }
    
      
      public override void CollectObservations(VectorSensor sensor)
      {
          //sensor.AddObservation(_numberCollect);
-         //sensor.AddObservation(transform.localPosition);
+         sensor.AddObservation(transform.localPosition);
      }
    
      public float speed = 10;
      private float _range = 3;
      public override void OnActionReceived(ActionBuffers actions)
      {
-         AddReward(-0.005f);
-         var con1 = Mathf.Clamp(actions.ContinuousActions[0], -_range, _range);
-         var con2 = Mathf.Clamp(actions.ContinuousActions[1], -_range, _range);
-         var next = transform.localPosition + new Vector3(con1, 0, con2);
-         if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
-         {
-             _movement.Goal = next;
-         }
-         else
-         {
-             AddReward(-0.01f);
-             RequestDecision();
-         }
-
+         //AddReward(-0.005f);
+         MoveCont(actions.ContinuousActions);
 
          if (transform.localPosition.y < -1f)
          {
              SetReward(-1.0f);
              EndEpisode();
          }
-         
+
          if (_numberPoison >= 4)
          {
+             SetReward(-1.0f);
              EndEpisode();
          }
          
          if (_numberCollect >= 3)
+         {
+             SetReward(1.0f);
+             EndEpisode();
+         }
+
+         if (_wallHits > 20)
          {
              EndEpisode();
          }
@@ -83,6 +78,22 @@ public class SingleAgent : Agent
          Debug.Log(vec.normalized);
          _possibleVectors.Clear();
          return vec.normalized;
+     }
+
+     public void MoveAbstract(ActionSegment<float> actions)
+     {
+         var con1 = Mathf.Clamp(actions[0], -_range, _range);
+         var con2 = Mathf.Clamp(actions[1], -_range, _range);
+         var next = transform.localPosition + new Vector3(con1, 0, con2);
+         if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
+         {
+             _movement.Goal = next;
+         }
+         else
+         {
+             AddReward(-0.01f);
+             RequestDecision();
+         }
      }
      
      public void MoveCont(ActionSegment<float> actions)
