@@ -9,6 +9,7 @@ TagManager:
   - DropOff
   - EndZone
   - Poison
+  - Collector
   layers:
   - Default
   - TransparentFX

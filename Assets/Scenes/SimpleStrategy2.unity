@@ -401,7 +401,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.VectorActionSpaceType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
@@ -421,11 +421,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.m_NumContinuousActions
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]

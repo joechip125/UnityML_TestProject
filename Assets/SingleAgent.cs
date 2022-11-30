@@ -23,12 +23,12 @@ public class SingleAgent : Agent
      public override void OnEpisodeBegin()
      {
          transform.localPosition = startTrans.localPosition;
-         //_movement.SetGoal(startTrans.localPosition);
+         _movement.SetGoal(startTrans.localPosition);
          _numberCollect = 0;
          _numberPoison = 0;
          _wallHits = 0;
          assetSpawner.RespawnCollection();
-         //RequestDecision();
+         RequestDecision();
      }
    
      
@@ -47,28 +47,12 @@ public class SingleAgent : Agent
      {
          AddReward(-0.005f);
          //MoveCont(actions.ContinuousActions);
-         MoveFoodCollector(actions);
+         //MoveFoodCollector(actions);
+         MoveAbstract(actions.ContinuousActions);
 
          if (transform.localPosition.y < -1f)
          {
              SetReward(-1.0f);
-             EndEpisode();
-         }
-
-         if (_numberPoison >= 4)
-         {
-             SetReward(-1.0f);
-             EndEpisode();
-         }
-         
-         if (_numberCollect >= 3)
-         {
-             SetReward(1.0f);
-             EndEpisode();
-         }
-
-         if (_wallHits > 20)
-         {
              EndEpisode();
          }
      }
@@ -86,8 +70,8 @@ public class SingleAgent : Agent
 
      public void MoveAbstract(ActionSegment<float> actions)
      {
-         var con1 = Mathf.Clamp(actions[0], -_range, _range);
-         var con2 = Mathf.Clamp(actions[1], -_range, _range);
+         var con1 = Mathf.Clamp(actions[0] * _range, -_range, _range);
+         var con2 = Mathf.Clamp(actions[1]* _range, -_range, _range);
          var next = transform.localPosition + new Vector3(con1, 0, con2);
          if (next.z is > -3 and < 33f && next.x is > -3 and < 33f)
          {
@@ -174,7 +158,7 @@ public class SingleAgent : Agent
      {
          if (collision.gameObject.CompareTag("Wall"))
          {
-             AddReward(-1f);
+             //AddReward(-1f);
              _wallHits++;
          }
      }
@@ -183,7 +167,7 @@ public class SingleAgent : Agent
      {
          if (collisionInfo.gameObject.CompareTag("Wall"))
          {
-             AddReward(-1f);
+             //AddReward(-1f);
              _wallHits++;
          }
      }
@@ -192,14 +176,14 @@ public class SingleAgent : Agent
      {
          if (other.CompareTag("Collectable"))
          {
-             AddReward(1f/ 3f);
+             AddReward(1f);
              other.gameObject.GetComponent<Collectable>().Deactivate();
              _numberCollect++;
          }
 
          if (other.CompareTag("Poison"))
          {
-             AddReward(-1f/ 4f);
+             AddReward(-1f);
              other.gameObject.GetComponent<Collectable>().Deactivate();
              _numberPoison++;
          }
