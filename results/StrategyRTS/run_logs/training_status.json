@@ -1,4 +1,26 @@
 {
+    "Strategy": {
+        "checkpoints": [
+            {
+                "steps": 242794,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-242794.onnx",
+                "reward": -15.964207166119627,
+                "creation_time": 1669836239.1517932,
+                "auxillary_file_paths": [
+                    "results\\StrategyRTS\\Strategy\\Strategy-242794.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 242794,
+            "file_path": "results\\StrategyRTS\\Strategy.onnx",
+            "reward": -15.964207166119627,
+            "creation_time": 1669836239.1517932,
+            "auxillary_file_paths": [
+                "results\\StrategyRTS\\Strategy\\Strategy-242794.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "0.28.0",

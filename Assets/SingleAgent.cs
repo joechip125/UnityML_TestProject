@@ -36,17 +36,18 @@ public class SingleAgent : Agent
      {
          //sensor.AddObservation(_numberCollect);
          //sensor.AddObservation(transform.localPosition);
-         sensor.AddObservation(rBody.velocity.x);
-         sensor.AddObservation(rBody.velocity.z);
+         var localVelocity = transform.InverseTransformDirection(rBody.velocity);
+         sensor.AddObservation(localVelocity.x);
+         sensor.AddObservation(localVelocity.z);
      }
    
      public float speed = 10;
      private float _range = 3;
      public override void OnActionReceived(ActionBuffers actions)
      {
-         //AddReward(-0.005f);
+         AddReward(-0.005f);
          //MoveCont(actions.ContinuousActions);
-         MoveAgent(actions.DiscreteActions);
+         MoveFoodCollector(actions);
 
          if (transform.localPosition.y < -1f)
          {
@@ -63,6 +64,11 @@ public class SingleAgent : Agent
          if (_numberCollect >= 3)
          {
              SetReward(1.0f);
+             EndEpisode();
+         }
+
+         if (_wallHits > 20)
+         {
              EndEpisode();
          }
      }
@@ -102,6 +108,30 @@ public class SingleAgent : Agent
          transform.Rotate(rotateDir, Time.deltaTime * 15f);
          transform.localPosition += dirToGo / 15;
      }
+     
+     public float turnSpeed = 30;
+     public float moveSpeed = 1;
+     private void MoveFoodCollector(ActionBuffers actionBuffers)
+     {
+         var continuousActions = actionBuffers.ContinuousActions;
+         var dirToGo = Vector3.zero;
+         var rotateDir = Vector3.zero;
+
+         var forward = Mathf.Clamp(continuousActions[0], -1f, 1f);
+         var right = Mathf.Clamp(continuousActions[1], -1f, 1f);
+         var rotate = Mathf.Clamp(continuousActions[2], -1f, 1f);
+         
+         dirToGo = transform.forward * forward;
+         dirToGo += transform.right * right;
+         rotateDir = -transform.up * rotate;
+         rBody.AddForce(dirToGo * moveSpeed, ForceMode.VelocityChange);
+         transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed);
+         
+         if (rBody.velocity.sqrMagnitude > 25f) // slow it down
+         {
+             rBody.velocity *= 0.95f;
+         }
+     }
 
      public void MoveAgent(ActionSegment<int> act)
      {
@@ -118,15 +148,25 @@ public class SingleAgent : Agent
                  dirToGo = transform.forward * -1f;
                  break;
              case 3:
-                 rotateDir = transform.up * 1f;
+                 dirToGo = transform.right * 1f;
                  break;
              case 4:
-                 rotateDir = transform.up * -1f;
+                 dirToGo = transform.right * -1f;
                  break;
+             //case 3:
+             //    rotateDir = transform.up * 1f;
+             //    break;
+             //case 4:
+             //    rotateDir = transform.up * -1f;
+             //    break;
          }
          //transform.Rotate(rotateDir, Time.deltaTime * 5f);
          //transform.localPosition += dirToGo / 15;
-         rBody.AddForce(dirToGo * 0.4f, ForceMode.VelocityChange);
+         rBody.AddForce(dirToGo * 0.5f, ForceMode.VelocityChange);
+         if (rBody.velocity.sqrMagnitude > 25f) // slow it down
+         {
+             rBody.velocity *= 0.95f;
+         }
      }
      
      
@@ -134,7 +174,16 @@ public class SingleAgent : Agent
      {
          if (collision.gameObject.CompareTag("Wall"))
          {
-             AddReward(-0.1f);
+             AddReward(-1f);
+             _wallHits++;
+         }
+     }
+
+     private void OnCollisionStay(Collision collisionInfo)
+     {
+         if (collisionInfo.gameObject.CompareTag("Wall"))
+         {
+             AddReward(-1f);
              _wallHits++;
          }
      }

@@ -109,7 +109,11 @@ public class SpawnArea : MonoBehaviour
 
             spawnLoc += new Vector3(10,0,0);
         }
+        SpawnWalls(numX, numZ);
+    }
 
+    private void SpawnWalls(int numX, int numZ)
+    {
         var placeX = (numX - 1) * 5;
         
         var temp2 = Instantiate(wallPrototype, 
@@ -131,7 +135,6 @@ public class SpawnArea : MonoBehaviour
             transform.localPosition + new Vector3(numX * 10 -4.5f, 0, numZ * 5 - 5f), 
             Quaternion.identity, transform);
         temp2.transform.localScale = new Vector3(1, 5, numZ * 10);
-
     }
     
  
