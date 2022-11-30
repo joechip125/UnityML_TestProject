@@ -207,45 +207,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &322297519 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2291122688876366446, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_PrefabInstance: {fileID: 1259981634}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &322297521
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 322297519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a501962d056745d1a30e99146ee39fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SensorName: GridSensor
-  m_CellScale: {x: 1.5, y: 0.01, z: 1.5}
-  m_GridSize: {x: 20, y: 1, z: 20}
-  m_RotateWithAgent: 0
-  m_AgentGameObject: {fileID: 322297519}
-  m_DetectableTags:
-  - Collectable
-  - Poison
-  - Wall
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 2147483647
-  m_MaxColliderBufferSize: 500
-  m_InitialColliderBufferSize: 4
-  m_DebugColors:
-  - {r: 0, g: 0.8113208, b: 0.2049187, a: 0}
-  - {r: 0.9811321, g: 0, b: 0.12156863, a: 0}
-  - {r: 0.7350241, g: 0.764151, b: 0, a: 0}
-  m_GizmoYOffset: 0
-  m_ShowGizmos: 1
-  m_CompressionType: 1
-  m_ObservationStacks: 5
 --- !u!1 &449095942
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,104 +301,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1001 &481012128
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 340427973565806488, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_Name
-      value: TrainingField (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 10.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -101.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646730, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: DecisionPeriod
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.VectorObservationSize
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.NumStackedVectorObservations
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_MaxRayDegrees
-      value: 163.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RaysPerDirection
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_ObservationStacks
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[0]
-      value: Collectable
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[1]
-      value: Poison
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
 --- !u!1 &668953220 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2291122688876366446, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
@@ -456,284 +319,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: GridSensor
-  m_CellScale: {x: 1.5, y: 0.01, z: 1.5}
+  m_CellScale: {x: 1, y: 0.01, z: 1}
   m_GridSize: {x: 20, y: 1, z: 20}
   m_RotateWithAgent: 0
   m_AgentGameObject: {fileID: 668953220}
-  m_DetectableTags:
-  - Collectable
-  - Poison
-  - Wall
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 2147483647
-  m_MaxColliderBufferSize: 500
-  m_InitialColliderBufferSize: 4
-  m_DebugColors:
-  - {r: 0, g: 0.8113208, b: 0.2049187, a: 0}
-  - {r: 0.9811321, g: 0, b: 0.12156863, a: 0}
-  - {r: 0.7350241, g: 0.764151, b: 0, a: 0}
-  m_GizmoYOffset: 0
-  m_ShowGizmos: 1
-  m_CompressionType: 1
-  m_ObservationStacks: 5
---- !u!1001 &780993396
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 340427973565806488, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_Name
-      value: TrainingField (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 10.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -31.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646730, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: DecisionPeriod
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.VectorObservationSize
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.NumStackedVectorObservations
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_MaxRayDegrees
-      value: 163.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RaysPerDirection
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_ObservationStacks
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[0]
-      value: Collectable
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[1]
-      value: Poison
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
---- !u!1 &1043196450 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2291122688876366446, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_PrefabInstance: {fileID: 481012128}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1043196452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1043196450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a501962d056745d1a30e99146ee39fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SensorName: GridSensor
-  m_CellScale: {x: 1.5, y: 0.01, z: 1.5}
-  m_GridSize: {x: 20, y: 1, z: 20}
-  m_RotateWithAgent: 0
-  m_AgentGameObject: {fileID: 1043196450}
-  m_DetectableTags:
-  - Collectable
-  - Poison
-  - Wall
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 2147483647
-  m_MaxColliderBufferSize: 500
-  m_InitialColliderBufferSize: 4
-  m_DebugColors:
-  - {r: 0, g: 0.8113208, b: 0.2049187, a: 0}
-  - {r: 0.9811321, g: 0, b: 0.12156863, a: 0}
-  - {r: 0.7350241, g: 0.764151, b: 0, a: 0}
-  m_GizmoYOffset: 0
-  m_ShowGizmos: 1
-  m_CompressionType: 1
-  m_ObservationStacks: 5
---- !u!1001 &1259981634
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 340427973565806488, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_Name
-      value: TrainingField (3)
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RootOrder
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 10.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -145
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 340427973565806490, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646730, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: DecisionPeriod
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.VectorObservationSize
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_BrainParameters.NumStackedVectorObservations
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_MaxRayDegrees
-      value: 163.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_RaysPerDirection
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_ObservationStacks
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[0]
-      value: Collectable
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[1]
-      value: Poison
-      objectReference: {fileID: 0}
-    - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-      propertyPath: m_DetectableTags.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
---- !u!1 &1998482666 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2291122688876366446, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
-  m_PrefabInstance: {fileID: 780993396}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1998482668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998482666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a501962d056745d1a30e99146ee39fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SensorName: GridSensor
-  m_CellScale: {x: 1.5, y: 0.01, z: 1.5}
-  m_GridSize: {x: 20, y: 1, z: 20}
-  m_RotateWithAgent: 0
-  m_AgentGameObject: {fileID: 1998482666}
   m_DetectableTags:
   - Collectable
   - Poison
@@ -811,12 +400,36 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.VectorActionSpaceType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 3
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.VectorActionSize.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_BrainParameters.NumStackedVectorObservations
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.VectorActionSize.Array.data[0]
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.m_ActionSpec.m_NumContinuousActions
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794602674846646740, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2794602674846646741, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_MaxRayDegrees

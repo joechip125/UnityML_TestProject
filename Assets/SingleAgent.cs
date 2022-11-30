@@ -35,7 +35,9 @@ public class SingleAgent : Agent
      public override void CollectObservations(VectorSensor sensor)
      {
          //sensor.AddObservation(_numberCollect);
-         sensor.AddObservation(transform.localPosition);
+         //sensor.AddObservation(transform.localPosition);
+         sensor.AddObservation(rBody.velocity.x);
+         sensor.AddObservation(rBody.velocity.z);
      }
    
      public float speed = 10;
@@ -43,7 +45,8 @@ public class SingleAgent : Agent
      public override void OnActionReceived(ActionBuffers actions)
      {
          //AddReward(-0.005f);
-         MoveCont(actions.ContinuousActions);
+         //MoveCont(actions.ContinuousActions);
+         MoveAgent(actions.DiscreteActions);
 
          if (transform.localPosition.y < -1f)
          {
@@ -60,11 +63,6 @@ public class SingleAgent : Agent
          if (_numberCollect >= 3)
          {
              SetReward(1.0f);
-             EndEpisode();
-         }
-
-         if (_wallHits > 20)
-         {
              EndEpisode();
          }
      }
@@ -126,9 +124,9 @@ public class SingleAgent : Agent
                  rotateDir = transform.up * -1f;
                  break;
          }
-         transform.Rotate(rotateDir, Time.deltaTime * 5f);
-         transform.localPosition += dirToGo / 15;
-         //rBody.AddForce(dirToGo * 0.4f, ForceMode.VelocityChange);
+         //transform.Rotate(rotateDir, Time.deltaTime * 5f);
+         //transform.localPosition += dirToGo / 15;
+         rBody.AddForce(dirToGo * 0.4f, ForceMode.VelocityChange);
      }
      
      
