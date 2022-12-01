@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;
@@ -7,11 +8,12 @@ using UnityEngine;
 
 public class GridAgent : Agent
 {
-
+    public event Action EpisodeBegin;
     public SpawnArea spawnArea;
     private bool m_IsActive;
     private float m_StepTime;
     private float m_StepDuration = 12;
+    
 
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -20,6 +22,7 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
+        EpisodeBegin?.Invoke();
         //RequestDecision();
         spawnArea.RespawnCollection();
         m_StepTime = 0;
