@@ -51,12 +51,6 @@ public class SpawnArea : MonoBehaviour
                 _rightChoice = counter;
                 _theRightChoice = t.coordinates;
                 t.SpawnSetAmount(1);
-                //t.UpdateTileStatus(TileStatus.Right);
-            }
-            
-            else if(counter != randChoice)
-            {
-               // t.UpdateTileStatus(TileStatus.Wrong);
             }
             counter++;
         }
