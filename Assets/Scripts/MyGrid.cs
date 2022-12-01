@@ -26,11 +26,11 @@ public class MyGrid : MonoBehaviour
 
     private Color ScanCell(int indexX, int indexZ)
     {
-        var pos = transform.localPosition + 
+        var pos = transform.position + 
                   new Vector3(indexX * m_CellScale.x, 5, indexZ * m_CellScale.z);
 
         var ray = new Ray(pos, Vector3.down);
-        Physics.SphereCast(ray, 0.3f,out var sphereHit, 12f);
+        Physics.SphereCast(ray, 0.5f,out var sphereHit, 12f);
         if (!sphereHit.collider) return Color.white;
         
         var gObj = sphereHit.collider.gameObject;
@@ -55,9 +55,7 @@ public class MyGrid : MonoBehaviour
         if (m_ShowGizmos)
         {
             var scale = new Vector3(m_CellScale.x, 1, m_CellScale.z);
-            var gizmoYOffset = new Vector3(0, m_GizmoYOffset, 0);
-            var oldGizmoMatrix = Gizmos.matrix;
-            var placement = transform.localPosition;
+            var placement = transform.position;
     
             for (int x = 0; x < cellsX; x++)
             {
