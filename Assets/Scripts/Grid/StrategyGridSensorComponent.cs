@@ -231,9 +231,9 @@ public class StrategyGridSensorComponent : SensorComponent
     /// Override this method and return custom GridSensor implementations.
     /// </summary>
     /// <returns>Array of grid sensors to be added to the component.</returns>
-    protected virtual GridSensorBase[] GetGridSensors()
+    protected virtual CustomGridSensor[] GetGridSensors()
     {
-        List<GridSensorBase> sensorList = new List<GridSensorBase>();
+        List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
         var sensor = new OneHotGridSensor(m_SensorName + "-OneHot", m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType);
         sensorList.Add(sensor);
         return sensorList.ToArray();

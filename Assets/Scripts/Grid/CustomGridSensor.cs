@@ -132,9 +132,6 @@ public class CustomGridSensor : ISensor, IDisposable
     /// <inheritdoc/>
     public byte[] GetCompressedObservation()
     {
-        m_CompressedObs.Clear();
-        var colors = m_GridBuffer.GetLayerColors();
-        
         using (TimerStack.Instance.Scoped("GridSensor.GetCompressedObservation"))
         {
             var allBytes = new List<byte>();
@@ -149,6 +146,21 @@ public class CustomGridSensor : ISensor, IDisposable
             return allBytes.ToArray();
         }
     }
+    
+    ///// <inheritdoc/>
+    //public byte[] GetCompressedObservation()
+    //{
+    //    m_CompressedObs.Clear();
+    //
+    //    var colors = m_GridBuffer.GetLayerColors();
+    //    for (int i = 0, n = colors.Length; i < n; i++)
+    //    {
+    //        m_PerceptionTexture.SetPixels32(colors[i]);
+    //        m_CompressedObs.AddRange(m_PerceptionTexture.EncodeToPNG());
+    //    }
+    //
+    //    return m_CompressedObs.ToArray();
+    //}
     
 
     void GridValuesToTexture(int channelIndex, int numChannelsToAdd)
@@ -174,124 +186,159 @@ public class CustomGridSensor : ISensor, IDisposable
     }
     
     protected virtual bool IsDataNormalized()
+    {
+        return false;
+    }
+
+    
+    protected internal virtual ProcessCollidersMethod GetProcessCollidersMethod()
+    {
+        return ProcessCollidersMethod.ProcessClosestColliders;
+    }
+
+    /// <summary>
+    /// If using PNG compression, check if the values are normalized.
+    /// </summary>
+    void ValidateValues(float[] dataValues, GameObject detectedObject)
+    {
+        if (m_CompressionType != SensorCompressionType.PNG)
         {
-            return false;
+            return;
         }
 
-        /// <summary>
-        /// Whether to process all detected colliders in a cell. Default to false and only use the one closest to the agent.
-        /// If overriding <seealso cref="GetObjectData"/>, consider override this method when needed.
-        /// </summary>
-        /// <returns>Bool value indicating whether to process all detected colliders in a cell.</returns>
-        protected internal virtual ProcessCollidersMethod GetProcessCollidersMethod()
+        for (int j = 0; j < dataValues.Length; j++)
         {
-            return ProcessCollidersMethod.ProcessClosestColliders;
+            if (dataValues[j] < 0 || dataValues[j] > 1)
+                throw new UnityAgentsException($"When using compression type {m_CompressionType} the data value has to be normalized between 0-1. " +
+                    $"Received value[{dataValues[j]}] for {detectedObject.name}");
         }
+    }
 
-        /// <summary>
-        /// If using PNG compression, check if the values are normalized.
-        /// </summary>
-        void ValidateValues(float[] dataValues, GameObject detectedObject)
+    /// <summary>
+    /// Collect data from the detected object if a detectable tag is matched.
+    /// </summary>
+    internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
+    {
+        Profiler.BeginSample("GridSensor.ProcessDetectedObject");
+        for (var i = 0; i < m_DetectableTags.Length; i++)
         {
-            if (m_CompressionType != SensorCompressionType.PNG)
+            if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
-                return;
-            }
-
-            for (int j = 0; j < dataValues.Length; j++)
-            {
-                if (dataValues[j] < 0 || dataValues[j] > 1)
-                    throw new UnityAgentsException($"When using compression type {m_CompressionType} the data value has to be normalized between 0-1. " +
-                        $"Received value[{dataValues[j]}] for {detectedObject.name}");
-            }
-        }
-
-        /// <summary>
-        /// Collect data from the detected object if a detectable tag is matched.
-        /// </summary>
-        internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
-        {
-            Profiler.BeginSample("GridSensor.ProcessDetectedObject");
-            for (var i = 0; i < m_DetectableTags.Length; i++)
-            {
-                if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
+                if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
                 {
-                    if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
-                    {
-                        Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);
-                    }
-                    else
-                    {
-                        Array.Clear(m_CellDataBuffer, 0, m_CellDataBuffer.Length);
-                    }
-
-                    GetObjectData(detectedObject, i, m_CellDataBuffer);
-                    ValidateValues(m_CellDataBuffer, detectedObject);
-                    Array.Copy(m_CellDataBuffer, 0, m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellObservationSize);
-                    break;
-                }
-            }
-            Profiler.EndSample();
-        }
-
-        /// <inheritdoc/>
-        public void Update()
-        {
-            ResetPerceptionBuffer();
-            using (TimerStack.Instance.Scoped("GridSensor.Update"))
-            {
-                if (m_BoxOverlapChecker != null)
-                {
-                    m_BoxOverlapChecker.Update();
-                }
-            }
-        }
-
-        /// <inheritdoc/>
-        public ObservationSpec GetObservationSpec()
-        {
-            return m_ObservationSpec;
-        }
-
-        /// <inheritdoc/>
-        public int Write(ObservationWriter writer)
-        {
-            using (TimerStack.Instance.Scoped("GridSensor.Write"))
-            {
-                int index = 0;
-                for (var h = m_GridSize.z - 1; h >= 0; h--)
-                {
-                    for (var w = 0; w < m_GridSize.x; w++)
-                    {
-                        for (var d = 0; d < m_CellObservationSize; d++)
-                        {
-                            writer[h, w, d] = m_PerceptionBuffer[index];
-                            index++;
-                        }
-                    }
-                }
-                return index;
-            }
-        }
-
-        /// <summary>
-        /// Clean up the internal objects.
-        /// </summary>
-        public void Dispose()
-        {
-            if (!ReferenceEquals(null, m_PerceptionTexture))
-            {
-                if (Application.isEditor)
-                {
-                    // Edit Mode tests complain if we use Destroy()
-                    UnityEngine.Object.DestroyImmediate(m_PerceptionTexture);
+                    Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);
                 }
                 else
                 {
-                    UnityEngine.Object.Destroy(m_PerceptionTexture);
+                    Array.Clear(m_CellDataBuffer, 0, m_CellDataBuffer.Length);
                 }
-                m_PerceptionTexture = null;
+    
+                GetObjectData(detectedObject, i, m_CellDataBuffer);
+                ValidateValues(m_CellDataBuffer, detectedObject);
+                Array.Copy(m_CellDataBuffer, 0, m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellObservationSize);
+                break;
             }
         }
+        Profiler.EndSample();
+    }
     
+    /// <inheritdoc/>
+    public void Update()
+    {
+        ResetPerceptionBuffer();
+        using (TimerStack.Instance.Scoped("GridSensor.Update"))
+        {
+            if (m_BoxOverlapChecker != null)
+            {
+                m_BoxOverlapChecker.Update();
+            }
+        }
+    }
+    
+    /// <inheritdoc/>
+    public ObservationSpec GetObservationSpec()
+    {
+        return m_ObservationSpec;
+    }
+    
+    /// <inheritdoc/>
+    public int Write(ObservationWriter writer)
+    {
+        using (TimerStack.Instance.Scoped("GridSensor.Write"))
+        {
+            int index = 0;
+            for (var h = m_GridSize.z - 1; h >= 0; h--)
+            {
+                for (var w = 0; w < m_GridSize.x; w++)
+                {
+                    for (var d = 0; d < m_CellObservationSize; d++)
+                    {
+                        writer[h, w, d] = m_PerceptionBuffer[index];
+                        index++;
+                    }
+                }
+            }
+            return index;
+        }
+    }
+    
+    ///// <inheritdoc/>
+    //public int Write(ObservationWriter writer)
+    //{
+    //    int numWritten = 0;
+    //    int w = m_GridBuffer.Width;
+    //    int h = m_GridBuffer.Height;
+    //    int n = m_GridBuffer.NumChannels;
+    //
+    //    for (int c = 0; c < n; c++)
+    //    {
+    //        for (int x = 0; x < w; x++)
+    //        {
+    //            for (int y = 0; y < h; y++)
+    //            {
+    //                writer[y, x, c] = m_GridBuffer.Read(c, x, y);
+    //                numWritten++;
+    //            }
+    //        }
+    //    }
+    //
+    //    return numWritten;
+    //}
+    
+    // <inheritdoc/>
+    //public virtual void Update() 
+    //{
+    //    if (AutoDetectionEnabled)
+    //    {
+    //        Detector.OnSensorUpdate();
+    //        Encoder.Encode(Detector.Result);
+    //    }
+    //
+    //    UpdateEvent?.Invoke();
+    //}
+    //
+    /// <inheritdoc/>
+    //public virtual void Reset() 
+    //{
+    //    Detector?.OnSensorReset();
+    //    ResetEvent?.Invoke();
+    //}
+    
+    
+    public void Dispose()
+    {
+        if (!ReferenceEquals(null, m_PerceptionTexture))
+        {
+            if (Application.isEditor)
+            {
+                // Edit Mode tests complain if we use Destroy()
+                UnityEngine.Object.DestroyImmediate(m_PerceptionTexture);
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(m_PerceptionTexture);
+            }
+            m_PerceptionTexture = null;
+        }
+    }
 }
