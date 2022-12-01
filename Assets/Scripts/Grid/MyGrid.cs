@@ -1,7 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents.Sensors;
+
+public enum CellContents
+{
+    None,
+    Collector,
+    Collectable,
+    Poison
+}
+
+
+[Serializable]
+public class CellInfo
+{
+    public IntVector2 index;
+    public Vector3 location;
+    public CellContents contents;
+}
 
 public class MyGrid : MonoBehaviour
 {
