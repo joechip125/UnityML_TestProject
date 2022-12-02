@@ -18,8 +18,48 @@ namespace MBaske.Sensors.Grid
         // Info.
         [SerializeField, ReadOnly]
         private string m_ObservationShape;
+        [HideInInspector]
+        public OverlapChecker m_BoxOverlapChecker;
+        
+        [SerializeField]
+        internal LayerMask m_ColliderMask;
+        /// <summary>
+        /// The layer mask.
+        /// </summary>
+        public LayerMask ColliderMask
+        {
+            get { return m_ColliderMask; }
+            set { m_ColliderMask = value; }
+        }
+        
+        [SerializeField]
+        internal string[] m_DetectableTags;
+        /// <summary>
+        /// List of tags that are detected.
+        /// Note that changing this after the sensor is created has no effect.
+        /// </summary>
+        public string[] DetectableTags
+        {
+            get { return m_DetectableTags; }
+            set { m_DetectableTags = value; }
+        }
+        
+        [SerializeField]
+        internal int m_MaxColliderBufferSize = 500;
+        /// <summary>
+        /// The absolute max size of the Collider buffer used in the non-allocating Physics calls.  In other words
+        /// the Collider buffer will never grow beyond this number even if there are more Colliders in the Grid Cell.
+        /// Note that changing this after the sensor is created has no effect.
+        /// </summary>
+        public int MaxColliderBufferSize
+        {
+            get { return m_MaxColliderBufferSize; }
+            set { m_MaxColliderBufferSize = value; }
+        }
 
-
+        [SerializeField]
+        internal int m_InitialColliderBufferSize = 4;
+        
         #region Basic Settings
 
         /// <summary>
@@ -32,10 +72,44 @@ namespace MBaske.Sensors.Grid
             set { m_SensorName = value; }
         }
         [SerializeField]
-        [Foldout("Basics")]
         [Tooltip("Name of the generated GridSensor.")]
         private string m_SensorName = "GridSensor";
 
+        
+        [SerializeField]
+        internal Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
+        
+        [SerializeField]
+        internal Vector3Int m_GridSize = new Vector3Int(16, 1, 16);
+        /// <summary>
+        /// The number of grid on each side.
+        /// Note that changing this after the sensor is created has no effect.
+        /// </summary>
+        public Vector3Int GridSize
+        {
+            get { return m_GridSize; }
+            set
+            {
+                if (value.y != 1)
+                {
+                    m_GridSize = new Vector3Int(value.x, 1, value.z);
+                }
+                else
+                {
+                    m_GridSize = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The scale of each grid cell.
+        /// Note that changing this after the sensor is created has no effect.
+        /// </summary>
+        public Vector3 CellScale
+        {
+            get { return m_CellScale; }
+            set { m_CellScale = value; }
+        }
 
         /// <summary>
         /// The number of stacked observations. Enable stacking (value > 1) 
@@ -48,9 +122,8 @@ namespace MBaske.Sensors.Grid
             set { m_ObservationStacks = value; }
         }
         [SerializeField, Min(1)]
-        [Foldout("Basics")]
         [Tooltip("The number of stacked observations. Enable stacking (value > 1) "
-            + "if agents need to infer movement from observations.")]
+                 + "if agents need to infer movement from observations.")]
         private int m_ObservationStacks = 1;
 
 
@@ -64,7 +137,6 @@ namespace MBaske.Sensors.Grid
         }
         [SerializeField]
         [OnValueChanged("OnCompressionTypeChange")]
-        [Foldout("Basics")]
         [Tooltip("The compression type used by the sensor.")]
         private SensorCompressionType m_CompressionType = SensorCompressionType.PNG;
 
@@ -87,7 +159,6 @@ namespace MBaske.Sensors.Grid
             set { m_ObservationType = value; }
         }
         [SerializeField]
-        [Foldout("Basics")]
         [Tooltip("The observation type of the sensor.")]
         private ObservationType m_ObservationType = ObservationType.Default;
 
@@ -243,6 +314,17 @@ namespace MBaske.Sensors.Grid
         /// <inheritdoc/>
         public override ISensor[] CreateSensors()
         {
+            
+            m_BoxOverlapChecker = new OverlapChecker(
+                m_CellScale,
+                m_GridSize,
+                m_ColliderMask,
+                gameObject,
+                m_DetectableTags,
+                m_InitialColliderBufferSize,
+                m_MaxColliderBufferSize
+            );
+            
 #if (UNITY_EDITOR)
             if (Application.isPlaying)
             {
@@ -272,6 +354,7 @@ namespace MBaske.Sensors.Grid
 #if (UNITY_EDITOR)
 
         private IEnumerator m_Debug_OnSensorCreated;
+        private bool m_ShowGizmos = true;
 
         #region Debug Methods 
 
@@ -476,5 +559,28 @@ namespace MBaske.Sensors.Grid
         /// Cleans up internal objects.
         /// </summary>
         public virtual void Dispose() { }
+        
+        void OnDrawGizmos()
+        {
+            if (m_ShowGizmos)
+            {
+                var scale = new Vector3(m_CellScale.x, 1, m_CellScale.z);
+                var placement = transform.position;
+    
+                for (int x = 0; x < m_GridSize.x; x++)
+                {
+                    for (int z = 0; z < m_GridSize.z; z++)
+                    {
+                        var debugRayColor = Color.white;
+                        Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
+                        Gizmos.DrawCube(placement + new Vector3(0,0, scale.z * z), Vector3.one);
+                    }
+
+                    placement += new Vector3(scale.x, 0, 0);
+                }
+            }
+        }
     }
+    
+    
 }

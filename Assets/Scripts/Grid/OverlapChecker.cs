@@ -83,7 +83,7 @@ public class OverlapChecker
     /// <summary>Converts the index of the cell to the 3D point (y is zero) relative to grid center</summary>
     /// <returns>Vector3 of the position of the center of the cell relative to grid center</returns>
     /// <param name="cellIndex">The index of the cell</param>
-    Vector3 GetCellLocalPosition(int cellIndex)
+    public Vector3 GetCellLocalPosition(int cellIndex)
     {
         float x = (cellIndex / m_GridSize.z - m_CellCenterOffset.x) * m_CellScale.x;
         float z = (cellIndex % m_GridSize.z - m_CellCenterOffset.z) * m_CellScale.z;
@@ -93,11 +93,6 @@ public class OverlapChecker
     internal Vector3 GetCellGlobalPosition(int cellIndex)
     {
         return m_CellLocalPositions[cellIndex] + m_CenterObject.transform.position;
-    }
-
-    internal Quaternion GetGridRotation()
-    {
-        return Quaternion.identity;
     }
     
     /// <summary>
@@ -127,26 +122,19 @@ public class OverlapChecker
     /// </summary>
     internal void UpdateGizmo()
     {
+        for (var cellIndex = 0; cellIndex < m_NumCells; cellIndex++)
+        {
+            var cellCenter = GetCellGlobalPosition(cellIndex);
+            var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
+            //Debug.Log($"num found {numFound}, cell index {cellIndex}, cell center {cellCenter}");
 
-            for (var cellIndex = 0; cellIndex < m_NumCells; cellIndex++)
-            {
-                var cellCenter = GetCellGlobalPosition(cellIndex);
-                var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
-
-                ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebug);
-            }
+            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebug);
+        }
 
     }
     
-
-        /// <summary>
-        /// This method attempts to perform the Physics.OverlapBoxNonAlloc and will double the size of the Collider buffer
-        /// if the number of Colliders in the buffer after the call is equal to the length of the buffer.
-        /// </summary>
-        /// <param name="cellCenter"></param>
-        /// <param name="halfCellScale"></param>
-        /// <param name="rotation"></param>
-        /// <returns></returns>
+    
+    
         int BufferResizingOverlapBoxNonAlloc(Vector3 cellCenter, Vector3 halfCellScale)
         {
             int numFound;
@@ -224,8 +212,7 @@ public class OverlapChecker
                 
             }
         }
-
-
+        
         internal void RegisterSensor(CustomGridSensor sensor)
         {
 

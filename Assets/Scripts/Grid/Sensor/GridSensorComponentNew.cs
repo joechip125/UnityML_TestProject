@@ -8,7 +8,7 @@ namespace MBaske.Sensors.Grid
     /// Write observations via the <see cref="GridSensorComponentBase.GridBuffer">
     /// property: m_GridSensorComponent.GridBuffer.Write(channel, x, y, value)
     /// </summary>
-    public class GridSensorComponent : GridSensorComponentBase
+    public class GridSensorComponentNew : GridSensorComponentBase
     {
         /// <inheritdoc/>
         public override ISensor[] CreateSensors()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
@@ -24,7 +25,8 @@ public class CustomGridSensor : ISensor, IDisposable
     
     ObservationSpec m_ObservationSpec;
     
-    internal OverlapChecker m_BoxOverlapChecker;
+    public OverlapChecker m_BoxOverlapChecker;
+    private GridBuffer _gridBuffer;
     
     // Buffers
     float[] m_PerceptionBuffer;
@@ -48,7 +50,8 @@ public class CustomGridSensor : ISensor, IDisposable
         Vector3 cellScale,
         Vector3Int gridSize,
         string[] detectableTags,
-        SensorCompressionType compression
+        SensorCompressionType compression,
+        GridBuffer gridBuffer
     )
     {
         m_Name = name;
@@ -56,6 +59,7 @@ public class CustomGridSensor : ISensor, IDisposable
         m_GridSize = gridSize;
         m_DetectableTags = detectableTags;
         CompressionType = compression;
+        _gridBuffer = gridBuffer;
 
         if (m_GridSize.y != 1)
         {
