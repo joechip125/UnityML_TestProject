@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents.Sensors;
@@ -12,9 +13,7 @@ public class OverlapChecker
     LayerMask m_ColliderMask;
     
     GameObject m_CenterObject;
-    
-    GameObject m_AgentGameObject;
-    
+
     string[] m_DetectableTags;
     
     int m_InitialColliderBufferSize;
@@ -29,20 +28,18 @@ public class OverlapChecker
     
     Vector3[] m_CellLocalPositions;
     
-#if MLA_UNITY_PHYSICS_MODULE
+
         Collider[] m_ColliderBuffer;
 
         public event Action<GameObject, int> GridOverlapDetectedAll;
         public event Action<GameObject, int> GridOverlapDetectedClosest;
         public event Action<GameObject, int> GridOverlapDetectedDebug;
-#endif
-    
-    public OverlapChecker(
+
+        public OverlapChecker(
         Vector3 cellScale,
         Vector3Int gridSize,
         LayerMask colliderMask,
         GameObject centerObject,
-        GameObject agentGameObject,
         string[] detectableTags,
         int initialColliderBufferSize,
         int maxColliderBufferSize)
@@ -51,7 +48,6 @@ public class OverlapChecker
         m_GridSize = gridSize;
         m_ColliderMask = colliderMask;
         m_CenterObject = centerObject;
-        m_AgentGameObject = agentGameObject;
         m_DetectableTags = detectableTags;
         m_InitialColliderBufferSize = initialColliderBufferSize;
         m_MaxColliderBufferSize = maxColliderBufferSize;
@@ -59,10 +55,9 @@ public class OverlapChecker
         m_NumCells = gridSize.x * gridSize.z;
         m_HalfCellScale = new Vector3(cellScale.x / 2f, cellScale.y, cellScale.z / 2f);
         m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
-#if MLA_UNITY_PHYSICS_MODULE
-            m_ColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, m_InitialColliderBufferSize)];
-#endif
-    
+
+        m_ColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, m_InitialColliderBufferSize)];
+        
         InitCellLocalPositions();
     }
     
@@ -111,40 +106,39 @@ public class OverlapChecker
     /// </summary>
     internal void Update()
     {
-#if MLA_UNITY_PHYSICS_MODULE
-            for (var cellIndex = 0; cellIndex < m_NumCells; cellIndex++)
-            {
-                var cellCenter = GetCellGlobalPosition(cellIndex);
-                var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale, GetGridRotation());
+        for (var cellIndex = 0; cellIndex < m_NumCells; cellIndex++)
+        {
+            var cellCenter = GetCellGlobalPosition(cellIndex);
+            var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
 
-                if (GridOverlapDetectedAll != null)
-                {
-                    ParseCollidersAll(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedAll);
-                }
-                if (GridOverlapDetectedClosest != null)
-                {
-                    ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
-                }
+            if (GridOverlapDetectedAll != null)
+            {
+                ParseCollidersAll(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedAll);
             }
-#endif
+            if (GridOverlapDetectedClosest != null)
+            {
+                ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
+            }
+        }
+
     }
     /// <summary>
     /// Same as Update(), but only load data for debug gizmo.
     /// </summary>
     internal void UpdateGizmo()
     {
-#if MLA_UNITY_PHYSICS_MODULE
+
             for (var cellIndex = 0; cellIndex < m_NumCells; cellIndex++)
             {
                 var cellCenter = GetCellGlobalPosition(cellIndex);
-                var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale, GetGridRotation());
+                var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
 
                 ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebug);
             }
-#endif
+
     }
     
-    #if MLA_UNITY_PHYSICS_MODULE
+
         /// <summary>
         /// This method attempts to perform the Physics.OverlapBoxNonAlloc and will double the size of the Collider buffer
         /// if the number of Colliders in the buffer after the call is equal to the length of the buffer.
@@ -153,14 +147,14 @@ public class OverlapChecker
         /// <param name="halfCellScale"></param>
         /// <param name="rotation"></param>
         /// <returns></returns>
-        int BufferResizingOverlapBoxNonAlloc(Vector3 cellCenter, Vector3 halfCellScale, Quaternion rotation)
+        int BufferResizingOverlapBoxNonAlloc(Vector3 cellCenter, Vector3 halfCellScale)
         {
             int numFound;
             // Since we can only get a fixed number of results, requery
             // until we're sure we can hold them all (or until we hit the max size).
             while (true)
             {
-                numFound = Physics.OverlapBoxNonAlloc(cellCenter, halfCellScale, m_ColliderBuffer, rotation, m_ColliderMask);
+                numFound = Physics.OverlapBoxNonAlloc(cellCenter, halfCellScale, m_ColliderBuffer, Quaternion.identity, m_ColliderMask);
                 if (numFound == m_ColliderBuffer.Length && m_ColliderBuffer.Length < m_MaxColliderBufferSize)
                 {
                     m_ColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, m_ColliderBuffer.Length * 2)];
@@ -185,13 +179,7 @@ public class OverlapChecker
             for (var i = 0; i < numFound; i++)
             {
                 var currentColliderGo = foundColliders[i].gameObject;
-
-                // Continue if the current collider go is the root reference
-                if (ReferenceEquals(currentColliderGo, m_AgentGameObject))
-                {
-                    continue;
-                }
-
+                
                 var closestColliderPoint = foundColliders[i].ClosestPointOnBounds(cellCenter);
                 var currentDistanceSquared = (closestColliderPoint - m_CenterObject.transform.position).sqrMagnitude;
 
@@ -231,17 +219,16 @@ public class OverlapChecker
             for (int i = 0; i < numFound; i++)
             {
                 var currentColliderGo = foundColliders[i].gameObject;
-                if (!ReferenceEquals(currentColliderGo, m_AgentGameObject))
-                {
-                    detectedAction.Invoke(currentColliderGo, cellIndex);
-                }
+             
+                detectedAction.Invoke(currentColliderGo, cellIndex);
+                
             }
         }
-#endif
+
 
         internal void RegisterSensor(CustomGridSensor sensor)
         {
-#if MLA_UNITY_PHYSICS_MODULE
+
             if (sensor.GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
             {
                 GridOverlapDetectedAll += sensor.ProcessDetectedObject;
@@ -250,14 +237,13 @@ public class OverlapChecker
             {
                 GridOverlapDetectedClosest += sensor.ProcessDetectedObject;
             }
-#endif
         }
 
         internal void RegisterDebugSensor(CustomGridSensor debugSensor)
         {
-#if MLA_UNITY_PHYSICS_MODULE
+
             GridOverlapDetectedDebug += debugSensor.ProcessDetectedObject;
-#endif
+
         }
 }
 

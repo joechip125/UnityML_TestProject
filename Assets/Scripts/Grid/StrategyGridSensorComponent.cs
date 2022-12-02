@@ -5,6 +5,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
+[AddComponentMenu("ML Agents/Grid Sensor", 50)]
 public class StrategyGridSensorComponent : SensorComponent
 {
     // dummy sensor only used for debug gizmo
@@ -14,17 +15,27 @@ public class StrategyGridSensorComponent : SensorComponent
     
     internal OverlapChecker m_BoxOverlapChecker;
 
+   
     [HideInInspector, SerializeField]
     protected internal string m_SensorName = "GridSensor";
-    
     public string SensorName
     {
         get { return m_SensorName; }
         set { m_SensorName = value; }
     }
 
+    public List<ChannelLabel> ChannelLabels
+    {
+        get { return m_ChannelLabels; }
+        set { m_ChannelLabels = new List<ChannelLabel>(value); }
+    }
+
+    [SerializeField, HideInInspector]
+    protected List<ChannelLabel> m_ChannelLabels;
+
     [HideInInspector, SerializeField]
     internal Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
+  
 
     /// <summary>
     /// The scale of each grid cell.
@@ -38,10 +49,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
     [HideInInspector, SerializeField]
     internal Vector3Int m_GridSize = new Vector3Int(16, 1, 16);
-    /// <summary>
-    /// The number of grid on each side.
-    /// Note that changing this after the sensor is created has no effect.
-    /// </summary>
+ 
     public Vector3Int GridSize
     {
         get { return m_GridSize; }
@@ -58,18 +66,6 @@ public class StrategyGridSensorComponent : SensorComponent
         }
     }
     
-    [HideInInspector, SerializeField]
-    internal GameObject m_AgentGameObject;
-    /// <summary>
-    /// The reference of the root of the agent. This is used to disambiguate objects with
-    /// the same tag as the agent. Defaults to current GameObject.
-    /// </summary>
-    public GameObject AgentGameObject
-    {
-        get { return (m_AgentGameObject == null ? gameObject : m_AgentGameObject); }
-        set { m_AgentGameObject = value; }
-    }
-
     [HideInInspector, SerializeField]
     internal string[] m_DetectableTags;
     /// <summary>
@@ -187,7 +183,6 @@ public class StrategyGridSensorComponent : SensorComponent
             m_GridSize,
             m_ColliderMask,
             gameObject,
-            AgentGameObject,
             m_DetectableTags,
             m_InitialColliderBufferSize,
             m_MaxColliderBufferSize
@@ -234,7 +229,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new OneHotGridSensor(m_SensorName + "-OneHot", m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType);
+        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
@@ -266,7 +261,6 @@ public class StrategyGridSensorComponent : SensorComponent
             m_DebugSensor.ResetPerceptionBuffer();
             m_BoxOverlapChecker.UpdateGizmo();
             var cellColors = m_DebugSensor.PerceptionBuffer;
-            var rotation = m_BoxOverlapChecker.GetGridRotation();
 
             var scale = new Vector3(m_CellScale.x, 1, m_CellScale.z);
             var gizmoYOffset = new Vector3(0, m_GizmoYOffset, 0);
@@ -274,7 +268,7 @@ public class StrategyGridSensorComponent : SensorComponent
             for (var i = 0; i < m_DebugSensor.PerceptionBuffer.Length; i++)
             {
                 var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
-                var cubeTransform = Matrix4x4.TRS(cellPosition + gizmoYOffset, rotation, scale);
+                var cubeTransform = Matrix4x4.TRS(cellPosition + gizmoYOffset, Quaternion.identity, scale);
                 Gizmos.matrix = oldGizmoMatrix * cubeTransform;
                 var colorIndex = cellColors[i] - 1;
                 var debugRayColor = Color.white;

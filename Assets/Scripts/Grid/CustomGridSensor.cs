@@ -132,19 +132,16 @@ public class CustomGridSensor : ISensor, IDisposable
     /// <inheritdoc/>
     public byte[] GetCompressedObservation()
     {
-        using (TimerStack.Instance.Scoped("GridSensor.GetCompressedObservation"))
+        var allBytes = new List<byte>();
+        var numImages = (m_CellObservationSize + 2) / 3;
+        for (int i = 0; i < numImages; i++)
         {
-            var allBytes = new List<byte>();
-            var numImages = (m_CellObservationSize + 2) / 3;
-            for (int i = 0; i < numImages; i++)
-            {
-                var channelIndex = 3 * i;
-                GridValuesToTexture(channelIndex, Math.Min(3, m_CellObservationSize - channelIndex));
-                allBytes.AddRange(m_PerceptionTexture.EncodeToPNG());
-            }
-
-            return allBytes.ToArray();
+            var channelIndex = 3 * i;
+            GridValuesToTexture(channelIndex, Math.Min(3, m_CellObservationSize - channelIndex));
+            allBytes.AddRange(m_PerceptionTexture.EncodeToPNG());
         }
+
+        return allBytes.ToArray();
     }
     
     ///// <inheritdoc/>
@@ -177,17 +174,18 @@ public class CustomGridSensor : ISensor, IDisposable
     
     protected virtual void GetObjectData(GameObject detectedObject, int tagIndex, float[] dataBuffer)
     {
-        dataBuffer[0] = tagIndex + 1;
+        //dataBuffer[0] = tagIndex + 1;
+        dataBuffer[tagIndex] = 1;
     }
 
     protected virtual int GetCellObservationSize()
     {
-        return 1;
+        return DetectableTags == null ? 0 : DetectableTags.Length;
     }
     
     protected virtual bool IsDataNormalized()
     {
-        return false;
+        return true;
     }
 
     
@@ -246,12 +244,10 @@ public class CustomGridSensor : ISensor, IDisposable
     public void Update()
     {
         ResetPerceptionBuffer();
-        using (TimerStack.Instance.Scoped("GridSensor.Update"))
+        
+        if (m_BoxOverlapChecker != null)
         {
-            if (m_BoxOverlapChecker != null)
-            {
-                m_BoxOverlapChecker.Update();
-            }
+            m_BoxOverlapChecker.Update();
         }
     }
     
@@ -264,22 +260,19 @@ public class CustomGridSensor : ISensor, IDisposable
     /// <inheritdoc/>
     public int Write(ObservationWriter writer)
     {
-        using (TimerStack.Instance.Scoped("GridSensor.Write"))
+        int index = 0;
+        for (var h = m_GridSize.z - 1; h >= 0; h--)
         {
-            int index = 0;
-            for (var h = m_GridSize.z - 1; h >= 0; h--)
+            for (var w = 0; w < m_GridSize.x; w++)
             {
-                for (var w = 0; w < m_GridSize.x; w++)
+                for (var d = 0; d < m_CellObservationSize; d++)
                 {
-                    for (var d = 0; d < m_CellObservationSize; d++)
-                    {
-                        writer[h, w, d] = m_PerceptionBuffer[index];
-                        index++;
-                    }
+                    writer[h, w, d] = m_PerceptionBuffer[index];
+                    index++;
                 }
             }
-            return index;
         }
+        return index;
     }
     
     ///// <inheritdoc/>
