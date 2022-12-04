@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MBaske.Sensors.Grid;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ public class OverlapChecker
     LayerMask m_ColliderMask;
     
     GameObject m_CenterObject;
+
+    private ColorGridBuffer m_GridBuffer;
 
     string[] m_DetectableTags;
     
@@ -115,7 +118,6 @@ public class OverlapChecker
                 ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
             }
         }
-
     }
     /// <summary>
     /// Same as Update(), but only load data for debug gizmo.
@@ -182,6 +184,7 @@ public class OverlapChecker
                 {
                     if (currentColliderGo.CompareTag(m_DetectableTags[ii]))
                     {
+                        //Debug.Log(currentColliderGo.tag);
                         index = ii;
                         break;
                     }

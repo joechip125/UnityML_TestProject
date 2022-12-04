@@ -15,12 +15,12 @@ public class StrategyGridSensorComponent : SensorComponent
     
     internal OverlapChecker m_BoxOverlapChecker;
     
-    public GridBuffer GridBuffer
+    public ColorGridBuffer GridBuffer
     {
         get { return m_GridBuffer; }
         set { m_GridBuffer = value; GridShape = value.GetShape(); }
     }
-    private GridBuffer m_GridBuffer;
+    private ColorGridBuffer m_GridBuffer;
     
     public GridBuffer.Shape GridShape
     {
@@ -246,7 +246,7 @@ public class StrategyGridSensorComponent : SensorComponent
             var cellColors = m_DebugSensor.PerceptionBuffer;
             var num = m_GridSize.x * m_GridSize.z;
             var gizmoYOffset = new Vector3(0, m_GizmoYOffset, 0);
-            for (var i = 0; i < num; i++)
+            for (var i = 0; i < m_DebugSensor.PerceptionBuffer.Length; i++)
             {
                 var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
                 var colorIndex = cellColors[i] - 1;
@@ -258,7 +258,6 @@ public class StrategyGridSensorComponent : SensorComponent
                 Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
                 Gizmos.DrawCube( cellPosition, Vector3.one);
             }
-
         }
     }
     

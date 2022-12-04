@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -30,6 +31,7 @@ public class FieldTile : MonoBehaviour
     public TileStatus currentStatus;
 
     public int numberCollect;
+    List<Vector3> tempLoc = new();
 
     public float CollectValue
     {
@@ -80,6 +82,7 @@ public class FieldTile : MonoBehaviour
     {
         var amount = Random.Range(0, 1);
         numberCollect = amount;
+        tempLoc.Clear();
 
         for (int i = 0; i < amount; i++)
         {
@@ -95,16 +98,32 @@ public class FieldTile : MonoBehaviour
 
     public void SpawnSetAmount(int amount)
     {
+        tempLoc.Clear();
         numberCollect = amount;
+        var tolerance = 1f;
+        var unique = false;
         for (int i = 0; i < amount; i++)
         {
+            while (!unique)
+            {
+                var location = new Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
+                if (tempLoc.Any(x => Vector3.Distance(location, x) < tolerance))
+                {
+                    continue;
+                }
+              
+                tempLoc.Add(location);
+                unique = true;
+            }
+            
             var temp  = Instantiate(Random.Range(0, 2) == 0 
                     ? spawnCollect : spawnPoison,
                 transform, false);
-            temp.transform.localPosition += new 
-                Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
+            temp.transform.localPosition += tempLoc[i];
             
             _collectRef.Add(temp);
+
+            unique = false;
         }
     }
     

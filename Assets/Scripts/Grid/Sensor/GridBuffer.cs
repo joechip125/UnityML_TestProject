@@ -126,22 +126,11 @@ namespace MBaske.Sensors.Grid
             set { m_Height = value; Initialize(); }
         }
         private int m_Height;
-
-        /// <summary>
-        /// Whether the buffer was changed since last Clear() call.
-        /// </summary>
-        //public bool IsDirty { get; private set; }
-
-
+        
         // [channel][y * width + x]
         private float[][] m_Values;
 
-        /// <summary>
-        /// Creates a <see cref="GridBuffer"/> instance.
-        /// </summary>
-        /// <param name="numChannels">Number of grid channels</param>
-        /// <param name="width">Grid width</param>
-        /// <param name="height">Grid height</param>
+     
         public GridBuffer(int numChannels, int width, int height)
         {
             m_NumChannels = numChannels;
@@ -150,19 +139,10 @@ namespace MBaske.Sensors.Grid
 
             Initialize();
         }
-
-        /// <summary>
-        /// Creates a <see cref="GridBuffer"/> instance.
-        /// </summary>
-        /// <param name="numChannels">Number of grid channels</param>
-        /// <param name="size">Grid size</param>
+        
         public GridBuffer(int numChannels, Vector2Int size)
             : this(numChannels, size.x, size.y) { }
-
-        /// <summary>
-        /// Creates a <see cref="GridBuffer"/> instance.
-        /// </summary>
-        /// <param name="shape"><see cref="Shape"/> of the grid</param>
+        
         public GridBuffer(Shape shape)
             : this(shape.NumChannels, shape.Width, shape.Height) { }
 

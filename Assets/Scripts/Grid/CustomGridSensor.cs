@@ -9,7 +9,6 @@ using UnityEngine.Profiling;
 
 public class CustomGridSensor : ISensor, IDisposable
 {
-    
     private readonly GridBuffer m_GridBuffer;
     private List<byte> m_CompressedObs;
     
@@ -117,6 +116,11 @@ public class CustomGridSensor : ISensor, IDisposable
         }
     }
 
+    public void ResetGridBuffer()
+    {
+        
+    }
+    
     /// <inheritdoc/>
     public string GetName()
     {
@@ -148,20 +152,20 @@ public class CustomGridSensor : ISensor, IDisposable
         return allBytes.ToArray();
     }
     
-    ///// <inheritdoc/>
-    //public byte[] GetCompressedObservation()
-    //{
-    //    m_CompressedObs.Clear();
-    //
-    //    var colors = m_GridBuffer.GetLayerColors();
-    //    for (int i = 0, n = colors.Length; i < n; i++)
-    //    {
-    //        m_PerceptionTexture.SetPixels32(colors[i]);
-    //        m_CompressedObs.AddRange(m_PerceptionTexture.EncodeToPNG());
-    //    }
-    //
-    //    return m_CompressedObs.ToArray();
-    //}
+    /// <inheritdoc/>
+    public byte[] GetCompressedObservation2()
+    {
+        m_CompressedObs.Clear();
+    
+        var colors = m_GridBuffer.GetLayerColors();
+        for (int i = 0, n = colors.Length; i < n; i++)
+        {
+            m_PerceptionTexture.SetPixels32(colors[i]);
+            m_CompressedObs.AddRange(m_PerceptionTexture.EncodeToPNG());
+        }
+    
+        return m_CompressedObs.ToArray();
+    }
     
 
     void GridValuesToTexture(int channelIndex, int numChannelsToAdd)
@@ -178,13 +182,14 @@ public class CustomGridSensor : ISensor, IDisposable
     
     protected virtual void GetObjectData(GameObject detectedObject, int tagIndex, float[] dataBuffer)
     {
-        //dataBuffer[0] = tagIndex + 1;
-        dataBuffer[tagIndex] = 1;
+        dataBuffer[0] = tagIndex + 1;
+       
+        //dataBuffer[tagIndex] = 1;
     }
 
     protected virtual int GetCellObservationSize()
     {
-        return DetectableTags == null ? 0 : DetectableTags.Length;
+        return 1;
     }
     
     protected virtual bool IsDataNormalized()
@@ -279,31 +284,30 @@ public class CustomGridSensor : ISensor, IDisposable
         return index;
     }
     
-    ///// <inheritdoc/>
-    //public int Write(ObservationWriter writer)
-    //{
-    //    int numWritten = 0;
-    //    int w = m_GridBuffer.Width;
-    //    int h = m_GridBuffer.Height;
-    //    int n = m_GridBuffer.NumChannels;
-    //
-    //    for (int c = 0; c < n; c++)
-    //    {
-    //        for (int x = 0; x < w; x++)
-    //        {
-    //            for (int y = 0; y < h; y++)
-    //            {
-    //                writer[y, x, c] = m_GridBuffer.Read(c, x, y);
-    //                numWritten++;
-    //            }
-    //        }
-    //    }
-    //
-    //    return numWritten;
-    //}
+    public int Write2(ObservationWriter writer)
+    {
+        int numWritten = 0;
+        int w = m_GridBuffer.Width;
+        int h = m_GridBuffer.Height;
+        int n = m_GridBuffer.NumChannels;
+    
+        for (int c = 0; c < n; c++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++)
+                {
+                    writer[y, x, c] = m_GridBuffer.Read(c, x, y);
+                    numWritten++;
+                }
+            }
+        }
+    
+        return numWritten;
+    }
     
     // <inheritdoc/>
-    //public virtual void Update() 
+    //public virtual void Update2() 
     //{
     //    if (AutoDetectionEnabled)
     //    {
