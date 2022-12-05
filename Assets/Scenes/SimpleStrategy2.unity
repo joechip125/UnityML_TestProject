@@ -485,6 +485,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 340427973565806491, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: _percentPoison
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 340427973565806491, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
+      propertyPath: _percentCollect
+      value: 90
+      objectReference: {fileID: 0}
     - target: {fileID: 2291122688876366434, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.59

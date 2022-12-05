@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public enum CollectTypes
@@ -75,11 +76,9 @@ public class SpawnArea : MonoBehaviour
             total += random;
             _numberToSpawn.Add(random);
         }
-
-
+        
         var poison = Mathf.CeilToInt(total / 10 * _percentPoison / 10);
         var collect = Mathf.CeilToInt(total / 10 * _percentCollect / 10);
-        Debug.Log($"numberToSpawn {_numberToSpawn.Count} total {total}, poison {poison},  collect {collect}");
         _spawnType.AddRange(Enumerable.Repeat(CollectTypes.Poison, poison));
         _spawnType.AddRange(Enumerable.Repeat(CollectTypes.Collect, collect));
 
@@ -112,8 +111,6 @@ public class SpawnArea : MonoBehaviour
             if (counter != 0)
             {
                 t.SpawnSetAmount(_collections[counter].collectTypesList);
-
-                //t.SpawnSetAmount(Random.Range(1, 4));
             }
 
             counter++;
@@ -191,25 +188,27 @@ public class SpawnArea : MonoBehaviour
 
     private void SpawnWalls(int numX, int numZ)
     {
-        var placeX = (numX - 1) * 5;
+        var min = tiles[0].GetTileLocation(TileLocations.Min);
+        var max = tiles[^1].GetTileLocation(TileLocations.Max);
+        var center = (max - new Vector3(Mathf.Abs(min.x), 0,Mathf.Abs(min.z))) / 2;
         
         var temp2 = Instantiate(wallPrototype, 
-            transform.localPosition + new Vector3(placeX, 0, -5.5f), 
+            new Vector3(center.x, 0, min.z), 
             Quaternion.identity, transform);
         temp2.transform.localScale = new Vector3(numX * 10, 5, 1);
         
         temp2 = Instantiate(wallPrototype, 
-            transform.localPosition + new Vector3(placeX, 0, numZ * 10 - 4.5f), 
+            new Vector3(center.x, 0, max.z), 
             Quaternion.identity, transform);
         temp2.transform.localScale = new Vector3(numX * 10, 5, 1);
         
         temp2 = Instantiate(wallPrototype, 
-            transform.localPosition + new Vector3(-5.5f, 0, numZ * 5 - 5f), 
+            new Vector3(min.x, 0, center.z), 
             Quaternion.identity, transform);
         temp2.transform.localScale = new Vector3(1, 5, numZ * 10);
         
         temp2 = Instantiate(wallPrototype, 
-            transform.localPosition + new Vector3(numX * 10 -4.5f, 0, numZ * 5 - 5f), 
+            new Vector3(max.x, 0, center.z), 
             Quaternion.identity, transform);
         temp2.transform.localScale = new Vector3(1, 5, numZ * 10);
     }

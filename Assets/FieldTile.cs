@@ -15,6 +15,13 @@ public enum TileStatus
     Right
 }
 
+public enum TileLocations
+{
+    Min,
+    Max,
+    Center
+}
+
 public class FieldTile : MonoBehaviour
 {
     public Material tileMat;
@@ -54,7 +61,6 @@ public class FieldTile : MonoBehaviour
     private void Awake()
     {
         var extents = GetComponent<MeshCollider>().bounds.extents;
-        Debug.Log(range);
         range = Mathf.Min(extents.x, extents.z) - 1;
         _text = GetComponentInChildren<TextMeshProUGUI>();
     }
@@ -79,6 +85,22 @@ public class FieldTile : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(newStatus), newStatus, null);
         }
+    }
+
+    public Vector3 GetTileLocation(TileLocations location)
+    {
+        var retVec = new Vector3();
+        var bounds = GetComponent<MeshCollider>().bounds;
+
+        retVec = location switch
+        {
+            TileLocations.Min => bounds.min,
+            TileLocations.Max => bounds.max,
+            TileLocations.Center => bounds.center,
+            _ => throw new ArgumentOutOfRangeException(nameof(location), location, null)
+        };
+
+        return retVec;
     }
     
     public void SpawnSetAmount(int amount)
