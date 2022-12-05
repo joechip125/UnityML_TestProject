@@ -314,17 +314,6 @@ namespace MBaske.Sensors.Grid
         /// <inheritdoc/>
         public override ISensor[] CreateSensors()
         {
-            
-            m_BoxOverlapChecker = new OverlapChecker(
-                m_CellScale,
-                m_GridSize,
-                m_ColliderMask,
-                gameObject,
-                m_DetectableTags,
-                m_InitialColliderBufferSize,
-                m_MaxColliderBufferSize
-            );
-            
 #if (UNITY_EDITOR)
             if (Application.isPlaying)
             {

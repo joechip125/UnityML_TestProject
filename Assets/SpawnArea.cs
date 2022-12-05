@@ -191,6 +191,7 @@ public class SpawnArea : MonoBehaviour
         var min = tiles[0].GetTileLocation(TileLocations.Min);
         var max = tiles[^1].GetTileLocation(TileLocations.Max);
         var center = (max - new Vector3(Mathf.Abs(min.x), 0,Mathf.Abs(min.z))) / 2;
+        //var rot = Quaternion.LookRotation( center - new Vector3(1, 5, numZ * 10), Vector3.up);
         
         var temp2 = Instantiate(wallPrototype, 
             new Vector3(center.x, 0, min.z), 

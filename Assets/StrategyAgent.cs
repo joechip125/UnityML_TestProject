@@ -81,8 +81,7 @@ public class StrategyAgent : Agent
          _obstacleDist = obsDist;
          _lastDistance = dist;
      }
-
-
+     
      private void OnCollisionStay(Collision collisionInfo)
      {
          if (collisionInfo.gameObject.TryGetComponent<Obstacle>(out var obstacle))
@@ -98,8 +97,6 @@ public class StrategyAgent : Agent
            
          }
      }
-   
- 
      
      public override void Heuristic(in ActionBuffers actionsOut)
      {

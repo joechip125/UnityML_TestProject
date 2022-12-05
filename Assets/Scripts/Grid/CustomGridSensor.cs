@@ -9,7 +9,7 @@ using UnityEngine.Profiling;
 
 public class CustomGridSensor : ISensor, IDisposable
 {
-    private readonly GridBuffer m_GridBuffer;
+    private  GridBuffer m_GridBuffer;
     private List<byte> m_CompressedObs;
     
     string m_Name;
@@ -42,8 +42,9 @@ public class CustomGridSensor : ISensor, IDisposable
     int m_CellObservationSize;
     
     Vector3 m_CellCenterOffset;
-    
-   
+    private bool AutoDetectionEnabled;
+
+
     public CustomGridSensor(
         string name,
         Vector3 cellScale,
@@ -58,7 +59,9 @@ public class CustomGridSensor : ISensor, IDisposable
         m_GridSize = gridSize;
         m_DetectableTags = detectableTags;
         CompressionType = compression;
-        _gridBuffer = gridBuffer;
+        
+        gridBuffer.GetShape().Validate();
+        m_GridBuffer = gridBuffer;
 
         if (m_GridSize.y != 1)
         {
@@ -227,10 +230,13 @@ public class CustomGridSensor : ISensor, IDisposable
     internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
     {
         Profiler.BeginSample("GridSensor.ProcessDetectedObject");
+
         for (var i = 0; i < m_DetectableTags.Length; i++)
         {
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
+                m_GridBuffer.Write(i, cellIndex, 1);
+                
                 if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
                 {
                     Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);
@@ -247,6 +253,11 @@ public class CustomGridSensor : ISensor, IDisposable
             }
         }
         Profiler.EndSample();
+    }
+
+    public void ProcessObjectGridBuffer(GameObject detectedObject, int cellIndex)
+    {
+        
     }
     
     /// <inheritdoc/>
@@ -307,17 +318,17 @@ public class CustomGridSensor : ISensor, IDisposable
     }
     
     // <inheritdoc/>
-    //public virtual void Update2() 
-    //{
-    //    if (AutoDetectionEnabled)
-    //    {
-    //        Detector.OnSensorUpdate();
-    //        Encoder.Encode(Detector.Result);
-    //    }
-    //
-    //    UpdateEvent?.Invoke();
-    //}
-    //
+    public virtual void Update2() 
+    {
+        if (AutoDetectionEnabled)
+        {
+            //Detector.OnSensorUpdate();
+            //Encoder.Encode(Detector.Result);
+        }
+    
+        //UpdateEvent?.Invoke();
+    }
+    
     /// <inheritdoc/>
     //public virtual void Reset() 
     //{

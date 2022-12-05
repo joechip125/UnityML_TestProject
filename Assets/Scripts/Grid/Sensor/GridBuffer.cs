@@ -214,6 +214,11 @@ namespace MBaske.Sensors.Grid
         {
             Write(channel, pos.x, pos.y, value);
         }
+        
+        public virtual void Write(int channel, int index, float value)
+        {
+            m_Values[channel][0] = value;
+        }
 
         /// <summary>
         /// Tries to write a float value to a specified grid cell.

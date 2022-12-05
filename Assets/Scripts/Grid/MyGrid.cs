@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MBaske.Sensors.Grid;
 using UnityEngine;
 using Unity.MLAgents.Sensors;
 
@@ -29,6 +30,8 @@ public class MyGrid : MonoBehaviour
     [SerializeField] public int cellsZ = 12;
     [HideInInspector, SerializeField]
     internal float m_GizmoYOffset = 0f;
+
+    public ColorGridBuffer GridBuffer;
 
     // Start is called before the first frame update
     void Start()

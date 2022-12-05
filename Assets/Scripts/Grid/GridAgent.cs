@@ -115,18 +115,10 @@ public class GridAgent : Agent
         var right = Mathf.Clamp(continuousActions[1], -1f, 1f);
         var rotate = Mathf.Clamp(continuousActions[2], -1f, 1f);
          
-        dirToGo = transform.forward * forward;
-        dirToGo += transform.right * right;
-        rotateDir = -transform.up * rotate;
-        //transform.localPosition += dirToGo;
-        //transform.Rotate(rotateDir, Time.fixedDeltaTime * turnSpeed);
-        
-        
+       // dirToGo = transform.forward * forward;
+       // dirToGo += transform.right * right;
+       // rotateDir = -transform.up * rotate;
 
-        if (GetCumulativeReward() < -1.0f)
-        {
-            EndEpisode();
-        }
     }
 
     private void FixedUpdate()
