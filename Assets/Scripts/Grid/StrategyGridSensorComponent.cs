@@ -165,7 +165,7 @@ public class StrategyGridSensorComponent : SensorComponent
             m_CellScale,
             m_GridSize,
             m_ColliderMask,
-            transform,
+            gameObject,
             m_DetectableTags,
             m_InitialColliderBufferSize,
             m_MaxColliderBufferSize
@@ -255,6 +255,8 @@ public class StrategyGridSensorComponent : SensorComponent
             {
                 debugRayColor = m_DebugColors[(int)colorIndex];
             }
+            
+            
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
             Gizmos.DrawCube( cellPosition, Vector3.one);
         }

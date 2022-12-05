@@ -9,7 +9,7 @@ using UnityEngine.Profiling;
 
 public class CustomGridSensor : ISensor, IDisposable
 {
-    private  GridBuffer m_GridBuffer;
+    private  ColorGridBuffer m_GridBuffer;
     private List<byte> m_CompressedObs;
     
     string m_Name;
@@ -51,7 +51,7 @@ public class CustomGridSensor : ISensor, IDisposable
         Vector3Int gridSize,
         string[] detectableTags,
         SensorCompressionType compression,
-        GridBuffer gridBuffer
+        ColorGridBuffer gridBuffer
     )
     {
         m_Name = name;
@@ -236,7 +236,7 @@ public class CustomGridSensor : ISensor, IDisposable
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
                 m_GridBuffer.Write(i, cellIndex, 1);
-                
+
                 if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
                 {
                     Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);

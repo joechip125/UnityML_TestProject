@@ -13,7 +13,7 @@ public class OverlapChecker
     
     LayerMask m_ColliderMask;
     
-    Transform m_CenterObject;
+    GameObject m_CenterObject;
 
     private ColorGridBuffer m_GridBuffer;
 
@@ -42,7 +42,7 @@ public class OverlapChecker
         Vector3 cellScale,
         Vector3Int gridSize,
         LayerMask colliderMask,
-        Transform centerObject,
+        GameObject centerObject,
         string[] detectableTags,
         int initialColliderBufferSize,
         int maxColliderBufferSize)
@@ -95,7 +95,7 @@ public class OverlapChecker
     
     internal Vector3 GetCellGlobalPosition(int cellIndex)
     {
-        return m_CellLocalPositions[cellIndex] + m_CenterObject.position;
+        return m_CellLocalPositions[cellIndex] + m_CenterObject.transform.position;
     }
     
     /// <summary>
@@ -108,6 +108,7 @@ public class OverlapChecker
         {
             var cellCenter = GetCellGlobalPosition(cellIndex);
             var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
+            //Debug.Log($"cell center {cellCenter}, cell index {cellIndex} num found {numFound}");
 
             if (GridOverlapDetectedAll != null)
             {
@@ -165,13 +166,14 @@ public class OverlapChecker
         {
             GameObject closestColliderGo = null;
             var minDistanceSquared = float.MaxValue;
+            //Debug.Log($"cell center {cellCenter}, cell index {cellIndex} num found {numFound}");
 
             for (var i = 0; i < numFound; i++)
             {
                 var currentColliderGo = foundColliders[i].gameObject;
                 
                 var closestColliderPoint = foundColliders[i].ClosestPointOnBounds(cellCenter);
-                var currentDistanceSquared = (closestColliderPoint - m_CenterObject.position).sqrMagnitude;
+                var currentDistanceSquared = (closestColliderPoint - m_CenterObject.transform.position).sqrMagnitude;
 
                 if (currentDistanceSquared >= minDistanceSquared)
                 {

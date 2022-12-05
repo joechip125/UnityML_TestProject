@@ -261,6 +261,11 @@ namespace MBaske.Sensors.Grid
         {
             return m_Values[channel][y * Width + x];
         }
+        
+        public virtual float Read(int channel, int index)
+        {
+            return m_Values[channel][index];
+        }
 
         /// <summary>
         /// Reads a float value from a specified grid cell.

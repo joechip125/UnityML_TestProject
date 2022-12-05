@@ -23,7 +23,7 @@ public class GridAgent : Agent
     private const int c_Left = 3;
     private const int c_Right = 4;
 
-    private GridBuffer m_SensorBuffer;
+    private ColorGridBuffer m_SensorBuffer;
     private GridBuffer m_MazeBuffer;
 
     // Current agent position on grid.
@@ -78,8 +78,8 @@ public class GridAgent : Agent
         // The ColorGridBuffer supports PNG compression.
         m_SensorBuffer = new ColorGridBuffer(3, length, length);
 
-        //var sensorComp = GetComponent<GridSensorComponentNew>();
-        //sensorComp.GridBuffer = m_SensorBuffer;
+        var sensorComp = GetComponent<StrategyGridSensorComponent>();
+        sensorComp.GridBuffer = m_SensorBuffer;
         //// Labels for sensor debugging.
         //sensorComp.ChannelLabels = new List<ChannelLabel>()
         //{
