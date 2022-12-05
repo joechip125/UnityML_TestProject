@@ -29,8 +29,9 @@ public class FieldTile : MonoBehaviour
     private List<GameObject> _collectRef = new();
 
     public TileStatus currentStatus;
-
-    public int numberCollect;
+    
+    private float range = 2f;
+    
     List<Vector3> tempLoc = new();
 
     public float CollectValue
@@ -52,6 +53,9 @@ public class FieldTile : MonoBehaviour
     
     private void Awake()
     {
+        var extents = GetComponent<MeshCollider>().bounds.extents;
+        Debug.Log(range);
+        range = Mathf.Min(extents.x, extents.z) - 1;
         _text = GetComponentInChildren<TextMeshProUGUI>();
     }
 
@@ -76,52 +80,53 @@ public class FieldTile : MonoBehaviour
                 throw new ArgumentOutOfRangeException(nameof(newStatus), newStatus, null);
         }
     }
-
-    private float range = 2f;
-    public void SpawnRandomAmount()
-    {
-        var amount = Random.Range(0, 1);
-        numberCollect = amount;
-        tempLoc.Clear();
-
-        for (int i = 0; i < amount; i++)
-        {
-            var temp  = Instantiate(spawnCollect,
-                transform, false);
-            temp.transform.localPosition += new 
-                Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
-            
-            _collectRef.Add(temp);
-        }
-    }
-
-
+    
     public void SpawnSetAmount(int amount)
     {
-        tempLoc.Clear();
-        numberCollect = amount;
-        var tolerance = 1f;
-        var unique = false;
+        SetUniqueLocations(amount, 1.2f);
         for (int i = 0; i < amount; i++)
         {
-            while (!unique)
-            {
-                var location = new Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
-                if (tempLoc.Any(x => Vector3.Distance(location, x) < tolerance))
-                {
-                    continue;
-                }
-              
-                tempLoc.Add(location);
-                unique = true;
-            }
-            
             var temp  = Instantiate(Random.Range(0, 2) == 0 
                     ? spawnCollect : spawnPoison,
                 transform, false);
             temp.transform.localPosition += tempLoc[i];
             
             _collectRef.Add(temp);
+        }
+    }
+    
+    public void SpawnSetAmount(List<CollectTypes> typesList)
+    {
+        SetUniqueLocations(typesList.Count, 1.2f);
+     
+        for (int i = 0; i < typesList.Count; i++)
+        {
+            var temp  = Instantiate(typesList[i] == CollectTypes.Collect 
+                    ? spawnCollect : spawnPoison,
+                transform, false);
+            temp.transform.localPosition += tempLoc[i];
+            
+            _collectRef.Add(temp);
+        }
+    }
+
+    private void SetUniqueLocations(int numberLocations,  float tolerance)
+    {
+        tempLoc.Clear();
+        var unique = false;
+        
+        for (int i = 0; i < numberLocations; i++)
+        {
+            while (!unique)
+            {
+                var location =  new Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
+                if (tempLoc.Any(x => Vector3.Distance(location, x) < tolerance))
+                {
+                    continue;
+                }
+                tempLoc.Add(location);
+                unique = true;
+            }
 
             unique = false;
         }

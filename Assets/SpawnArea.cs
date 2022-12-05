@@ -1,9 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+public enum CollectTypes
+{
+    Collect,
+    Poison
+}
+[Serializable]
+public class Collections
+{
+    public List<CollectTypes> collectTypesList = new();
+}
 
 public class SpawnArea : MonoBehaviour
 {
@@ -12,27 +25,97 @@ public class SpawnArea : MonoBehaviour
     public int xTiles;
     public int zTiles;
     public List<FieldTile> tiles;
+    [SerializeField]private float _percentCollect;
+    [SerializeField]private float _percentPoison;
     private IntVector2 _theRightChoice;
     private int _rightChoice;
     private int _totalScore;
 
     private int _numWrong;
     private int _numRight;
+    private List<CollectTypes> _spawnType = new();
+    private List<Collections> _collections = new();
+    private List<int> _numberToSpawn = new();
+
+    public float PercentCollect
+    {
+        get => _percentCollect;
+        set
+        {
+            _percentCollect = value;
+            _percentPoison = 100 - _percentCollect;
+        }
+    }
+    
+    public float PercentPoison
+    {
+        get => _percentPoison;
+        set
+        {
+            _percentPoison = value;
+            _percentCollect = 100 - _percentPoison;
+        }
+    }
     
     void Start()
     {
         SpawnAreas(xTiles, zTiles);
     }
 
+    public void GetCollection()
+    {
+        _numberToSpawn.Clear();
+        _spawnType.Clear();
+        _collections.Clear();
+        var total = 0f;
+
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            var random = Random.Range(1, 4);
+            total += random;
+            _numberToSpawn.Add(random);
+        }
+
+
+        var poison = Mathf.CeilToInt(total / 10 * _percentPoison / 10);
+        var collect = Mathf.CeilToInt(total / 10 * _percentCollect / 10);
+        Debug.Log($"numberToSpawn {_numberToSpawn.Count} total {total}, poison {poison},  collect {collect}");
+        _spawnType.AddRange(Enumerable.Repeat(CollectTypes.Poison, poison));
+        _spawnType.AddRange(Enumerable.Repeat(CollectTypes.Collect, collect));
+
+        foreach (var n in _numberToSpawn)
+        {
+            _collections.Add(new Collections());
+            for (int i = 0; i < n; i++)
+            {
+                var choice =   Random.Range(0, _spawnType.Count - 1);
+
+                if (choice < _spawnType.Count)
+                {
+                    var type = _spawnType[choice];
+                    _spawnType.RemoveAt(choice);
+                    
+                    _collections[^1].collectTypesList.Add(type);
+                }
+            }
+        }
+    }
+    
     public void RespawnCollection()
     {
+        GetCollection();
         var counter = 0;
         foreach (var t in tiles)
         {
             t.ClearAllCollect();
 
-            if(counter != 0)
-                t.SpawnSetAmount(Random.Range(1, 4));
+            if (counter != 0)
+            {
+                t.SpawnSetAmount(_collections[counter].collectTypesList);
+
+                //t.SpawnSetAmount(Random.Range(1, 4));
+            }
+
             counter++;
         }
     }
