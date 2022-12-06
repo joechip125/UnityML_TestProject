@@ -13,6 +13,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private float _goalR;
     public float moveSpeed = 0.2f;
     public float rotationSpeed = 0.001f;
+    public Guid Guid;
 
     public Action FoundObjectAct;
     public Action CollideWithWall;
@@ -20,8 +21,21 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Quaternion _nextRotation;
     private Quaternion _currentRotation;
     public Action MoveComplete;
+    public event Action<Vector2, Guid> NeedDirectionEvent; 
     public Action MoveStarted;
-    
+
+    private void Awake()
+    {
+        Guid = new Guid();
+    }
+
+    private void Start()
+    {
+        var pos = transform.localPosition;
+        var normPos = new Vector2(pos.x, pos.z).normalized;
+        NeedDirectionEvent?.Invoke(normPos, Guid);
+    }
+
     public Vector3 Goal
     {
         get => _goal;
@@ -35,7 +49,6 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             _currentRotation = transform.rotation;
             _nextRotation = Quaternion.LookRotation(
                 _goal - transform.localPosition, Vector3.up);
-            MoveStarted?.Invoke();
         }
     }
     
@@ -84,6 +97,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         return transform.localPosition;
     }
 
+    public void OnDirectionGot(Vector3 nextPos)
+    {
+        Goal = nextPos;
+    }
+    
     public void DestroyUnit()
     {
         Destroy(gameObject);

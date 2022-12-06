@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace;
 using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -10,6 +11,8 @@ using UnityEngine;
 public class GridAgent : Agent
 {
     public event Action EpisodeBegin;
+    public event Action<Vector3, Guid> NeedDirectionEvent;
+    public Controller Controller;
     public SpawnArea spawnArea;
 
     [SerializeField]
@@ -38,7 +41,9 @@ public class GridAgent : Agent
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
 
-    
+    private Queue<Vector2Int> _moveQueue = new();
+
+
     public event Action<Vector2Int> FoundFoodEvent;
 
     [SerializeField]
@@ -95,14 +100,17 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
-        EpisodeBegin?.Invoke();
-        //RequestDecision();
         spawnArea.RespawnCollection();
         m_SensorBuffer.Clear();
         m_GridPosition = Vector2Int.zero;
         m_StepTime = 0;
     }
-    
+
+    private void EnqMove(Vector2Int pos)
+    {
+        _moveQueue.Enqueue(pos);
+        RequestDecision();
+    }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         m_ValidActions.Clear();
@@ -145,8 +153,8 @@ public class GridAgent : Agent
     }
     
     public override void OnActionReceived(ActionBuffers actions)
-    {   
-        //AddReward(-0.005f);
+    {  
+        var pos = _moveQueue.Dequeue();
 
         bool isDone = false;
         var action = actions.DiscreteActions[0];
@@ -174,7 +182,7 @@ public class GridAgent : Agent
     {
         if (m_IsActive)
         {
-            RequestDecision();
+            //RequestDecision();
         }
         else if (m_StepDuration > 0)
         {

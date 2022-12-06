@@ -132,7 +132,7 @@ public class FieldTile : MonoBehaviour
         }
     }
 
-    private void SetUniqueLocations(int numberLocations,  float tolerance)
+    private void SetUniqueLocations(int numberLocations, float tolerance)
     {
         tempLoc.Clear();
         var unique = false;
