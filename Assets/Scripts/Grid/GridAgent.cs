@@ -76,10 +76,10 @@ public class GridAgent : Agent
 
         int length = m_LookDistance * 2 + 1;
         // The ColorGridBuffer supports PNG compression.
-        m_SensorBuffer = new ColorGridBuffer(3, length, length);
+        m_SensorBuffer = new ColorGridBuffer(5, 20, 20);
 
         var sensorComp = GetComponent<StrategyGridSensorComponent>();
-        sensorComp.GridBuffer = m_SensorBuffer;
+        sensorComp.ExternalBuffer = m_SensorBuffer;
         //// Labels for sensor debugging.
         //sensorComp.ChannelLabels = new List<ChannelLabel>()
         //{
@@ -93,42 +93,81 @@ public class GridAgent : Agent
     {
     }
     
-    
     public override void OnEpisodeBegin()
     {
         EpisodeBegin?.Invoke();
         //RequestDecision();
         spawnArea.RespawnCollection();
+        m_SensorBuffer.Clear();
+        m_GridPosition = Vector2Int.zero;
         m_StepTime = 0;
     }
     
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        //m_ValidActions.Clear();
-        //m_ValidActions.Add(c_Stay);
-        //
-        //for (int action = 1; action < 5; action++)
-        //{
-        //    bool isValid = m_MazeBuffer.TryRead(MyGrid.Wall, 
-        //        m_GridPosition + m_Directions[action],
-        //        out float value) && value == 0; // no wall
-        //    //isValid = m_MazeBuffer.Contains(m_GridPosition + m_Directions[action]);
-        //    
-        //    if (isValid)
-        //    {
-        //        m_ValidActions.Add(action);
-        //    }
-        //    else if (m_MaskActions)
-        //    {
-        //        actionMask.SetActionEnabled(0, action, false);
-        //    }
-        //}
+        m_ValidActions.Clear();
+        m_ValidActions.Add(c_Stay);
+        
+        for (int action = 1; action < 5; action++)
+        {
+            bool isValid = m_SensorBuffer.TryRead(MyGrid.Wall, 
+                m_GridPosition + m_Directions[action],
+                out float value) && value == 0; // no wall
+
+            if (isValid)
+            {
+                m_ValidActions.Add(action);
+            }
+            else if (m_MaskActions)
+            {
+                actionMask.SetActionEnabled(0, action, false);
+            }
+        }
     }
 
+    private bool ValidatePosition(bool rewardAgent)
+    {
+        // From 0 to +1. 
+        float visitValue = m_SensorBuffer.Read(MyGrid.Visit, m_GridPosition);
+
+        m_SensorBuffer.Write(2, m_GridPosition,
+            1);
+
+        //(1, visitValue + m_RewardDecrement)
+        if (rewardAgent)
+        {
+            // From +0.5 to -0.5.
+            AddReward(0.5f - visitValue);
+            
+        }
+
+        return visitValue == 1;
+    }
+    
     public override void OnActionReceived(ActionBuffers actions)
     {   
         //AddReward(-0.005f);
+
+        bool isDone = false;
         var action = actions.DiscreteActions[0];
+        if (m_ValidActions.Contains(action))
+        {
+            m_GridPosition += m_Directions[action];
+            m_LocalPosNext = new Vector3(m_GridPosition.x, 0, m_GridPosition.y);
+            
+            isDone = ValidatePosition(true);
+        }
+        else
+        {
+            AddReward(-1.0f);
+        }
+
+        if (isDone)
+        {
+            m_IsActive = false;
+           // EndEpisode();
+        }
+        
     }
 
     private void FixedUpdate()

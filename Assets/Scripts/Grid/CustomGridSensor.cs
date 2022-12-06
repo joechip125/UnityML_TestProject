@@ -142,10 +142,10 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         for (var i = 0; i < m_NumCells; i++)
         {
-            
-            
-            
-            var extract = buffer1.Read()
+            for (int j = 0; j < m_DetectableTags.Length; j++)
+            {
+                buffer2.Write(j, i,  buffer1.Read(j, i));
+            }
         }
     }
     
@@ -297,7 +297,6 @@ public class CustomGridSensor : ISensor, IDisposable
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
                 m_GridBuffer.Write(i, indexX,1);
-                Debug.Log(indexX);
             }
         }
         Profiler.EndSample();
