@@ -14,7 +14,7 @@ namespace MBaske.Sensors.Grid
     {
         protected int m_NumLayers;
         protected Color32[][] m_Colors;
-        protected Color32[] c_Black;
+        protected Color32[] c_White;
 
         /// <summary>
         /// Creates a <see cref="ColorGridBuffer"/> instance.
@@ -52,12 +52,12 @@ namespace MBaske.Sensors.Grid
                 m_Colors[i] = new Color32[Width * Height];
             }
 
-            c_Black = Enumerable.Repeat(new Color32(0, 0, 0, 255), Width * Height).ToArray();
+            c_White = Enumerable.Repeat(new Color32(255, 255, 255, 255 / 2), Width * Height).ToArray();
             ClearColors();
         }
 
         /// <summary>
-        /// Clears all grid values by setting them to 0. Sets all pixels to black.
+        /// Clears all grid values by setting them to 0. Sets all pixels to white.
         /// </summary>
         public override void Clear()
         {
@@ -158,7 +158,7 @@ namespace MBaske.Sensors.Grid
 
         private void ClearLayerColors(int layer)
         {
-            System.Array.Copy(c_Black, m_Colors[layer], m_Colors[layer].Length);
+            System.Array.Copy(c_White, m_Colors[layer], m_Colors[layer].Length);
         }
 
         private void ClearChannelColors(int channel)

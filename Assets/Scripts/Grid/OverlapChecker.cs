@@ -15,8 +15,6 @@ public class OverlapChecker
     
     GameObject m_CenterObject;
 
-    private ColorGridBuffer m_GridBuffer;
-
     string[] m_DetectableTags;
     
     int m_InitialColliderBufferSize;
@@ -34,9 +32,10 @@ public class OverlapChecker
 
         Collider[] m_ColliderBuffer;
 
-        public event Action<GameObject, int> GridOverlapDetectedAll;
-        public event Action<GameObject, int> GridOverlapDetectedClosest;
-        public event Action<GameObject, int> GridOverlapDetectedDebug;
+        public event Action<GameObject, int, int> GridOverlapDetectedAll;
+        public event Action<GameObject, int, int> GridOverlapDetectedClosest;
+        public event Action<GameObject, int, int> GridOverlapDetectedDebug;
+        public event Action<GameObject, int, int> GridOverlapDetectedDebugGridbuffer; 
 
         public OverlapChecker(
         Vector3 cellScale,
@@ -93,6 +92,7 @@ public class OverlapChecker
         return new Vector3(x, 0, z);
     }
     
+    
     internal Vector3 GetCellGlobalPosition(int cellIndex)
     {
         return m_CellLocalPositions[cellIndex] + m_CenterObject.transform.position;
@@ -115,7 +115,7 @@ public class OverlapChecker
                 ParseCollidersAll(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedAll);
             }
             if (GridOverlapDetectedClosest != null)
-            {
+            { 
                 ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
             }
         }
@@ -131,7 +131,7 @@ public class OverlapChecker
             var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
             //Debug.Log($"num found {numFound}, cell index {cellIndex}, cell center {cellCenter}");
 
-            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebug);
+            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebugGridbuffer);
         }
 
     }
@@ -160,16 +160,15 @@ public class OverlapChecker
         /// <summary>
         /// Parses the array of colliders found within a cell. Finds the closest gameobject to the agent root reference within the cell
         /// </summary>
-        void ParseCollidersClosest(Collider[] foundColliders, int numFound, int cellIndex, Vector3 cellCenter, Action<GameObject, int> detectedAction)
+        void ParseCollidersClosest(Collider[] foundColliders, int numFound, int cellIndex, Vector3 cellCenter, Action<GameObject, int, int> detectedAction)
         {
             GameObject closestColliderGo = null;
             var minDistanceSquared = float.MaxValue;
-            //Debug.Log($"cell center {cellCenter}, cell index {cellIndex} num found {numFound}");
-
+            
             for (var i = 0; i < numFound; i++)
             {
                 var currentColliderGo = foundColliders[i].gameObject;
-                
+
                 var closestColliderPoint = foundColliders[i].ClosestPointOnBounds(cellCenter);
                 var currentDistanceSquared = (closestColliderPoint - m_CenterObject.transform.position).sqrMagnitude;
 
@@ -184,7 +183,6 @@ public class OverlapChecker
                 {
                     if (currentColliderGo.CompareTag(m_DetectableTags[ii]))
                     {
-                        //Debug.Log(currentColliderGo.tag);
                         index = ii;
                         break;
                     }
@@ -198,20 +196,20 @@ public class OverlapChecker
 
             if (!ReferenceEquals(closestColliderGo, null))
             {
-                detectedAction.Invoke(closestColliderGo, cellIndex);
+                detectedAction.Invoke(closestColliderGo, cellIndex, 0);
             }
         }
 
         /// <summary>
         /// Parses all colliders in the array of colliders found within a cell.
         /// </summary>
-        void ParseCollidersAll(Collider[] foundColliders, int numFound, int cellIndex, Vector3 cellCenter, Action<GameObject, int> detectedAction)
+        void ParseCollidersAll(Collider[] foundColliders, int numFound, int cellIndex, Vector3 cellCenter, Action<GameObject, int, int> detectedAction)
         {
             for (int i = 0; i < numFound; i++)
             {
                 var currentColliderGo = foundColliders[i].gameObject;
              
-                detectedAction.Invoke(currentColliderGo, cellIndex);
+                detectedAction.Invoke(currentColliderGo, cellIndex, 0);
                 
             }
         }
@@ -221,19 +219,19 @@ public class OverlapChecker
 
             if (sensor.GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
             {
-                GridOverlapDetectedAll += sensor.ProcessDetectedObject;
+             //   GridOverlapDetectedAll += sensor.ProcessDetectedObject;
             }
             else
             {
-                GridOverlapDetectedClosest += sensor.ProcessDetectedObject;
+              //  GridOverlapDetectedClosest += sensor.ProcessDetectedObject;
             }
         }
 
         internal void RegisterDebugSensor(CustomGridSensor debugSensor)
         {
 
-            GridOverlapDetectedDebug += debugSensor.ProcessDetectedObject;
-
+            //GridOverlapDetectedDebug += debugSensor.ProcessDetectedObject;
+            GridOverlapDetectedDebugGridbuffer += debugSensor.ProcessObjectGridBuffer;
         }
 }
 

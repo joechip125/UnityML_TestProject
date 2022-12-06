@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MBaske.Sensors.Grid;
+using Unity.Barracuda;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
@@ -10,6 +11,7 @@ using UnityEngine.Profiling;
 public class CustomGridSensor : ISensor, IDisposable
 {
     private  ColorGridBuffer m_GridBuffer;
+    private  ColorGridBuffer m_ExternalBuffer;
     private List<byte> m_CompressedObs;
     
     string m_Name;
@@ -51,7 +53,8 @@ public class CustomGridSensor : ISensor, IDisposable
         Vector3Int gridSize,
         string[] detectableTags,
         SensorCompressionType compression,
-        ColorGridBuffer gridBuffer
+        ColorGridBuffer gridBuffer,
+        ColorGridBuffer externalBuffer
     )
     {
         m_Name = name;
@@ -59,6 +62,7 @@ public class CustomGridSensor : ISensor, IDisposable
         m_GridSize = gridSize;
         m_DetectableTags = detectableTags;
         CompressionType = compression;
+        m_ExternalBuffer = externalBuffer;
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
@@ -127,6 +131,22 @@ public class CustomGridSensor : ISensor, IDisposable
     public void ResetGridBuffer()
     {
         m_GridBuffer.Clear();
+        
+        if (m_ExternalBuffer != null)
+        {
+            LayerBuffers(m_ExternalBuffer, m_GridBuffer);
+        }
+    }
+
+    private void LayerBuffers(GridBuffer buffer1, GridBuffer buffer2)
+    {
+        for (var i = 0; i < m_NumCells; i++)
+        {
+            
+            
+            
+            var extract = buffer1.Read()
+        }
     }
     
     /// <inheritdoc/>
@@ -231,6 +251,11 @@ public class CustomGridSensor : ISensor, IDisposable
 
     void ValidateGridBuffer()
     {
+        if (m_CompressionType != SensorCompressionType.PNG)
+        {
+            return;
+        }
+        
         
     }
 
@@ -239,17 +264,12 @@ public class CustomGridSensor : ISensor, IDisposable
     /// </summary>
     internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
     {
-        Debug.Log(cellIndex);
         Profiler.BeginSample("GridSensor.ProcessDetectedObject");
 
-        Debug.Log(cellIndex);
         for (var i = 0; i < m_DetectableTags.Length; i++)
         {
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
-                m_GridBuffer.Write(i, cellIndex, 1);
-                Debug.Log(cellIndex * m_CellObservationSize);
-
                 if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
                 {
                     Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);
@@ -268,15 +288,26 @@ public class CustomGridSensor : ISensor, IDisposable
         Profiler.EndSample();
     }
 
-    public void ProcessObjectGridBuffer(GameObject detectedObject, int cellIndex)
+    public void ProcessObjectGridBuffer(GameObject detectedObject, int indexX, int indexZ)
     {
-        
+        Profiler.BeginSample("GridSensor.ProcessDetectedObject");
+
+        for (var i = 0; i < m_DetectableTags.Length; i++)
+        {
+            if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
+            {
+                m_GridBuffer.Write(i, indexX,1);
+                Debug.Log(indexX);
+            }
+        }
+        Profiler.EndSample();
     }
     
     /// <inheritdoc/>
     public void Update()
     {
         ResetPerceptionBuffer();
+        ResetGridBuffer();
         
         if (m_BoxOverlapChecker != null)
         {
@@ -291,7 +322,7 @@ public class CustomGridSensor : ISensor, IDisposable
     }
     
     /// <inheritdoc/>
-    public int Write(ObservationWriter writer)
+    public int Write2(ObservationWriter writer)
     {
         int index = 0;
         for (var h = m_GridSize.z - 1; h >= 0; h--)
@@ -308,7 +339,7 @@ public class CustomGridSensor : ISensor, IDisposable
         return index;
     }
     
-    public int Write2(ObservationWriter writer)
+    public int Write(ObservationWriter writer)
     {
         int numWritten = 0;
         int w = m_GridBuffer.Width;

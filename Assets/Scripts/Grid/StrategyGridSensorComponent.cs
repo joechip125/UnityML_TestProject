@@ -21,6 +21,8 @@ public class StrategyGridSensorComponent : SensorComponent
         set { m_GridBuffer = value; GridShape = value.GetShape(); }
     }
     private ColorGridBuffer m_GridBuffer;
+
+    public ColorGridBuffer ExternalBuffer;
     
     public GridBuffer.Shape GridShape
     {
@@ -176,7 +178,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
         m_GridBuffer = new ColorGridBuffer(3, 20, 20);
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_GridSize, m_DetectableTags, SensorCompressionType.None, m_GridBuffer);
+        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_GridSize, m_DetectableTags, SensorCompressionType.None, m_GridBuffer, ExternalBuffer);
         m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
     
         m_Sensors = GetGridSensors().ToList();
@@ -211,7 +213,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType, m_GridBuffer);
+        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType, m_GridBuffer, ExternalBuffer);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
@@ -239,6 +241,7 @@ public class StrategyGridSensorComponent : SensorComponent
         }
 
         m_DebugSensor.ResetPerceptionBuffer();
+        m_DebugSensor.ResetGridBuffer();
         m_BoxOverlapChecker.UpdateGizmo();
         var cellColors = m_DebugSensor.PerceptionBuffer;
         var num = m_GridSize.x * m_GridSize.z;
@@ -248,9 +251,15 @@ public class StrategyGridSensorComponent : SensorComponent
             var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
             var colorIndex = cellColors[i] - 1;
             var debugRayColor = Color.white;
+
+            if (m_GridBuffer.ReadAll(i, out var result))
+            {
+                debugRayColor = m_DebugColors[(int)result];
+            }
             if (colorIndex > -1 && m_DebugColors.Length > colorIndex)
             {
-                debugRayColor = m_DebugColors[(int)colorIndex];
+                //debugRayColor = m_DebugColors[(int)colorIndex];
+                //m_ChannelLabels[(int) colorIndex];
             }
             
             

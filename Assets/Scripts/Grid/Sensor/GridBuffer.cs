@@ -217,7 +217,7 @@ namespace MBaske.Sensors.Grid
         
         public virtual void Write(int channel, int index, float value)
         {
-            m_Values[channel][0] = value;
+            m_Values[channel][index] = value;
         }
 
         /// <summary>
@@ -267,6 +267,27 @@ namespace MBaske.Sensors.Grid
             return m_Values[channel][index];
         }
 
+        public bool ReadAll(int index, out float result)
+        {
+            var outBool = false;
+            result = 0;
+            for (int i = 0; i < NumChannels; i++)
+            {
+                var on = m_Values[i][index];
+                if (on == 0)
+                {
+                    continue;
+                }
+                else
+                {
+                    outBool = true;
+                    result = i;
+                }
+            }
+
+            return outBool;
+        }
+        
         /// <summary>
         /// Reads a float value from a specified grid cell.
         /// </summary>
