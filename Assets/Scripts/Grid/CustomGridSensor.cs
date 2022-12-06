@@ -20,7 +20,7 @@ public class CustomGridSensor : ISensor, IDisposable
     
     Vector3 m_CellScale;
     
-    Vector3Int m_GridSize;
+    //Vector3Int m_GridSize;
     
     string[] m_DetectableTags;
     
@@ -32,14 +32,8 @@ public class CustomGridSensor : ISensor, IDisposable
     private GridBuffer _gridBuffer;
     
     // Buffers
-    float[] m_PerceptionBuffer;
-    
-    Color[] m_PerceptionColors;
-    
     Texture2D m_PerceptionTexture;
     
-    float[] m_CellDataBuffer;
-
     // Utility Constants Calculated on Init
     int m_NumCells;
     
@@ -52,7 +46,6 @@ public class CustomGridSensor : ISensor, IDisposable
     public CustomGridSensor(
         string name,
         Vector3 cellScale,
-        Vector3Int gridSize,
         string[] detectableTags,
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
@@ -61,7 +54,6 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         m_Name = name;
         m_CellScale = cellScale;
-        m_GridSize = gridSize;
         m_DetectableTags = detectableTags;
         CompressionType = compression;
         m_ExternalBuffer = externalBuffer;
@@ -71,15 +63,9 @@ public class CustomGridSensor : ISensor, IDisposable
         
         HandleCompressionType();
 
-        if (m_GridSize.y != 1)
-        {
-            throw new UnityAgentsException("GridSensor only supports 2D grids.");
-        }
-
         m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
-        m_CellObservationSize = GetCellObservationSize();
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
-        m_PerceptionTexture = new Texture2D(m_GridSize.x, m_GridSize.z, TextureFormat.RGB24, false);
+        m_PerceptionTexture = new Texture2D(m_GridBuffer.Height, m_GridBuffer.Width, TextureFormat.RGB24, false);
 
         ResetGridBuffer();
     }
@@ -103,11 +89,7 @@ public class CustomGridSensor : ISensor, IDisposable
             m_CompressionType = value;
         }
     }
-    internal float[] PerceptionBuffer
-    {
-        get { return m_PerceptionBuffer; }
-    }
-
+  
   
     protected string[] DetectableTags
     {
@@ -180,12 +162,7 @@ public class CustomGridSensor : ISensor, IDisposable
     
         return m_CompressedObs.ToArray();
     }
-
-    protected virtual int GetCellObservationSize()
-    {
-        return 1;
-    }
-
+    
     protected virtual bool IsDataNormalized()
     {
         return true;

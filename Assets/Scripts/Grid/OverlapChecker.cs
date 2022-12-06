@@ -29,13 +29,11 @@ public class OverlapChecker
     
     Vector3[] m_CellLocalPositions;
     
+    Collider[] m_ColliderBuffer;
 
-        Collider[] m_ColliderBuffer;
-
-        public event Action<GameObject, int> GridOverlapDetectedAll;
-        public event Action<GameObject, int> GridOverlapDetectedClosest;
-        public event Action<GameObject, int> GridOverlapDetectedDebug;
-        public event Action<GameObject, int> GridOverlapDetectedDebugGridbuffer; 
+    public event Action<GameObject, int> GridOverlapDetectedAll;
+    public event Action<GameObject, int> GridOverlapDetectedClosest;
+    public event Action<GameObject, int> GridOverlapDetectedDebugGridBuffer; 
 
         public OverlapChecker(
         Vector3 cellScale,
@@ -129,7 +127,7 @@ public class OverlapChecker
             var cellCenter = GetCellGlobalPosition(cellIndex);
             var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
 
-            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebugGridbuffer);
+            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebugGridBuffer);
         }
 
     }
@@ -214,10 +212,9 @@ public class OverlapChecker
         
         internal void RegisterSensor(CustomGridSensor sensor)
         {
-
             if (sensor.GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
             {
-             //   GridOverlapDetectedAll += sensor.ProcessDetectedObject;
+                GridOverlapDetectedAll += sensor.ProcessObjectGridBuffer;
             }
             else
             {
@@ -227,9 +224,7 @@ public class OverlapChecker
 
         internal void RegisterDebugSensor(CustomGridSensor debugSensor)
         {
-
-            //GridOverlapDetectedDebug += debugSensor.ProcessDetectedObject;
-            GridOverlapDetectedDebugGridbuffer += debugSensor.ProcessObjectGridBuffer;
+            GridOverlapDetectedDebugGridBuffer += debugSensor.ProcessObjectGridBuffer;
         }
 }
 

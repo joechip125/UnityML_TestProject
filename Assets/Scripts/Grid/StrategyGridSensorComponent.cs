@@ -14,6 +14,9 @@ public class StrategyGridSensorComponent : SensorComponent
     List<CustomGridSensor> m_Sensors;
     
     internal OverlapChecker m_BoxOverlapChecker;
+
+    [SerializeField]
+    int TotalNumberChannels = 3;
     
     public ColorGridBuffer GridBuffer
     {
@@ -30,7 +33,7 @@ public class StrategyGridSensorComponent : SensorComponent
         set => m_GridShape = value;
     }
     [SerializeField]
-    private GridBuffer.Shape m_GridShape = new GridBuffer.Shape(3, 20, 20);
+    private GridBuffer.Shape m_GridShape;
     
    
     [SerializeField]
@@ -52,18 +55,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
     [SerializeField]
     internal Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
-  
-
-    /// <summary>
-    /// The scale of each grid cell.
-    /// Note that changing this after the sensor is created has no effect.
-    /// </summary>
-    public Vector3 CellScale
-    {
-        get { return m_CellScale; }
-        set { m_CellScale = value; }
-    }
-
+    
     public Vector3Int GridSize
     {
         get { return m_GridSize; }
@@ -85,45 +77,15 @@ public class StrategyGridSensorComponent : SensorComponent
 
     [SerializeField]
     internal string[] m_DetectableTags;
-   
-    public string[] DetectableTags
-    {
-        get { return m_DetectableTags; }
-        set { m_DetectableTags = value; }
-    }
-    
+
     [SerializeField]
     internal LayerMask m_ColliderMask;
-
-    public LayerMask ColliderMask
-    {
-        get { return m_ColliderMask; }
-        set { m_ColliderMask = value; }
-    }
-
-    public int MaxColliderBufferSize
-    {
-        get { return m_MaxColliderBufferSize; }
-        set { m_MaxColliderBufferSize = value; }
-    }
-
+    
     [SerializeField]
     internal int m_MaxColliderBufferSize = 500;
-
-    public int InitialColliderBufferSize
-    {
-        get { return m_InitialColliderBufferSize; }
-        set { m_InitialColliderBufferSize = value; }
-    }
-
+    
     [SerializeField]
     internal int m_InitialColliderBufferSize = 4;
-
-    public Color[] DebugColors
-    {
-        get { return m_DebugColors; }
-        set { m_DebugColors = value; }
-    }
 
     [SerializeField]
     internal Color[] m_DebugColors;
@@ -131,20 +93,10 @@ public class StrategyGridSensorComponent : SensorComponent
 
     [SerializeField]
     internal float m_GizmoYOffset = 0f;
-    public float GizmoYOffset
-    {
-        get { return m_GizmoYOffset; }
-        set { m_GizmoYOffset = value; }
-    }
-
+    
     [SerializeField]
     internal bool m_ShowGizmos = false;
-    public bool ShowGizmos
-    {
-        get { return m_ShowGizmos; }
-        set { m_ShowGizmos = value; }
-    }
-    
+
     [SerializeField]
     internal SensorCompressionType m_CompressionType = SensorCompressionType.PNG;
     public SensorCompressionType CompressionType
@@ -176,10 +128,11 @@ public class StrategyGridSensorComponent : SensorComponent
             m_MaxColliderBufferSize
         );
 
-        m_GridBuffer = new ColorGridBuffer(3, m_GridSize.x, m_GridSize.z);
-        m_GridShape = new GridBuffer.Shape(3, m_GridSize.x, m_GridSize.z);
+        m_GridBuffer = new ColorGridBuffer(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
+        m_GridShape = new GridBuffer.Shape(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
+        
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_GridSize, m_DetectableTags, SensorCompressionType.None, m_GridBuffer, ExternalBuffer);
+        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_DetectableTags, SensorCompressionType.None, m_GridBuffer, ExternalBuffer);
         m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
     
         m_Sensors = GetGridSensors().ToList();
@@ -214,7 +167,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_GridSize, m_DetectableTags, m_CompressionType, m_GridBuffer, ExternalBuffer);
+        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_DetectableTags, m_CompressionType, m_GridBuffer, ExternalBuffer);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
