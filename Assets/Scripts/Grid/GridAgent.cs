@@ -8,12 +8,29 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
+[Serializable]
+public class UnitStore
+{
+    public UnitStore(Vector2Int index, Guid unitGuid)
+    {
+        unitLocation = index;
+        Guid = unitGuid;
+    }
+    
+    public Vector2Int unitLocation;
+    public Guid Guid;
+}
+
 public class GridAgent : Agent
 {
     public event Action EpisodeBegin;
     public event Action<Vector3, Guid> NeedDirectionEvent;
     public Controller Controller;
     public SpawnArea spawnArea;
+
+    private UnitStore _currentUnit;
+    private Guid _currentGuid;
+    private Vector2Int _currentStartIndex;
 
     [SerializeField]
     [Tooltip("Select to enable action masking. Note that a model trained with action " +
@@ -41,7 +58,7 @@ public class GridAgent : Agent
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
 
-    private Queue<Vector2Int> _moveQueue = new();
+    private Queue<UnitStore> _moveQueue = new();
 
 
     public event Action<Vector2Int> FoundFoodEvent;
@@ -69,6 +86,7 @@ public class GridAgent : Agent
     {
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
         m_ValidActions = new List<int>(5);
+        this.Controller.NeedDirectionEvent += OnGetMove;
 
         m_Directions = new Vector2Int[]
         {
@@ -106,10 +124,9 @@ public class GridAgent : Agent
         m_StepTime = 0;
     }
 
-    private void EnqMove(Vector2Int pos)
+    private void OnGetMove(Vector2 pos, Guid guid)
     {
-        _moveQueue.Enqueue(pos);
-        RequestDecision();
+        _moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), guid));
     }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
@@ -153,9 +170,7 @@ public class GridAgent : Agent
     }
     
     public override void OnActionReceived(ActionBuffers actions)
-    {  
-        var pos = _moveQueue.Dequeue();
-
+    {
         bool isDone = false;
         var action = actions.DiscreteActions[0];
         if (m_ValidActions.Contains(action))
@@ -165,6 +180,7 @@ public class GridAgent : Agent
             
             isDone = ValidatePosition(true);
         }
+        
         else
         {
             AddReward(-1.0f);
@@ -173,16 +189,26 @@ public class GridAgent : Agent
         if (isDone)
         {
             m_IsActive = false;
-           // EndEpisode();
+            EndEpisode();
         }
-        
     }
 
+    private bool TryGetTask()
+    {
+        if (_moveQueue.Count > 0)
+        {
+            _currentUnit = _moveQueue.Dequeue();
+            return true;
+        }
+
+        return false;
+    }
+    
     private void FixedUpdate()
     {
         if (m_IsActive)
         {
-            //RequestDecision();
+            RequestDecision();
         }
         else if (m_StepDuration > 0)
         {
@@ -191,8 +217,8 @@ public class GridAgent : Agent
         }
         else
         {
-            // Wait one step before activating.
-            m_IsActive = true;
+            if(TryGetTask())
+                m_IsActive = true;
         }
     }
     

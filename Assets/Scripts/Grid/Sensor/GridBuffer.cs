@@ -273,18 +273,11 @@ namespace MBaske.Sensors.Grid
             result = 0;
             for (int i = 0; i < NumChannels; i++)
             {
-                
-                
                 var on = m_Values[i][index];
-                if (on == 0)
-                {
-                    continue;
-                }
-                else
-                {
-                    outBool = true;
-                    result = i;
-                }
+                if (on == 0) continue;
+                
+                outBool = true;
+                result = i;
             }
 
             return outBool;

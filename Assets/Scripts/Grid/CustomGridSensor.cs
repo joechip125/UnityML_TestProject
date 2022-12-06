@@ -14,6 +14,8 @@ public class CustomGridSensor : ISensor, IDisposable
     private  ColorGridBuffer m_ExternalBuffer;
     private List<byte> m_CompressedObs;
     
+    private ObservationType m_ObservationType = ObservationType.Default;
+    
     string m_Name;
     
     Vector3 m_CellScale;
@@ -66,19 +68,20 @@ public class CustomGridSensor : ISensor, IDisposable
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
+        
+        HandleCompressionType();
 
         if (m_GridSize.y != 1)
         {
             throw new UnityAgentsException("GridSensor only supports 2D grids.");
         }
 
-        m_NumCells = m_GridSize.x * m_GridSize.z;
+        m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
         m_CellObservationSize = GetCellObservationSize();
-        //m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, observationType);
-        m_ObservationSpec = ObservationSpec.Visual(m_GridSize.x, m_GridSize.z, m_CellObservationSize);
+        m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
         m_PerceptionTexture = new Texture2D(m_GridSize.x, m_GridSize.z, TextureFormat.RGB24, false);
 
-        ResetPerceptionBuffer();
+        ResetGridBuffer();
     }
 
     public Texture2D GetPerceptionTexture()
@@ -113,38 +116,23 @@ public class CustomGridSensor : ISensor, IDisposable
     
     public void Reset() { }
     
-    public void ResetPerceptionBuffer()
-    {
-        if (m_PerceptionBuffer != null)
-        {
-            Array.Clear(m_PerceptionBuffer, 0, m_PerceptionBuffer.Length);
-            Array.Clear(m_CellDataBuffer, 0, m_CellDataBuffer.Length);
-        }
-        else
-        {
-            m_PerceptionBuffer = new float[m_CellObservationSize * m_NumCells];
-            m_CellDataBuffer = new float[m_CellObservationSize];
-            m_PerceptionColors = new Color[m_NumCells];
-        }
-    }
-
     public void ResetGridBuffer()
     {
         m_GridBuffer.Clear();
         
         if (m_ExternalBuffer != null)
         {
-            LayerBuffers(m_ExternalBuffer, m_GridBuffer);
+            CombineBuffers(m_ExternalBuffer, m_GridBuffer);
         }
     }
 
-    private void LayerBuffers(GridBuffer buffer1, GridBuffer buffer2)
+    private void CombineBuffers(GridBuffer readBuffer, GridBuffer writeBuffer)
     {
         for (var i = 0; i < m_NumCells; i++)
         {
             for (int j = 0; j < m_DetectableTags.Length; j++)
             {
-                buffer2.Write(j, i,  buffer1.Read(j, i));
+                writeBuffer.Write(j, i,  readBuffer.Read(j, i));
             }
         }
     }
@@ -164,24 +152,22 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         return BuiltInSensorType.GridSensor;
     }
+    
+    protected void HandleCompressionType()
+    {
+        DestroyTexture();
+
+        if (m_CompressionType == SensorCompressionType.PNG)
+        {
+            m_PerceptionTexture = new Texture2D(
+                m_GridBuffer.Width, m_GridBuffer.Height, TextureFormat.RGB24, false);
+            m_CompressedObs = new List<byte>(
+                m_GridBuffer.Width * m_GridBuffer.Height * m_GridBuffer.NumChannels);
+        }
+    }
 
     /// <inheritdoc/>
     public byte[] GetCompressedObservation()
-    {
-        var allBytes = new List<byte>();
-        var numImages = (m_CellObservationSize + 2) / 3;
-        for (int i = 0; i < numImages; i++)
-        {
-            var channelIndex = 3 * i;
-            GridValuesToTexture(channelIndex, Math.Min(3, m_CellObservationSize - channelIndex));
-            allBytes.AddRange(m_PerceptionTexture.EncodeToPNG());
-        }
-
-        return allBytes.ToArray();
-    }
-    
-    /// <inheritdoc/>
-    public byte[] GetCompressedObservation2()
     {
         m_CompressedObs.Clear();
     
@@ -194,75 +180,29 @@ public class CustomGridSensor : ISensor, IDisposable
     
         return m_CompressedObs.ToArray();
     }
-    
-
-    void GridValuesToTexture(int channelIndex, int numChannelsToAdd)
-    {
-        for (int i = 0; i < m_NumCells; i++)
-        {
-            for (int j = 0; j < numChannelsToAdd; j++)
-            {
-                m_PerceptionColors[i][j] = m_PerceptionBuffer[i * m_CellObservationSize + channelIndex + j];
-            }
-        }
-        m_PerceptionTexture.SetPixels(m_PerceptionColors);
-    }
-    
-    protected virtual void GetObjectData(GameObject detectedObject, int tagIndex, float[] dataBuffer)
-    {
-        dataBuffer[0] = tagIndex + 1;
-       
-        //dataBuffer[tagIndex] = 1;
-    }
 
     protected virtual int GetCellObservationSize()
     {
         return 1;
     }
-    
+
     protected virtual bool IsDataNormalized()
     {
         return true;
     }
 
-    
+
     protected internal virtual ProcessCollidersMethod GetProcessCollidersMethod()
     {
         return ProcessCollidersMethod.ProcessClosestColliders;
     }
 
-    /// <summary>
-    /// If using PNG compression, check if the values are normalized.
-    /// </summary>
-    void ValidateValues(float[] dataValues, GameObject detectedObject)
-    {
-        if (m_CompressionType != SensorCompressionType.PNG)
-        {
-            return;
-        }
-
-        for (int j = 0; j < dataValues.Length; j++)
-        {
-            if (dataValues[j] < 0 || dataValues[j] > 1)
-                throw new UnityAgentsException($"When using compression type {m_CompressionType} the data value has to be normalized between 0-1. " +
-                    $"Received value[{dataValues[j]}] for {detectedObject.name}");
-        }
-    }
-
-    void ValidateGridBuffer()
-    {
-        if (m_CompressionType != SensorCompressionType.PNG)
-        {
-            return;
-        }
-        
-        
-    }
 
     /// <summary>
     /// Collect data from the detected object if a detectable tag is matched.
     /// </summary>
-    internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
+
+    public void ProcessObjectGridBuffer(GameObject detectedObject, int cellIndex)
     {
         Profiler.BeginSample("GridSensor.ProcessDetectedObject");
 
@@ -270,74 +210,19 @@ public class CustomGridSensor : ISensor, IDisposable
         {
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
-                if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
-                {
-                    Array.Copy(m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellDataBuffer, 0, m_CellObservationSize);
-                }
-                else
-                {
-                    Array.Clear(m_CellDataBuffer, 0, m_CellDataBuffer.Length);
-                }
-    
-                GetObjectData(detectedObject, i, m_CellDataBuffer);
-                ValidateValues(m_CellDataBuffer, detectedObject);
-                Array.Copy(m_CellDataBuffer, 0, m_PerceptionBuffer, cellIndex * m_CellObservationSize, m_CellObservationSize);
-                break;
+                m_GridBuffer.Write(i, cellIndex,1);
             }
         }
         Profiler.EndSample();
     }
 
-    public void ProcessObjectGridBuffer(GameObject detectedObject, int indexX, int indexZ)
-    {
-        Profiler.BeginSample("GridSensor.ProcessDetectedObject");
-
-        for (var i = 0; i < m_DetectableTags.Length; i++)
-        {
-            if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
-            {
-                m_GridBuffer.Write(i, indexX,1);
-            }
-        }
-        Profiler.EndSample();
-    }
-    
-    /// <inheritdoc/>
-    public void Update()
-    {
-        ResetPerceptionBuffer();
-        ResetGridBuffer();
-        
-        if (m_BoxOverlapChecker != null)
-        {
-            m_BoxOverlapChecker.Update();
-        }
-    }
-    
     /// <inheritdoc/>
     public ObservationSpec GetObservationSpec()
     {
         return m_ObservationSpec;
     }
-    
+
     /// <inheritdoc/>
-    public int Write2(ObservationWriter writer)
-    {
-        int index = 0;
-        for (var h = m_GridSize.z - 1; h >= 0; h--)
-        {
-            for (var w = 0; w < m_GridSize.x; w++)
-            {
-                for (var d = 0; d < m_CellObservationSize; d++)
-                {
-                    writer[h, w, d] = m_PerceptionBuffer[index];
-                    index++;
-                }
-            }
-        }
-        return index;
-    }
-    
     public int Write(ObservationWriter writer)
     {
         int numWritten = 0;
@@ -359,41 +244,34 @@ public class CustomGridSensor : ISensor, IDisposable
     
         return numWritten;
     }
-    
-    // <inheritdoc/>
-    public virtual void Update2() 
-    {
-        if (AutoDetectionEnabled)
-        {
-            //Detector.OnSensorUpdate();
-            //Encoder.Encode(Detector.Result);
-        }
-    
-        //UpdateEvent?.Invoke();
-    }
-    
+
     /// <inheritdoc/>
-    //public virtual void Reset() 
-    //{
-    //    Detector?.OnSensorReset();
-    //    ResetEvent?.Invoke();
-    //}
-    
-    
+    public void Update()
+    {
+        ResetGridBuffer();
+
+        m_BoxOverlapChecker?.Update();
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
-        if (!ReferenceEquals(null, m_PerceptionTexture))
+        DestroyTexture();   
+    }
+
+    private void DestroyTexture()
+    {
+        if (ReferenceEquals(null, m_PerceptionTexture)) return;
+        
+        if (Application.isEditor)
         {
-            if (Application.isEditor)
-            {
-                // Edit Mode tests complain if we use Destroy()
-                UnityEngine.Object.DestroyImmediate(m_PerceptionTexture);
-            }
-            else
-            {
-                UnityEngine.Object.Destroy(m_PerceptionTexture);
-            }
-            m_PerceptionTexture = null;
+            // Edit Mode tests complain if we use Destroy()
+            UnityEngine.Object.DestroyImmediate(m_PerceptionTexture);
         }
+        else
+        {
+            UnityEngine.Object.Destroy(m_PerceptionTexture);
+        }
+        m_PerceptionTexture = null;
     }
 }

@@ -176,7 +176,8 @@ public class StrategyGridSensorComponent : SensorComponent
             m_MaxColliderBufferSize
         );
 
-        m_GridBuffer = new ColorGridBuffer(3, 20, 20);
+        m_GridBuffer = new ColorGridBuffer(3, m_GridSize.x, m_GridSize.z);
+        m_GridShape = new GridBuffer.Shape(3, m_GridSize.x, m_GridSize.z);
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
         m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_GridSize, m_DetectableTags, SensorCompressionType.None, m_GridBuffer, ExternalBuffer);
         m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
@@ -239,29 +240,20 @@ public class StrategyGridSensorComponent : SensorComponent
         {
             return;
         }
-
-        m_DebugSensor.ResetPerceptionBuffer();
+        
         m_DebugSensor.ResetGridBuffer();
         m_BoxOverlapChecker.UpdateGizmo();
-        var cellColors = m_DebugSensor.PerceptionBuffer;
         var num = m_GridSize.x * m_GridSize.z;
         var gizmoYOffset = new Vector3(0, m_GizmoYOffset, 0);
-        for (var i = 0; i < m_DebugSensor.PerceptionBuffer.Length; i++)
+        for (var i = 0; i < num; i++)
         {
             var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
-            var colorIndex = cellColors[i] - 1;
             var debugRayColor = Color.white;
 
             if (m_GridBuffer.ReadAll(i, out var result))
             {
                 debugRayColor = m_DebugColors[(int)result];
             }
-            if (colorIndex > -1 && m_DebugColors.Length > colorIndex)
-            {
-                //debugRayColor = m_DebugColors[(int)colorIndex];
-                //m_ChannelLabels[(int) colorIndex];
-            }
-            
             
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
             Gizmos.DrawCube( cellPosition, Vector3.one);
