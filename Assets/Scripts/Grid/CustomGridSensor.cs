@@ -70,12 +70,17 @@ public class CustomGridSensor : ISensor, IDisposable
 
         m_NumCells = m_GridSize.x * m_GridSize.z;
         m_CellObservationSize = GetCellObservationSize();
+        //m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, observationType);
         m_ObservationSpec = ObservationSpec.Visual(m_GridSize.x, m_GridSize.z, m_CellObservationSize);
         m_PerceptionTexture = new Texture2D(m_GridSize.x, m_GridSize.z, TextureFormat.RGB24, false);
 
         ResetPerceptionBuffer();
     }
-    
+
+    public Texture2D GetPerceptionTexture()
+    {
+        return m_PerceptionTexture;
+    }
     
     public SensorCompressionType CompressionType
     {
@@ -121,7 +126,7 @@ public class CustomGridSensor : ISensor, IDisposable
 
     public void ResetGridBuffer()
     {
-        
+        m_GridBuffer.Clear();
     }
     
     /// <inheritdoc/>
@@ -224,18 +229,26 @@ public class CustomGridSensor : ISensor, IDisposable
         }
     }
 
+    void ValidateGridBuffer()
+    {
+        
+    }
+
     /// <summary>
     /// Collect data from the detected object if a detectable tag is matched.
     /// </summary>
     internal void ProcessDetectedObject(GameObject detectedObject, int cellIndex)
     {
+        Debug.Log(cellIndex);
         Profiler.BeginSample("GridSensor.ProcessDetectedObject");
 
+        Debug.Log(cellIndex);
         for (var i = 0; i < m_DetectableTags.Length; i++)
         {
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
             {
                 m_GridBuffer.Write(i, cellIndex, 1);
+                Debug.Log(cellIndex * m_CellObservationSize);
 
                 if (GetProcessCollidersMethod() == ProcessCollidersMethod.ProcessAllColliders)
                 {

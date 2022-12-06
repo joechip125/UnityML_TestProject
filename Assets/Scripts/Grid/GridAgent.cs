@@ -101,24 +101,34 @@ public class GridAgent : Agent
         spawnArea.RespawnCollection();
         m_StepTime = 0;
     }
+    
+    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
+    {
+        //m_ValidActions.Clear();
+        //m_ValidActions.Add(c_Stay);
+        //
+        //for (int action = 1; action < 5; action++)
+        //{
+        //    bool isValid = m_MazeBuffer.TryRead(MyGrid.Wall, 
+        //        m_GridPosition + m_Directions[action],
+        //        out float value) && value == 0; // no wall
+        //    //isValid = m_MazeBuffer.Contains(m_GridPosition + m_Directions[action]);
+        //    
+        //    if (isValid)
+        //    {
+        //        m_ValidActions.Add(action);
+        //    }
+        //    else if (m_MaskActions)
+        //    {
+        //        actionMask.SetActionEnabled(0, action, false);
+        //    }
+        //}
+    }
 
     public override void OnActionReceived(ActionBuffers actions)
     {   
         //AddReward(-0.005f);
-        
-        
-        var continuousActions = actions.ContinuousActions;
-        var dirToGo = Vector3.zero;
-        var rotateDir = Vector3.zero;
-
-        var forward = Mathf.Clamp(continuousActions[0], -1f, 1f);
-        var right = Mathf.Clamp(continuousActions[1], -1f, 1f);
-        var rotate = Mathf.Clamp(continuousActions[2], -1f, 1f);
-         
-       // dirToGo = transform.forward * forward;
-       // dirToGo += transform.right * right;
-       // rotateDir = -transform.up * rotate;
-
+        var action = actions.DiscreteActions[0];
     }
 
     private void FixedUpdate()
@@ -139,5 +149,55 @@ public class GridAgent : Agent
         }
     }
     
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var discreteActionsOut = actionsOut.DiscreteActions;
+        discreteActionsOut[0] = c_Stay;
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            discreteActionsOut[0] = c_Right;
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            discreteActionsOut[0] = c_Up;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            discreteActionsOut[0] = c_Left;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            discreteActionsOut[0] = c_Down;
+        }
+    }
+    
+    private void UpdateSensorBuffer()
+    {
+        m_SensorBuffer.Clear();
+
+        // Current FOV.
+        int xMin = m_GridPosition.x - m_LookDistance;
+        int xMax = m_GridPosition.x + m_LookDistance;
+        int yMin = m_GridPosition.y - m_LookDistance;
+        int yMax = m_GridPosition.y + m_LookDistance;
+
+        for (int mx = xMin; mx <= xMax; mx++)
+        {
+            int sx = mx - xMin;
+            for (int my = yMin; my <= yMax; my++)
+            {
+                int sy = my - yMin;
+                // TryRead -> FOV might extend beyond maze bounds.
+                if (m_MazeBuffer.TryRead(MyGrid.Collectable, mx, my, out float wall))
+                {
+                    // Copy maze -> sensor.
+                    m_SensorBuffer.Write(MyGrid.Wall, sx, sy, wall);
+                    m_SensorBuffer.Write(MyGrid.Collectable, sx, sy, m_MazeBuffer.Read(MyGrid.Collectable, mx, my));
+                    m_SensorBuffer.Write(MyGrid.Visit, sx, sy, m_MazeBuffer.Read(MyGrid.Visit, mx, my));
+                }
+            }
+        }
+    }
     
 }

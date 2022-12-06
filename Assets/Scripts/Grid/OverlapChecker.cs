@@ -136,8 +136,6 @@ public class OverlapChecker
 
     }
     
-    
-    
         int BufferResizingOverlapBoxNonAlloc(Vector3 cellCenter, Vector3 halfCellScale)
         {
             int numFound;

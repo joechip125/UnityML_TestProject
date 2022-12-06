@@ -27,8 +27,8 @@ public class StrategyGridSensorComponent : SensorComponent
         get => m_GridShape;
         set => m_GridShape = value;
     }
-    [SerializeField, HideInInspector]
-    private GridBuffer.Shape m_GridShape = new GridBuffer.Shape(1, 20, 20);
+    [SerializeField]
+    private GridBuffer.Shape m_GridShape = new GridBuffer.Shape(3, 20, 20);
     
    
     [SerializeField]
@@ -62,9 +62,6 @@ public class StrategyGridSensorComponent : SensorComponent
         set { m_CellScale = value; }
     }
 
-    [SerializeField]
-    internal Vector3Int m_GridSize = new Vector3Int(16, 1, 16);
- 
     public Vector3Int GridSize
     {
         get { return m_GridSize; }
@@ -80,7 +77,10 @@ public class StrategyGridSensorComponent : SensorComponent
             }
         }
     }
-    
+
+    [SerializeField]
+    internal Vector3Int m_GridSize = new Vector3Int(20, 1, 20);
+
     [SerializeField]
     internal string[] m_DetectableTags;
    
@@ -99,9 +99,6 @@ public class StrategyGridSensorComponent : SensorComponent
         set { m_ColliderMask = value; }
     }
 
-    [SerializeField]
-    internal int m_MaxColliderBufferSize = 500;
-  
     public int MaxColliderBufferSize
     {
         get { return m_MaxColliderBufferSize; }
@@ -109,20 +106,26 @@ public class StrategyGridSensorComponent : SensorComponent
     }
 
     [SerializeField]
-    internal int m_InitialColliderBufferSize = 4;
+    internal int m_MaxColliderBufferSize = 500;
+
     public int InitialColliderBufferSize
     {
         get { return m_InitialColliderBufferSize; }
         set { m_InitialColliderBufferSize = value; }
     }
-    
+
     [SerializeField]
-    internal Color[] m_DebugColors;
+    internal int m_InitialColliderBufferSize = 4;
+
     public Color[] DebugColors
     {
         get { return m_DebugColors; }
         set { m_DebugColors = value; }
     }
+
+    [SerializeField]
+    internal Color[] m_DebugColors;
+    
 
     [SerializeField]
     internal float m_GizmoYOffset = 0f;
@@ -205,11 +208,6 @@ public class StrategyGridSensorComponent : SensorComponent
         }
     }
     
-    /// <summary>
-    /// Get an array of GridSensors to be added in this component.
-    /// Override this method and return custom GridSensor implementations.
-    /// </summary>
-    /// <returns>Array of grid sensors to be added to the component.</returns>
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
@@ -223,13 +221,12 @@ public class StrategyGridSensorComponent : SensorComponent
     /// </summary>
     internal void UpdateSensor()
     {
-        if (m_Sensors != null)
+        if (m_Sensors == null) return;
+        
+        m_BoxOverlapChecker.ColliderMask = m_ColliderMask;
+        foreach (var sensor in m_Sensors)
         {
-            m_BoxOverlapChecker.ColliderMask = m_ColliderMask;
-            foreach (var sensor in m_Sensors)
-            {
-                sensor.CompressionType = m_CompressionType;
-            }
+            sensor.CompressionType = m_CompressionType;
         }
     }
     

@@ -25,11 +25,12 @@ public class CellInfo
 public class MyGrid : MonoBehaviour
 {
     
-    public const int NumChannels = 3;
+    public const int NumChannels = 4;
     // Buffer channels.
     public const int Visit = 0;
     public const int Collectable = 1;
     public const int Poison = 2;
+    public const int Wall = 2;
     
     private bool m_ShowGizmos = false;
     [SerializeField] public Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
