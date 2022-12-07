@@ -21,19 +21,27 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Quaternion _nextRotation;
     private Quaternion _currentRotation;
     public Action MoveComplete;
-    public event Action<Vector2, Guid> NeedDirectionEvent; 
+    public event Action<Vector2, Guid, Action<Vector3>> NeedDirectionEvent; 
     public Action MoveStarted;
+
+    public event Action<Vector3> GetDirectionEvent;
 
     private void Awake()
     {
         Guid = new Guid();
+        GetDirectionEvent += OnGetDirection;
+    }
+
+    private void OnApplicationQuit()
+    {
+        GetDirectionEvent -= OnGetDirection;
     }
 
     private void Start()
     {
         var pos = transform.localPosition;
         var normPos = new Vector2(pos.x, pos.z).normalized;
-        NeedDirectionEvent?.Invoke(normPos, Guid);
+        NeedDirectionEvent?.Invoke(normPos, Guid, GetDirectionEvent);
     }
 
     public Vector3 Goal
@@ -50,6 +58,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             _nextRotation = Quaternion.LookRotation(
                 _goal - transform.localPosition, Vector3.up);
         }
+    }
+
+    private void OnGetDirection(Vector3 newPos)
+    {
+        Goal = newPos;
     }
     
     void Update()

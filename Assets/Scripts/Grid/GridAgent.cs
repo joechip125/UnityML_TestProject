@@ -11,22 +11,23 @@ using UnityEngine;
 [Serializable]
 public class UnitStore
 {
-    public UnitStore(Vector2Int index, Guid unitGuid)
+    public UnitStore(Vector2Int index, Guid unitGuid, Action<Vector3> callBack)
     {
         unitLocation = index;
         Guid = unitGuid;
+        callBackEvent = callBack;
     }
     
     public Vector2Int unitLocation;
     public Guid Guid;
+    public Action<Vector3> callBackEvent;
 }
 
 public class GridAgent : Agent
 {
     public event Action EpisodeBegin;
-    public event Action<Vector3, Guid> NeedDirectionEvent;
+    
     public Controller Controller;
-    public SpawnArea spawnArea;
 
     private UnitStore _currentUnit;
     private Guid _currentGuid;
@@ -40,8 +41,8 @@ public class GridAgent : Agent
     private const int c_Stay = 0; 
     private const int c_Up = 1;
     private const int c_Down = 2;
-    private const int c_Left = 3;
-    private const int c_Right = 4;
+    private const int c_Right = 3;
+    private const int c_Left = 4;
 
     private ColorGridBuffer m_SensorBuffer;
     private GridBuffer m_MazeBuffer;
@@ -59,14 +60,10 @@ public class GridAgent : Agent
     private bool m_IsActive;
 
     private Queue<UnitStore> _moveQueue = new();
-
-
+    
     public event Action<Vector2Int> FoundFoodEvent;
 
     [SerializeField]
-    [Tooltip("The number of grid cells the agent can observe in any cardinal direction. " +
-             "The resulting grid observation will always have odd dimensions, as the agent " +
-             "is located at its center position, e.g. radius = 10 results in grid size 21 x 21.")]
     private int m_LookDistance = 10;
 
     [SerializeField]
@@ -84,6 +81,11 @@ public class GridAgent : Agent
     
     public override void Initialize()
     {
+        //private const int c_Stay = 0; 
+        //private const int c_Up = 1;
+        //private const int c_Down = 2;
+        //private const int c_Left = 3;
+        //private const int c_Right = 4;
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
         m_ValidActions = new List<int>(5);
         this.Controller.NeedDirectionEvent += OnGetMove;
@@ -97,7 +99,7 @@ public class GridAgent : Agent
             Vector2Int.right
         };
 
-        int length = m_LookDistance * 2 + 1;
+        int length = m_LookDistance * 2;
         // The ColorGridBuffer supports PNG compression.
         m_SensorBuffer = new ColorGridBuffer(5, 20, 20);
 
@@ -118,15 +120,16 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
-        spawnArea.RespawnCollection();
+        EpisodeBegin?.Invoke();
+        
         m_SensorBuffer.Clear();
         m_GridPosition = Vector2Int.zero;
         m_StepTime = 0;
     }
 
-    private void OnGetMove(Vector2 pos, Guid guid)
+    private void OnGetMove(Vector2 pos, Guid guid, Action<Vector3> callBack)
     {
-        _moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), guid));
+        _moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), guid, callBack));
     }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
@@ -163,7 +166,6 @@ public class GridAgent : Agent
         {
             // From +0.5 to -0.5.
             AddReward(0.5f - visitValue);
-            
         }
 
         return visitValue == 1;
@@ -176,8 +178,7 @@ public class GridAgent : Agent
         if (m_ValidActions.Contains(action))
         {
             m_GridPosition += m_Directions[action];
-            m_LocalPosNext = new Vector3(m_GridPosition.x, 0, m_GridPosition.y);
-            
+
             isDone = ValidatePosition(true);
         }
         
@@ -188,6 +189,9 @@ public class GridAgent : Agent
 
         if (isDone)
         {
+            //TODO Make this work
+            _currentUnit.callBackEvent.Invoke(new Vector3());
+            
             m_IsActive = false;
             EndEpisode();
         }
@@ -224,6 +228,17 @@ public class GridAgent : Agent
     
     public override void Heuristic(in ActionBuffers actionsOut)
     {
+        //Vector2Int.zero,
+        //Vector2Int.up,
+        //Vector2Int.down,
+        //Vector2Int.left,
+        //Vector2Int.right
+            
+        //private const int c_Stay = 0; 
+        //private const int c_Up = 1;
+        //private const int c_Down = 2;
+        //private const int c_Left = 3;
+        //private const int c_Right = 4;
         var discreteActionsOut = actionsOut.DiscreteActions;
         discreteActionsOut[0] = c_Stay;
 

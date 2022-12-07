@@ -25,8 +25,20 @@ namespace DefaultNamespace
         private List<UnitValues> _units = new ();
         public GridAgent agent;
         
-        public event Action<Vector2, Guid> NeedDirectionEvent;
+        public SpawnArea spawnArea;
+        
+        public event Action<Vector2, Guid, Action<Vector3>> NeedDirectionEvent;
 
+        private void Awake()
+        {
+            agent.EpisodeBegin += AgentSetup;
+        }
+
+        private void AgentSetup()
+        {
+            spawnArea.RespawnCollection();
+        }
+        
         private void Start()
         {
             var units = FindObjectsOfType<UnitMovement>()
@@ -41,31 +53,24 @@ namespace DefaultNamespace
             }
         }
 
-        public void RegisterSomething(Action<Vector2, Guid> callback)
+        public void RegisterSomething(Action<Vector3> callback)
         {
-            callback += (vector2, guid) =>
-            {
-
-            };
+           
         }
         
         private void OnApplicationQuit()
         {
+            agent.EpisodeBegin -= AgentSetup;
             foreach (var u in _units)
             {
-               
                 u.movement.NeedDirectionEvent -= OnDirectionNeeded;
             }
         }
+        
 
-        public void OnDirectionReceived(Vector3 pos, Guid guid)
+        private void OnDirectionNeeded(Vector2 normPos, Guid guid, Action<Vector3> callBack)
         {
-            
-        }
-
-        private void OnDirectionNeeded(Vector2 normPos, Guid guid)
-        {
-            NeedDirectionEvent?.Invoke(normPos, guid);
+            NeedDirectionEvent?.Invoke(normPos, guid, callBack);
         }
     }
 }
