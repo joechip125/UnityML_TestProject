@@ -39,6 +39,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
 
     private void Start()
     {
+        RequestDirection();
+    }
+
+    private void RequestDirection()
+    {
         var pos = transform.localPosition;
         var normPos = new Vector2(pos.x, pos.z).normalized;
         NeedDirectionEvent?.Invoke(normPos, Guid, GetDirectionEvent);
@@ -77,7 +82,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             {
                 _moveToGoal = false;
                 _goalT = 0;
-                MoveComplete?.Invoke();
+                RequestDirection();
             }
             else _goalT += Time.deltaTime * moveSpeed;
 
