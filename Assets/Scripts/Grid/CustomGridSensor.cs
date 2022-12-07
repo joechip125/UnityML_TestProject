@@ -10,30 +10,29 @@ using UnityEngine.Profiling;
 
 public class CustomGridSensor : ISensor, IDisposable
 {
-    private  ColorGridBuffer m_GridBuffer;
-    private  ColorGridBuffer m_ExternalBuffer;
-    private List<byte> m_CompressedObs;
-    
     private ObservationType m_ObservationType = ObservationType.Default;
-    
+
     string m_Name;
-    
+
     Vector3 m_CellScale;
-    
-    //Vector3Int m_GridSize;
-    
+
+
     string[] m_DetectableTags;
-    
+
     SensorCompressionType m_CompressionType;
-    
+
     ObservationSpec m_ObservationSpec;
-    
+
     public OverlapChecker m_BoxOverlapChecker;
     private GridBuffer _gridBuffer;
-    
+
     // Buffers
     Texture2D m_PerceptionTexture;
     
+    private  ColorGridBuffer m_GridBuffer;
+    private  ColorGridBuffer m_ExternalBuffer;
+    private List<byte> m_CompressedObs;
+
     // Utility Constants Calculated on Init
     int m_NumCells;
     
@@ -61,11 +60,10 @@ public class CustomGridSensor : ISensor, IDisposable
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
         
-        HandleCompressionType();
-
         m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
-        m_PerceptionTexture = new Texture2D(m_GridBuffer.Height, m_GridBuffer.Width, TextureFormat.RGB24, false);
+        
+        HandleCompressionType();
 
         ResetGridBuffer();
     }
@@ -88,12 +86,6 @@ public class CustomGridSensor : ISensor, IDisposable
             }
             m_CompressionType = value;
         }
-    }
-  
-  
-    protected string[] DetectableTags
-    {
-        get { return m_DetectableTags; }
     }
     
     public void Reset() { }
