@@ -118,11 +118,11 @@ public class GridAgent : Agent
     public override void OnEpisodeBegin()
     {
         EpisodeBegin?.Invoke();
-        //Debug.Log((byte)(1 * 255));
-        
+
         m_SensorBuffer.Clear();
-        if(_currentUnit != null && !taskComplete)
+        if (_currentUnit != null && !taskComplete)
             m_GridPosition = _currentUnit.unitLocation;
+        else m_GridPosition = new Vector2Int();
         m_StepTime = 0;
     }
 
@@ -201,10 +201,10 @@ public class GridAgent : Agent
         if (isDone)
         {
             //TODO Make this work
-            _currentUnit.callBackEvent.Invoke(new Vector3());
+            //_currentUnit.callBackEvent.Invoke(new Vector3());
             
             m_IsActive = false;
-            EndEpisode();
+            //EndEpisode();
         }
     }
 

@@ -31,10 +31,10 @@ namespace DefaultNamespace
 
         private void Awake()
         {
-            agent.EpisodeBegin += AgentSetup;
+            agent.EpisodeBegin += OnEpisodeBegin;
         }
 
-        private void AgentSetup()
+        private void OnEpisodeBegin()
         {
             spawnArea.RespawnCollection();
         }
@@ -45,6 +45,8 @@ namespace DefaultNamespace
                 .Where(x => 
                     Vector3.Distance(x.transform.localPosition, 
                   transform.localPosition) < maxDistance).ToList();
+            
+            Debug.Log(units.Count);
             
             foreach (var u in units)
             {
@@ -60,7 +62,7 @@ namespace DefaultNamespace
         
         private void OnApplicationQuit()
         {
-            agent.EpisodeBegin -= AgentSetup;
+            agent.EpisodeBegin -= OnEpisodeBegin;
             foreach (var u in _units)
             {
                 u.movement.NeedDirectionEvent -= OnDirectionNeeded;

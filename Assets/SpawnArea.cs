@@ -25,7 +25,7 @@ public class SpawnArea : MonoBehaviour
     public GameObject wallPrototype;
     public int xTiles;
     public int zTiles;
-    public List<FieldTile> tiles;
+    [SerializeField, HideInInspector] public List<FieldTile> tiles;
     [SerializeField]private float _percentCollect;
     [SerializeField]private float _percentPoison;
     private IntVector2 _theRightChoice;
