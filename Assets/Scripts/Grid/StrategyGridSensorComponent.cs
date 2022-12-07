@@ -14,9 +14,6 @@ public class StrategyGridSensorComponent : SensorComponent
     List<CustomGridSensor> m_Sensors;
     
     internal OverlapChecker m_BoxOverlapChecker;
-
-    [SerializeField]
-    int TotalNumberChannels = 3;
     
     public ColorGridBuffer GridBuffer
     {
@@ -44,11 +41,7 @@ public class StrategyGridSensorComponent : SensorComponent
         set { m_SensorName = value; }
     }
 
-    public List<ChannelLabel> ChannelLabels
-    {
-        get { return m_ChannelLabels; }
-        set { m_ChannelLabels = new List<ChannelLabel>(value); }
-    }
+    public List<ChannelLabel> ChannelLabels => m_ChannelLabels;
 
     [SerializeField]
     protected List<ChannelLabel> m_ChannelLabels;
@@ -74,10 +67,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
     [SerializeField]
     internal Vector3Int m_GridSize = new Vector3Int(20, 1, 20);
-
-    [SerializeField]
-    internal string[] m_DetectableTags;
-
+    
     [SerializeField]
     internal LayerMask m_ColliderMask;
     
@@ -86,11 +76,7 @@ public class StrategyGridSensorComponent : SensorComponent
     
     [SerializeField]
     internal int m_InitialColliderBufferSize = 4;
-
-    [SerializeField]
-    internal Color[] m_DebugColors;
     
-
     [SerializeField]
     internal float m_GizmoYOffset = 0f;
     
@@ -109,6 +95,9 @@ public class StrategyGridSensorComponent : SensorComponent
     [Range(1, 50)]
     [Tooltip("Number of frames of observations that will be stacked before being fed to the neural network.")]
     internal int m_ObservationStacks = 1;
+
+    [SerializeField] private int TotalNumberChannels = 3;
+
     public int ObservationStacks
     {
         get { return m_ObservationStacks; }
@@ -123,16 +112,16 @@ public class StrategyGridSensorComponent : SensorComponent
             m_GridSize,
             m_ColliderMask,
             gameObject,
-            m_DetectableTags,
             m_InitialColliderBufferSize,
-            m_MaxColliderBufferSize
+            m_MaxColliderBufferSize,
+            m_ChannelLabels
         );
 
         m_GridBuffer = new ColorGridBuffer(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
         m_GridShape = new GridBuffer.Shape(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, m_DetectableTags, SensorCompressionType.None, m_GridBuffer, ExternalBuffer);
+        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, SensorCompressionType.None, m_GridBuffer, ExternalBuffer, ChannelLabels);
         m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
     
         m_Sensors = GetGridSensors().ToList();
@@ -167,7 +156,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_DetectableTags, m_CompressionType, m_GridBuffer, ExternalBuffer);
+        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_CompressionType, m_GridBuffer, ExternalBuffer, ChannelLabels);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
@@ -206,8 +195,7 @@ public class StrategyGridSensorComponent : SensorComponent
             if (m_GridBuffer.ReadAll(i, out var channel, out var value))
             {
                 debugRayColor =m_ChannelLabels[(int) channel].Color;
-                //debugRayColor = m_DebugColors[(int)channel];
-                //debugRayColor = m_DebugColors[(int)channel] * (byte)(value * 255);
+                // * (byte)(value * 255);
             }
             
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);

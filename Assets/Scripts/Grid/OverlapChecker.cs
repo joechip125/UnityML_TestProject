@@ -15,7 +15,9 @@ public class OverlapChecker
     
     GameObject m_CenterObject;
 
-    string[] m_DetectableTags;
+    //string[] m_DetectableTags;
+
+    private List<ChannelLabel> _labels = new();
     
     int m_InitialColliderBufferSize;
     
@@ -40,17 +42,18 @@ public class OverlapChecker
         Vector3Int gridSize,
         LayerMask colliderMask,
         GameObject centerObject,
-        string[] detectableTags,
         int initialColliderBufferSize,
-        int maxColliderBufferSize)
+        int maxColliderBufferSize,
+        List<ChannelLabel> labels)
     {
         m_CellScale = cellScale;
         m_GridSize = gridSize;
         m_ColliderMask = colliderMask;
         m_CenterObject = centerObject;
-        m_DetectableTags = detectableTags;
+        //m_DetectableTags = detectableTags;
         m_InitialColliderBufferSize = initialColliderBufferSize;
         m_MaxColliderBufferSize = maxColliderBufferSize;
+        _labels = labels;
 
         m_NumCells = gridSize.x * gridSize.z;
         m_HalfCellScale = new Vector3(cellScale.x / 2f, cellScale.y, cellScale.z / 2f);
@@ -175,9 +178,9 @@ public class OverlapChecker
 
                 // Checks if our colliders contain a detectable object
                 var index = -1;
-                for (var ii = 0; ii < m_DetectableTags.Length; ii++)
+                for (var ii = 0; ii < _labels.Count; ii++)
                 {
-                    if (currentColliderGo.CompareTag(m_DetectableTags[ii]))
+                    if (currentColliderGo.CompareTag(_labels[ii].Name))
                     {
                         index = ii;
                         break;

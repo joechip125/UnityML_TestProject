@@ -10,27 +10,39 @@ namespace DefaultNamespace
     [Serializable]
     public class UnitValues
     {
-        public UnitValues(UnitMovement movement)
+        public UnitValues(Vector2 pos, Action<Vector3> callBack)
         {
-            this.movement = movement;
+            unitPos = pos;
+            CallBack = callBack;
+
         }
-        
-        public UnitMovement movement;
-        public Guid Guid;
+
+        public Vector2 unitPos;
+        public Action<Vector3> CallBack;
+    }
+    
+    [Serializable]
+    public class UnitStore
+    {
+        public UnitStore()
+        {
+            
+        }
+
+        public Queue<UnitValues> Unit = new();
     }
     
     public class Controller : MonoBehaviour
     {
         private float maxDistance = 12;
-        private List<UnitValues> _units = new ();
+        private List<UnitMovement> _units = new ();
+        public UnitStore _unitStore;
         public GridAgent agent;
-        
         public SpawnArea spawnArea;
-        
-        public event Action<Vector2, Guid, Action<Vector3>> NeedDirectionEvent;
 
         private void Awake()
         {
+            agent.unitStore = _unitStore;
             agent.EpisodeBegin += OnEpisodeBegin;
         }
 
@@ -45,19 +57,12 @@ namespace DefaultNamespace
                 .Where(x => 
                     Vector3.Distance(x.transform.localPosition, 
                   transform.localPosition) < maxDistance).ToList();
-            
-            Debug.Log(units.Count);
-            
+
             foreach (var u in units)
             {
-                _units.Add(new UnitValues(u));
+                _units.Add(u);
                 u.NeedDirectionEvent += OnDirectionNeeded;
             }
-        }
-
-        public void RegisterSomething(Action<Vector3> callback)
-        {
-           
         }
         
         private void OnApplicationQuit()
@@ -65,14 +70,14 @@ namespace DefaultNamespace
             agent.EpisodeBegin -= OnEpisodeBegin;
             foreach (var u in _units)
             {
-                u.movement.NeedDirectionEvent -= OnDirectionNeeded;
+                u.NeedDirectionEvent -= OnDirectionNeeded;
             }
         }
         
-
-        private void OnDirectionNeeded(Vector2 normPos, Guid guid, Action<Vector3> callBack)
+        private void OnDirectionNeeded(Vector2 normPos, Action<Vector3> callBack)
         {
-            NeedDirectionEvent?.Invoke(normPos, guid, callBack);
+            _unitStore.Unit.Enqueue(new UnitValues(normPos, callBack));
+            //NeedDirectionEvent?.Invoke(normPos,  callBack);
         }
     }
 }

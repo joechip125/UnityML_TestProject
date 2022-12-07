@@ -8,20 +8,6 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
-[Serializable]
-public class UnitStore
-{
-    public UnitStore(Vector2Int index, Guid unitGuid, Action<Vector3> callBack)
-    {
-        unitLocation = index;
-        Guid = unitGuid;
-        callBackEvent = callBack;
-    }
-    
-    public Vector2Int unitLocation;
-    public Guid Guid;
-    public Action<Vector3> callBackEvent;
-}
 
 public class GridAgent : Agent
 {
@@ -29,9 +15,8 @@ public class GridAgent : Agent
     
     public Controller Controller;
 
-    private UnitStore _currentUnit;
-    private Guid _currentGuid;
-    private Vector2Int _currentStartIndex;
+    public UnitStore unitStore;
+    private UnitValues _currentUnit;
 
     [SerializeField]
     [Tooltip("Select to enable action masking. Note that a model trained with action " +
@@ -59,8 +44,6 @@ public class GridAgent : Agent
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
     private bool taskComplete;
-
-    private Queue<UnitStore> _moveQueue = new();
     
     public event Action<Vector2Int> FoundFoodEvent;
 
@@ -85,7 +68,6 @@ public class GridAgent : Agent
         taskComplete = true;
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
         m_ValidActions = new List<int>(5);
-        this.Controller.NeedDirectionEvent += OnGetMove;
 
         m_Directions = new Vector2Int[]
         {
@@ -95,20 +77,11 @@ public class GridAgent : Agent
             Vector2Int.left,
             Vector2Int.right
         };
-
-        int length = m_LookDistance * 2;
-        // The ColorGridBuffer supports PNG compression.
+        
         m_SensorBuffer = new ColorGridBuffer(5, 20, 20);
 
         var sensorComp = GetComponent<StrategyGridSensorComponent>();
         sensorComp.ExternalBuffer = m_SensorBuffer;
-        //// Labels for sensor debugging.
-        //sensorComp.ChannelLabels = new List<ChannelLabel>()
-        //{
-        //    new ChannelLabel("Wall", new Color32(0, 128, 255, 255)),
-        //    new ChannelLabel("Food", new Color32(64, 255, 64, 255)),
-        //    new ChannelLabel("Visited", new Color32(255, 64, 64, 255)),
-        //};
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -119,16 +92,25 @@ public class GridAgent : Agent
     {
         EpisodeBegin?.Invoke();
 
+        unitStore ??= Controller._unitStore;
+
         m_SensorBuffer.Clear();
-        if (_currentUnit != null && !taskComplete)
-            m_GridPosition = _currentUnit.unitLocation;
-        else m_GridPosition = new Vector2Int();
+        if (taskComplete)
+        {
+            TryGetTask();
+        }
+        else
+        {
+            m_GridPosition = _currentUnit.unitPos;    
+        }
+        //m_GridPosition = unitStore.unitLocation;
+        m_GridPosition = new Vector2Int();
         m_StepTime = 0;
     }
 
-    private void OnGetMove(Vector2 pos, Guid guid, Action<Vector3> callBack)
+    private void OnGetMove(Vector2 pos, Action<Vector3> callBack)
     {
-        _moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), guid, callBack));
+        //_moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), callBack));
     }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
@@ -172,7 +154,6 @@ public class GridAgent : Agent
             }
         }
 
-        //(1, visitValue + m_RewardDecrement)
         if (rewardAgent)
         {
             // From +0.5 to -0.5.
@@ -197,6 +178,11 @@ public class GridAgent : Agent
         {
             AddReward(-1.0f);
         }
+        
+        if (taskComplete)
+        {
+            TryGetTask();
+        }
 
         if (isDone)
         {
@@ -210,14 +196,11 @@ public class GridAgent : Agent
 
     private bool TryGetTask()
     {
-        if (_moveQueue.Count > 0)
-        {
-            _currentUnit = _moveQueue.Dequeue();
-            taskComplete = false;
-            return true;
-        }
-
-        return false;
+        if (unitStore.Unit.Count <= 0) return false;
+        
+        _currentUnit = unitStore.Unit.Dequeue();
+        taskComplete = false;
+        return true;
     }
     
     private void FixedUpdate()
@@ -267,33 +250,4 @@ public class GridAgent : Agent
             discreteActionsOut[0] = c_Down;
         }
     }
-    
-    private void UpdateSensorBuffer()
-    {
-        m_SensorBuffer.Clear();
-
-        // Current FOV.
-        int xMin = m_GridPosition.x - m_LookDistance;
-        int xMax = m_GridPosition.x + m_LookDistance;
-        int yMin = m_GridPosition.y - m_LookDistance;
-        int yMax = m_GridPosition.y + m_LookDistance;
-
-        for (int mx = xMin; mx <= xMax; mx++)
-        {
-            int sx = mx - xMin;
-            for (int my = yMin; my <= yMax; my++)
-            {
-                int sy = my - yMin;
-                // TryRead -> FOV might extend beyond maze bounds.
-                if (m_MazeBuffer.TryRead(MyGrid.Collectable, mx, my, out float wall))
-                {
-                    // Copy maze -> sensor.
-                    m_SensorBuffer.Write(MyGrid.Wall, sx, sy, wall);
-                    m_SensorBuffer.Write(MyGrid.Collectable, sx, sy, m_MazeBuffer.Read(MyGrid.Collectable, mx, my));
-                    m_SensorBuffer.Write(MyGrid.Visit, sx, sy, m_MazeBuffer.Read(MyGrid.Visit, mx, my));
-                }
-            }
-        }
-    }
-    
 }

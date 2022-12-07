@@ -15,13 +15,14 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     public float rotationSpeed = 0.001f;
     public Guid Guid;
 
+    private bool _requestedDirection;
     public Action FoundObjectAct;
     public Action CollideWithWall;
     private int _unitScore;
     private Quaternion _nextRotation;
     private Quaternion _currentRotation;
     public Action MoveComplete;
-    public event Action<Vector2, Guid, Action<Vector3>> NeedDirectionEvent; 
+    public event Action<Vector2, Action<Vector3>> NeedDirectionEvent; 
     public Action MoveStarted;
 
     public event Action<Vector3> GetDirectionEvent;
@@ -36,17 +37,19 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     {
         GetDirectionEvent -= OnGetDirection;
     }
-
-    private void Start()
-    {
-        RequestDirection();
-    }
+    
 
     private void RequestDirection()
     {
         var pos = transform.localPosition;
         var normPos = new Vector2(pos.x, pos.z).normalized;
-        NeedDirectionEvent?.Invoke(normPos, Guid, GetDirectionEvent);
+
+        if (NeedDirectionEvent != null)
+        {
+            _requestedDirection = true;
+            NeedDirectionEvent.Invoke(normPos, GetDirectionEvent);
+        }
+      
     }
 
     public Vector3 Goal
@@ -59,6 +62,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             _goal = value;
             _goalT = 0;
             _moveToGoal = true;
+            _requestedDirection = false;
             _currentRotation = transform.rotation;
             _nextRotation = Quaternion.LookRotation(
                 _goal - transform.localPosition, Vector3.up);
@@ -82,11 +86,14 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             {
                 _moveToGoal = false;
                 _goalT = 0;
-                RequestDirection();
             }
             else _goalT += Time.deltaTime * moveSpeed;
 
             _goalR += Time.deltaTime * rotationSpeed;
+        }
+        if(!_moveToGoal && !_requestedDirection)
+        {
+            RequestDirection();
         }
     }
 

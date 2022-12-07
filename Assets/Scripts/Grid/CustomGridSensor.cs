@@ -15,10 +15,9 @@ public class CustomGridSensor : ISensor, IDisposable
     string m_Name;
 
     Vector3 m_CellScale;
-
-
-    string[] m_DetectableTags;
-    private byte[] _byteTest;
+    
+    //string[] m_DetectableTags;
+    private List<ChannelLabel> _labels = new();
 
     SensorCompressionType m_CompressionType;
 
@@ -37,8 +36,6 @@ public class CustomGridSensor : ISensor, IDisposable
     // Utility Constants Calculated on Init
     int m_NumCells;
     
-    int m_CellObservationSize;
-    
     Vector3 m_CellCenterOffset;
     private bool AutoDetectionEnabled;
 
@@ -46,17 +43,17 @@ public class CustomGridSensor : ISensor, IDisposable
     public CustomGridSensor(
         string name,
         Vector3 cellScale,
-        string[] detectableTags,
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
-        ColorGridBuffer externalBuffer
-    )
+        ColorGridBuffer externalBuffer,
+        List<ChannelLabel> labels)
     {
         m_Name = name;
         m_CellScale = cellScale;
-        m_DetectableTags = detectableTags;
+        //m_DetectableTags = detectableTags;
         CompressionType = compression;
         m_ExternalBuffer = externalBuffer;
+        _labels = labels;
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
@@ -105,7 +102,7 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         for (var i = 0; i < m_NumCells; i++)
         {
-            for (int j = 0; j < m_DetectableTags.Length; j++)
+            for (int j = 0; j < _labels.Count; j++)
             {
                 writeBuffer.Write(j, i,  readBuffer.Read(j, i));
             }
@@ -176,9 +173,9 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         Profiler.BeginSample("GridSensor.ProcessDetectedObject");
 
-        for (var i = 0; i < m_DetectableTags.Length; i++)
+        for (var i = 0; i < _labels.Count; i++)
         {
-            if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(m_DetectableTags[i]))
+            if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(_labels[i].Name))
             {
                 m_GridBuffer.Write(i, cellIndex,1);
             }
