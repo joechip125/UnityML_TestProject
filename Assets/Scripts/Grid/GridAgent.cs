@@ -58,6 +58,7 @@ public class GridAgent : Agent
     // Whether the agent is currently requesting decisions.
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
+    private bool taskComplete;
 
     private Queue<UnitStore> _moveQueue = new();
     
@@ -81,6 +82,7 @@ public class GridAgent : Agent
     
     public override void Initialize()
     {
+        taskComplete = true;
         //private const int c_Stay = 0; 
         //private const int c_Up = 1;
         //private const int c_Down = 2;
@@ -202,6 +204,7 @@ public class GridAgent : Agent
         if (_moveQueue.Count > 0)
         {
             _currentUnit = _moveQueue.Dequeue();
+            taskComplete = false;
             return true;
         }
 
@@ -219,6 +222,13 @@ public class GridAgent : Agent
             m_StepTime += Time.fixedDeltaTime;
             m_IsActive = m_StepTime >= m_StepDuration;
         }
+
+        if (taskComplete)
+        {
+            if(TryGetTask())
+                m_IsActive = true;
+        }
+        
         else
         {
             if(TryGetTask())
@@ -228,17 +238,6 @@ public class GridAgent : Agent
     
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        //Vector2Int.zero,
-        //Vector2Int.up,
-        //Vector2Int.down,
-        //Vector2Int.left,
-        //Vector2Int.right
-            
-        //private const int c_Stay = 0; 
-        //private const int c_Up = 1;
-        //private const int c_Down = 2;
-        //private const int c_Left = 3;
-        //private const int c_Right = 4;
         var discreteActionsOut = actionsOut.DiscreteActions;
         discreteActionsOut[0] = c_Stay;
 
