@@ -125,7 +125,8 @@ public class GridAgent : Agent
         EpisodeBegin?.Invoke();
         
         m_SensorBuffer.Clear();
-        m_GridPosition = Vector2Int.zero;
+        if(_currentUnit != null)
+            m_GridPosition = _currentUnit.unitLocation;
         m_StepTime = 0;
     }
 
@@ -158,7 +159,7 @@ public class GridAgent : Agent
     private bool ValidatePosition(bool rewardAgent)
     {
         // From 0 to +1. 
-        float visitValue = m_SensorBuffer.Read(MyGrid.Visit, m_GridPosition);
+        float visitValue = m_SensorBuffer.Read(2, m_GridPosition);
 
         m_SensorBuffer.Write(2, m_GridPosition,
             1);
