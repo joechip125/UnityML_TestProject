@@ -267,17 +267,18 @@ namespace MBaske.Sensors.Grid
             return m_Values[channel][index];
         }
 
-        public bool ReadAll(int index, out float result)
+        public bool ReadAll(int index, out float hitChannel, out float channelValue)
         {
             var outBool = false;
-            result = 0;
+            hitChannel = 0;
+            channelValue = 0;
             for (int i = 0; i < NumChannels; i++)
             {
-                var on = m_Values[i][index];
-                if (on == 0) continue;
+                channelValue = m_Values[i][index];
+                if (channelValue == 0) continue;
                 
                 outBool = true;
-                result = i;
+                hitChannel = i;
             }
 
             return outBool;

@@ -508,7 +508,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  Controller: {fileID: 0}
+  Controller: {fileID: 1710121638}
   m_MaskActions: 0
   m_LookDistance: 10
   m_RewardDecrement: 0.25

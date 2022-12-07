@@ -118,7 +118,7 @@ public class GridAgent : Agent
     public override void OnEpisodeBegin()
     {
         EpisodeBegin?.Invoke();
-        Debug.Log((byte)(1 * 255));
+        //Debug.Log((byte)(1 * 255));
         
         m_SensorBuffer.Clear();
         if(_currentUnit != null && !taskComplete)

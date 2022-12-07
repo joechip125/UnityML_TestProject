@@ -203,9 +203,9 @@ public class StrategyGridSensorComponent : SensorComponent
             var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
             var debugRayColor = Color.white;
 
-            if (m_GridBuffer.ReadAll(i, out var result))
+            if (m_GridBuffer.ReadAll(i, out var channel, out var value))
             {
-                debugRayColor = m_DebugColors[(int)result];
+                debugRayColor = m_DebugColors[(int)channel] * (byte)(value * 255);
             }
             
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
