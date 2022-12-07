@@ -560,7 +560,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1.04
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.y
@@ -568,7 +568,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.85
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalRotation.w
@@ -627,7 +627,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1936667393}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.1, y: 0.5, z: 4.91}
+  m_LocalPosition: {x: 5.5, y: 0.5, z: 5.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -660,10 +660,6 @@ MonoBehaviour:
     Color: {r: 0.6554808, g: 0, b: 0.83137256, a: 0}
   m_CellScale: {x: 1, y: 0.01, z: 1}
   m_GridSize: {x: 20, y: 1, z: 20}
-  m_DetectableTags:
-  - Collectable
-  - Poison
-  - Visited
   m_ColliderMask:
     serializedVersion: 2
     m_Bits: 2147483647

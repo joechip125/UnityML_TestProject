@@ -30,7 +30,7 @@ public class GridAgent : Agent
     private const int c_Left = 4;
 
     private ColorGridBuffer m_SensorBuffer;
-    private GridBuffer m_MazeBuffer;
+    private ColorGridBuffer m_CompleteBuffer;
 
     // Current agent position on grid.
     private Vector2Int m_GridPosition;
@@ -44,6 +44,7 @@ public class GridAgent : Agent
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
     private bool taskComplete;
+    private bool _assignedTask;
     
     public event Action<Vector2Int> FoundFoodEvent;
 
@@ -101,17 +102,17 @@ public class GridAgent : Agent
         }
         else
         {
-            m_GridPosition = _currentUnit.unitPos;    
+            m_GridPosition = GetIndexFromPosition(_currentUnit.unitPos);    
         }
-        //m_GridPosition = unitStore.unitLocation;
-        m_GridPosition = new Vector2Int();
+        
         m_StepTime = 0;
     }
 
-    private void OnGetMove(Vector2 pos, Action<Vector3> callBack)
+    private Vector2Int GetIndexFromPosition(Vector2 normPos)
     {
-        //_moveQueue.Enqueue(new UnitStore(m_SensorBuffer.NormalizedToGridPos(pos), callBack));
+        return m_SensorBuffer.NormalizedToGridPos(normPos);
     }
+    
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         m_ValidActions.Clear();
@@ -144,13 +145,17 @@ public class GridAgent : Agent
         
         if (rewardAgent)
         {
+            Debug.Log(m_GridPosition);
             // From +0.5 to -0.5.
             AddReward(0.5f - visitValue);
 
-            if (m_SensorBuffer.Read(0, m_GridPosition) > 0.9f)
+            if (m_SensorBuffer.Read(0, m_GridPosition) > 0f)
             {
-                //m_LocalPosNext = m_SensorBuffer.Read()
-                AddReward(1);    
+                Debug.Log(m_GridPosition);
+                taskComplete = true;
+                _assignedTask = false;
+                AddReward(1);
+                EndEpisode();
             }
         }
 
@@ -179,27 +184,24 @@ public class GridAgent : Agent
             AddReward(-1.0f);
         }
         
-        if (taskComplete)
-        {
-            TryGetTask();
-        }
-
-        if (isDone)
+        
+        if (taskComplete || !_assignedTask)
         {
             //TODO Make this work
             //_currentUnit.callBackEvent.Invoke(new Vector3());
             
-            m_IsActive = false;
-            //EndEpisode();
+            
+            EndEpisode();
         }
     }
 
     private bool TryGetTask()
     {
         if (unitStore.Unit.Count <= 0) return false;
-        
+
         _currentUnit = unitStore.Unit.Dequeue();
         taskComplete = false;
+        _assignedTask = true;
         return true;
     }
     
@@ -213,18 +215,6 @@ public class GridAgent : Agent
         {
             m_StepTime += Time.fixedDeltaTime;
             m_IsActive = m_StepTime >= m_StepDuration;
-        }
-
-        if (taskComplete)
-        {
-            if(TryGetTask())
-                m_IsActive = true;
-        }
-        
-        else
-        {
-            if(TryGetTask())
-                m_IsActive = true;
         }
     }
     

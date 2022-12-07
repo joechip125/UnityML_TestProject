@@ -31,6 +31,8 @@ public class CustomGridSensor : ISensor, IDisposable
     
     private  ColorGridBuffer m_GridBuffer;
     private  ColorGridBuffer m_ExternalBuffer;
+    private ColorGridBuffer _tempBuffer;
+    
     private List<byte> m_CompressedObs;
 
     // Utility Constants Calculated on Init
@@ -57,7 +59,7 @@ public class CustomGridSensor : ISensor, IDisposable
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
-        
+        _tempBuffer = m_GridBuffer;
         m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
         
