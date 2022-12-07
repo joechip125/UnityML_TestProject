@@ -83,11 +83,6 @@ public class GridAgent : Agent
     public override void Initialize()
     {
         taskComplete = true;
-        //private const int c_Stay = 0; 
-        //private const int c_Up = 1;
-        //private const int c_Down = 2;
-        //private const int c_Left = 3;
-        //private const int c_Right = 4;
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
         m_ValidActions = new List<int>(5);
         this.Controller.NeedDirectionEvent += OnGetMove;
@@ -123,6 +118,7 @@ public class GridAgent : Agent
     public override void OnEpisodeBegin()
     {
         EpisodeBegin?.Invoke();
+        Debug.Log((byte)(1 * 255));
         
         m_SensorBuffer.Clear();
         if(_currentUnit != null && !taskComplete)
@@ -162,7 +158,19 @@ public class GridAgent : Agent
         float visitValue = m_SensorBuffer.Read(2, m_GridPosition);
 
         m_SensorBuffer.Write(2, m_GridPosition,
-            1);
+            Mathf.Min(1, visitValue + m_RewardDecrement));
+        
+        if (rewardAgent)
+        {
+            // From +0.5 to -0.5.
+            AddReward(0.5f - visitValue);
+
+            if (m_SensorBuffer.Read(0, m_GridPosition) > 0.9f)
+            {
+                //m_LocalPosNext = m_SensorBuffer.Read()
+                AddReward(1);    
+            }
+        }
 
         //(1, visitValue + m_RewardDecrement)
         if (rewardAgent)

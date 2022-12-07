@@ -18,6 +18,7 @@ public class CustomGridSensor : ISensor, IDisposable
 
 
     string[] m_DetectableTags;
+    private byte[] _byteTest;
 
     SensorCompressionType m_CompressionType;
 
