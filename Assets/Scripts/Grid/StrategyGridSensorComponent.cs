@@ -205,7 +205,8 @@ public class StrategyGridSensorComponent : SensorComponent
 
             if (m_GridBuffer.ReadAll(i, out var channel, out var value))
             {
-                debugRayColor = m_DebugColors[(int)channel];
+                debugRayColor =m_ChannelLabels[(int) channel].Color;
+                //debugRayColor = m_DebugColors[(int)channel];
                 //debugRayColor = m_DebugColors[(int)channel] * (byte)(value * 255);
             }
             
