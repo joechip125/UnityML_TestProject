@@ -125,7 +125,7 @@ public class GridAgent : Agent
         EpisodeBegin?.Invoke();
         
         m_SensorBuffer.Clear();
-        if(_currentUnit != null)
+        if(_currentUnit != null && !taskComplete)
             m_GridPosition = _currentUnit.unitLocation;
         m_StepTime = 0;
     }
