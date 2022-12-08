@@ -121,7 +121,7 @@ public class StrategyGridSensorComponent : SensorComponent
         m_GridShape = new GridBuffer.Shape(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        m_DebugSensor = new CustomGridSensor("DebugGridSensor", m_CellScale, SensorCompressionType.None, m_GridBuffer, ExternalBuffer, ChannelLabels);
+        m_DebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, m_GridBuffer, ExternalBuffer, ChannelLabels);
         m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
     
         m_Sensors = GetGridSensors().ToList();
@@ -156,7 +156,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(m_SensorName, m_CellScale, m_CompressionType, m_GridBuffer, ExternalBuffer, ChannelLabels);
+        var sensor = new CustomGridSensor(m_SensorName, m_CompressionType, m_GridBuffer, ExternalBuffer, ChannelLabels);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }

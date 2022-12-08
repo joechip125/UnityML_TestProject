@@ -13,9 +13,7 @@ public class CustomGridSensor : ISensor, IDisposable
     private ObservationType m_ObservationType = ObservationType.Default;
 
     string m_Name;
-
-    Vector3 m_CellScale;
-  
+    
     private List<ChannelLabel> _labels = new();
 
     SensorCompressionType m_CompressionType;
@@ -43,14 +41,12 @@ public class CustomGridSensor : ISensor, IDisposable
 
     public CustomGridSensor(
         string name,
-        Vector3 cellScale,
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
         ColorGridBuffer externalBuffer,
         List<ChannelLabel> labels)
     {
         m_Name = name;
-        m_CellScale = cellScale;
         CompressionType = compression;
         m_ExternalBuffer = externalBuffer;
         _labels = labels;
@@ -58,7 +54,6 @@ public class CustomGridSensor : ISensor, IDisposable
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
         m_NumCells = m_GridBuffer.SizeZ * m_GridBuffer.SizeX;
-        //m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Width, m_GridBuffer.Height, m_GridBuffer.NumChannels, m_ObservationType);
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, m_ObservationType);
         
         HandleCompressionType();
@@ -131,8 +126,6 @@ public class CustomGridSensor : ISensor, IDisposable
 
         if (m_CompressionType == SensorCompressionType.PNG)
         {
-            //m_PerceptionTexture = new Texture2D(
-            //    m_GridBuffer.Height, m_GridBuffer.Width, TextureFormat.RGB24, false);
             m_PerceptionTexture = new Texture2D(
                 m_GridBuffer.SizeX, m_GridBuffer.SizeZ, TextureFormat.RGB24, false);
             m_CompressedObs = new List<byte>(
@@ -233,7 +226,6 @@ public class CustomGridSensor : ISensor, IDisposable
         
         if (Application.isEditor)
         {
-            // Edit Mode tests complain if we use Destroy()
             UnityEngine.Object.DestroyImmediate(m_PerceptionTexture);
         }
         else

@@ -15,8 +15,6 @@ public class OverlapChecker
     
     GameObject m_CenterObject;
 
-    //string[] m_DetectableTags;
-
     private List<ChannelLabel> _labels = new();
     
     int m_InitialColliderBufferSize;
@@ -50,7 +48,6 @@ public class OverlapChecker
         m_GridSize = gridSize;
         m_ColliderMask = colliderMask;
         m_CenterObject = centerObject;
-        //m_DetectableTags = detectableTags;
         m_InitialColliderBufferSize = initialColliderBufferSize;
         m_MaxColliderBufferSize = maxColliderBufferSize;
         _labels = labels;
