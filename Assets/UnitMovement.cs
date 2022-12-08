@@ -11,7 +11,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private bool _moveToGoal;
     private float _goalT;
     private float _goalR;
-    public float moveSpeed = 0.2f;
+    public float moveSpeed = 0.002f;
     public float rotationSpeed = 0.001f;
     public Guid Guid;
 

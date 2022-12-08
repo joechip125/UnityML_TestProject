@@ -97,9 +97,8 @@ public class GridAgent : Agent
     
     public Vector2Int GetCellIndexFromPosition(Vector3 pos)
     {
-        Debug.Log(transform.position - pos);
-        return new Vector2Int(Mathf.RoundToInt(pos.x - m_CellCenterOffset.x),
-            Mathf.RoundToInt(pos.z - m_CellCenterOffset.z));
+        var comb = (transform.position - pos) - m_CellCenterOffset;
+        return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.z)), Mathf.RoundToInt(Mathf.Abs(comb.x)));
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -117,8 +116,7 @@ public class GridAgent : Agent
         }
         else if(_taskAssigned && !_taskComplete)
         {
-            m_GridPosition = new Vector2Int();
-            Debug.Log(GetCellIndexFromPosition(_currentUnit.unitPos));
+            m_GridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
             m_LocalPosNext = _currentUnit.unitPos;
         }
         
@@ -163,10 +161,8 @@ public class GridAgent : Agent
             if (sensorComp.GridBuffer.Read(0, m_GridPosition) > 0f)
             {
                 Debug.Log(m_GridPosition);
-                _taskComplete = true;
-                _taskAssigned = false;
-                AddReward(1);
-                EndEpisode();
+                Debug.Log(m_LocalPosNext);
+                TaskCompleted();
             }
         }
 
@@ -177,6 +173,15 @@ public class GridAgent : Agent
         }
 
         return visitValue == 1;
+    }
+
+    private void TaskCompleted()
+    {
+        _currentUnit.CallBack.Invoke(m_LocalPosNext);
+        _taskComplete = true;
+        _taskAssigned = false;
+        AddReward(1);
+        EndEpisode();
     }
     
     public override void OnActionReceived(ActionBuffers actions)
@@ -190,6 +195,11 @@ public class GridAgent : Agent
             m_GridPosition += m_Directions[action];
         
             isDone = ValidatePosition(true);
+
+            if (isDone)
+            {
+                EndEpisode();
+            }
         }
         
         else
@@ -223,7 +233,7 @@ public class GridAgent : Agent
             EndEpisode();
         }
         
-        if (m_IsActive)
+        if (m_IsActive && _taskAssigned)
         {
             RequestDecision();
         }

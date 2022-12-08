@@ -141,7 +141,7 @@ public class FieldTile : MonoBehaviour
         {
             while (!unique)
             {
-                var location =  new Vector3(Random.Range(-range, range), 0.15f, Random.Range(-range, range));
+                var location =  new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
                 if (tempLoc.Any(x => Vector3.Distance(location, x) < tolerance))
                 {
                     continue;
