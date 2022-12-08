@@ -59,7 +59,6 @@ public class CustomGridSensor : ISensor, IDisposable
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
-        _tempBuffer = m_GridBuffer;
         m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
         

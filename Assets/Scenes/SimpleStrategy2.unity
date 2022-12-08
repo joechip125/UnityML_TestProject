@@ -554,6 +554,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Collector
       objectReference: {fileID: 0}
+    - target: {fileID: 4108373170441605168, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
+      propertyPath: m_TagString
+      value: Collector
+      objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -627,7 +631,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1936667393}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.5, y: 0.5, z: 5.5}
+  m_LocalPosition: {x: 5.32, y: 0.5, z: 5.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -647,7 +651,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_GridShape:
-    NumChannels: 3
+    NumChannels: 4
     Width: 20
     Height: 20
   m_SensorName: GridSensor
@@ -658,6 +662,8 @@ MonoBehaviour:
     Color: {r: 0.8301887, g: 0.016409677, b: 0, a: 0}
   - Name: Visited
     Color: {r: 0.6554808, g: 0, b: 0.83137256, a: 0}
+  - Name: Collector
+    Color: {r: 0.28864408, g: 0.2756853, b: 0.6037736, a: 0}
   m_CellScale: {x: 1, y: 0.01, z: 1}
   m_GridSize: {x: 20, y: 1, z: 20}
   m_ColliderMask:
@@ -669,7 +675,7 @@ MonoBehaviour:
   m_ShowGizmos: 1
   m_CompressionType: 1
   m_ObservationStacks: 1
-  TotalNumberChannels: 3
+  TotalNumberChannels: 4
 --- !u!114 &1936667396
 MonoBehaviour:
   m_ObjectHideFlags: 0

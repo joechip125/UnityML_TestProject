@@ -22,7 +22,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private Quaternion _nextRotation;
     private Quaternion _currentRotation;
     public Action MoveComplete;
-    public event Action<Vector2, Action<Vector3>> NeedDirectionEvent; 
+    public event Action<Vector3, Action<Vector3>> NeedDirectionEvent; 
     public Action MoveStarted;
 
     public event Action<Vector3> GetDirectionEvent;
@@ -47,7 +47,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         if (NeedDirectionEvent != null)
         {
             _requestedDirection = true;
-            NeedDirectionEvent.Invoke(normPos, GetDirectionEvent);
+            NeedDirectionEvent.Invoke(transform.localPosition, GetDirectionEvent);
         }
       
     }

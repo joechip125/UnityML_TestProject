@@ -10,14 +10,13 @@ namespace DefaultNamespace
     [Serializable]
     public class UnitValues
     {
-        public UnitValues(Vector2 pos, Action<Vector3> callBack)
+        public UnitValues(Vector3 pos, Action<Vector3> callBack)
         {
             unitPos = pos;
             CallBack = callBack;
-
         }
 
-        public Vector2 unitPos;
+        public Vector3 unitPos;
         public Action<Vector3> CallBack;
     }
     
@@ -74,7 +73,7 @@ namespace DefaultNamespace
             }
         }
         
-        private void OnDirectionNeeded(Vector2 normPos, Action<Vector3> callBack)
+        private void OnDirectionNeeded(Vector3 normPos, Action<Vector3> callBack)
         {
             _unitStore.Unit.Enqueue(new UnitValues(normPos, callBack));
             //NeedDirectionEvent?.Invoke(normPos,  callBack);

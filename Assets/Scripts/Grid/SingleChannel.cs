@@ -20,7 +20,7 @@ namespace DefaultNamespace.Grid
         
         public override string ToString()
         {
-            return $"Gridx {Width} x {Height}";
+            return $"Grid {Width} x {Height}";
         }
         
         public int Width

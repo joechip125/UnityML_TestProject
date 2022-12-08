@@ -30,7 +30,7 @@ public class GridAgent : Agent
     private const int c_Left = 4;
 
     private ColorGridBuffer m_SensorBuffer;
-    private ColorGridBuffer m_CompleteBuffer;
+    private ColorGridBuffer m_ReadBuffer;
 
     // Current agent position on grid.
     private Vector2Int m_GridPosition;
@@ -43,11 +43,9 @@ public class GridAgent : Agent
     // Whether the agent is currently requesting decisions.
     // Agent is inactive during animation at inference.
     private bool m_IsActive;
-    private bool taskComplete;
-    private bool _assignedTask;
+    private bool _taskComplete;
+    private bool _taskAssigned;
     
-    public event Action<Vector2Int> FoundFoodEvent;
-
     [SerializeField]
     private int m_LookDistance = 10;
 
@@ -63,10 +61,13 @@ public class GridAgent : Agent
     [Range(0, 0.5f)] 
     private float m_StepDuration = 0.1f;
     private float m_StepTime;
-    
+
+    private StrategyGridSensorComponent sensorComp;
+
     public override void Initialize()
     {
-        taskComplete = true;
+        _taskComplete = true;
+        _taskAssigned = false;
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
         m_ValidActions = new List<int>(5);
 
@@ -81,7 +82,7 @@ public class GridAgent : Agent
         
         m_SensorBuffer = new ColorGridBuffer(5, 20, 20);
 
-        var sensorComp = GetComponent<StrategyGridSensorComponent>();
+        sensorComp = GetComponent<StrategyGridSensorComponent>();
         sensorComp.ExternalBuffer = m_SensorBuffer;
     }
     
@@ -94,23 +95,25 @@ public class GridAgent : Agent
         EpisodeBegin?.Invoke();
 
         unitStore ??= Controller._unitStore;
+        m_ReadBuffer ??= GetComponent<StrategyGridSensorComponent>().GridBuffer;
 
         m_SensorBuffer.Clear();
-        if (taskComplete)
+        if (_taskComplete)
         {
             TryGetTask();
         }
         else
         {
-            m_GridPosition = GetIndexFromPosition(_currentUnit.unitPos);    
+          //  m_GridPosition = GetIndexFromPosition(_currentUnit.unitPos);
+          //  m_LocalPosNext = _currentUnit.unitPos;
         }
         
         m_StepTime = 0;
     }
 
-    private Vector2Int GetIndexFromPosition(Vector2 normPos)
+    private Vector2Int GetIndexFromPosition(Vector3 pos)
     {
-        return m_SensorBuffer.NormalizedToGridPos(normPos);
+        return m_SensorBuffer.NormalizedToGridPos(new Vector2(pos.x, pos.z).normalized);
     }
     
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
@@ -134,26 +137,25 @@ public class GridAgent : Agent
             }
         }
     }
-
+    
     private bool ValidatePosition(bool rewardAgent)
     {
         // From 0 to +1. 
         float visitValue = m_SensorBuffer.Read(2, m_GridPosition);
-
+        
         m_SensorBuffer.Write(2, m_GridPosition,
             Mathf.Min(1, visitValue + m_RewardDecrement));
         
         if (rewardAgent)
         {
-            Debug.Log(m_GridPosition);
             // From +0.5 to -0.5.
             AddReward(0.5f - visitValue);
 
-            if (m_SensorBuffer.Read(0, m_GridPosition) > 0f)
+            if (sensorComp.GridBuffer.Read(0, m_GridPosition) > 0f)
             {
                 Debug.Log(m_GridPosition);
-                taskComplete = true;
-                _assignedTask = false;
+                _taskComplete = true;
+                _taskAssigned = false;
                 AddReward(1);
                 EndEpisode();
             }
@@ -172,6 +174,8 @@ public class GridAgent : Agent
     {
         bool isDone = false;
         var action = actions.DiscreteActions[0];
+        m_LocalPosNext += new Vector3(m_Directions[action].x, 0,m_Directions[action].y);
+
         if (m_ValidActions.Contains(action))
         {
             m_GridPosition += m_Directions[action];
@@ -185,12 +189,9 @@ public class GridAgent : Agent
         }
         
         
-        if (taskComplete || !_assignedTask)
+        if (_taskComplete && _taskAssigned)
         {
-            //TODO Make this work
-            //_currentUnit.callBackEvent.Invoke(new Vector3());
-            
-            
+            _currentUnit.CallBack.Invoke(m_LocalPosNext);
             EndEpisode();
         }
     }
@@ -200,8 +201,8 @@ public class GridAgent : Agent
         if (unitStore.Unit.Count <= 0) return false;
 
         _currentUnit = unitStore.Unit.Dequeue();
-        taskComplete = false;
-        _assignedTask = true;
+        _taskComplete = false;
+        _taskAssigned = true;
         return true;
     }
     
