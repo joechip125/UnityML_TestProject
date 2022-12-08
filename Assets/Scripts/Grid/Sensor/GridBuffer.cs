@@ -201,6 +201,7 @@ namespace MBaske.Sensors.Grid
         public virtual void Write(int channel, int x, int z, float value)
         {
             m_Values[channel][z * SizeX + x] = value;
+            //m_Values[channel][x * SizeZ + z] = value;
             //IsDirty = true;
         }
 
@@ -260,6 +261,7 @@ namespace MBaske.Sensors.Grid
         public virtual float Read(int channel, int x, int z)
         {
             return m_Values[channel][z * SizeX + x];
+            //return m_Values[channel][x * SizeZ + z];
         }
         
         public virtual float Read(int channel, int index)

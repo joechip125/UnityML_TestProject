@@ -131,35 +131,17 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     {
         Destroy(gameObject);
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.TryGetComponent<Collectable>(out var obstacle))
-        {
-            FoundObjectAct?.Invoke();
-        }
-    }
+    
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.TryGetComponent<Collectable>(out var obstacle))
         {
+            obstacle.Deactivate();
             FoundObjectAct?.Invoke();
         }
-        
-        if (other.CompareTag("Wall"))
-        {
-            CollideWithWall?.Invoke();
-        }
     }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Wall"))
-        {
-            CollideWithWall?.Invoke();
-        }
-    }
+    
 
     public int GetUnitScore()
     {

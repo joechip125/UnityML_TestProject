@@ -98,7 +98,7 @@ public class GridAgent : Agent
     public Vector2Int GetCellIndexFromPosition(Vector3 pos)
     {
         var comb = (transform.position - pos) - m_CellCenterOffset;
-        return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.z)), Mathf.RoundToInt(Mathf.Abs(comb.x)));
+        return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
     }
     
     public int GetIntIndexFromPosition(Vector3 pos)
