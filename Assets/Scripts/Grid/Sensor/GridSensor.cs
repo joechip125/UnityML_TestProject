@@ -78,7 +78,7 @@ namespace MBaske.Sensors.Grid
             HandleCompressionType();
 
             m_ObservationSpec = ObservationSpec.Visual(
-                m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, observationType);
+                m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, observationType);
         }
 
         /// <summary>
@@ -100,9 +100,9 @@ namespace MBaske.Sensors.Grid
             if (m_CompressionType == SensorCompressionType.PNG)
             {
                 m_PerceptionTexture = new Texture2D(
-                    m_GridBuffer.Width, m_GridBuffer.Height, TextureFormat.RGB24, false);
+                    m_GridBuffer.SizeX, m_GridBuffer.SizeZ, TextureFormat.RGB24, false);
                 m_CompressedObs = new List<byte>(
-                    m_GridBuffer.Width * m_GridBuffer.Height * m_GridBuffer.NumChannels);
+                    m_GridBuffer.SizeX * m_GridBuffer.SizeZ * m_GridBuffer.NumChannels);
             }
         }
 
@@ -143,8 +143,8 @@ namespace MBaske.Sensors.Grid
         public int Write(ObservationWriter writer)
         {
             int numWritten = 0;
-            int w = m_GridBuffer.Width;
-            int h = m_GridBuffer.Height;
+            int w = m_GridBuffer.SizeX;
+            int h = m_GridBuffer.SizeZ;
             int n = m_GridBuffer.NumChannels;
 
             for (int c = 0; c < n; c++)

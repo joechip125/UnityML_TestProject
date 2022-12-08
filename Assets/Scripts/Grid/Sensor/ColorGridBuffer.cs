@@ -20,10 +20,10 @@ namespace MBaske.Sensors.Grid
         /// Creates a <see cref="ColorGridBuffer"/> instance.
         /// </summary>
         /// <param name="numChannels">Number of grid channels</param>
-        /// <param name="width">Grid width</param>
-        /// <param name="height">Grid height</param>
-        public ColorGridBuffer(int numChannels, int width, int height)
-            : base(numChannels, width, height) { }
+        /// <param name="sizeX">Grid width</param>
+        /// <param name="sizeZ">Grid height</param>
+        public ColorGridBuffer(int numChannels, int sizeX, int sizeZ)
+            : base(numChannels, sizeX, sizeZ) { }
 
         /// <summary>
         /// Creates a <see cref="ColorGridBuffer"/> instance.
@@ -38,7 +38,7 @@ namespace MBaske.Sensors.Grid
         /// </summary>
         /// <param name="shape"><see cref="GridBuffer.Shape"/> of the grid</param>
         public ColorGridBuffer(Shape shape) 
-            : base(shape.NumChannels, shape.Width, shape.Height) { }
+            : base(shape.NumChannels, shape.SizeX, shape.SizeZ) { }
 
         protected override void Initialize()
         {
@@ -49,10 +49,10 @@ namespace MBaske.Sensors.Grid
 
             for (int i = 0; i < m_NumLayers; i++)
             {
-                m_Colors[i] = new Color32[Width * Height];
+                m_Colors[i] = new Color32[SizeX * SizeZ];
             }
 
-            c_White = Enumerable.Repeat(new Color32(255, 255, 255, 255 / 2), Width * Height).ToArray();
+            c_White = Enumerable.Repeat(new Color32(255, 255, 255, 255 / 2), SizeX * SizeZ).ToArray();
             ClearColors();
         }
 
@@ -124,16 +124,16 @@ namespace MBaske.Sensors.Grid
         /// </summary>
         /// <param name="channel">The channel index</param>
         /// <param name="x">The x position of the cell</param>
-        /// <param name="y">The y position of the cell</param>
+        /// <param name="z">The y position of the cell</param>
         /// <param name="value">The value to write</param>
-        public override void Write(int channel, int x, int y, float value)
+        public override void Write(int channel, int x, int z, float value)
         {
-            base.Write(channel, x, y, value);
+            base.Write(channel, x, z, value);
 
             int layer = channel / 3;
             int color = channel - layer * 3;
             // Bottom to top, left to right.
-            m_Colors[layer][(Height - y - 1) * Width + x][color] = (byte)(value * 255);
+            m_Colors[layer][(SizeZ - z - 1) * SizeX + x][color] = (byte)(value * 255);
         }
 
         /// <inheritdoc/>

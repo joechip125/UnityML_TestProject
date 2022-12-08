@@ -35,7 +35,7 @@ namespace MBaske.Sensors.Grid
             // 0 - proximity lookup
             // 1 - kernel value (max, dilated area)
             // 2 - buffer value (max, dilated area)
-            m_AuxGrid = new GridBuffer(3, buffer.Width, buffer.Height);
+            m_AuxGrid = new GridBuffer(3, buffer.SizeX, buffer.SizeZ);
             m_Kernels = new List<Point>[c_MaxRadius];
 
             for (int radius = 1; radius <= c_MaxRadius; radius++)

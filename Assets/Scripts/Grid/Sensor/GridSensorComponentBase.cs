@@ -277,8 +277,8 @@ namespace MBaske.Sensors.Grid
         protected void UpdateGridSize(int width, int height)
         {
             var shape = GridShape;
-            shape.Width = width;
-            shape.Height = height;
+            shape.SizeX = width;
+            shape.SizeZ = height;
             GridShape = shape;
         }
 
@@ -286,7 +286,7 @@ namespace MBaske.Sensors.Grid
         {
             m_ObservationShape = string.Format("{0} channel{1} x {2} width x {3} height",
                     m_GridShape.NumChannels, m_GridShape.NumChannels == 1 ? "" : "s",
-                    m_GridShape.Width, m_GridShape.Height);
+                    m_GridShape.SizeX, m_GridShape.SizeZ);
         }
 
         #endregion

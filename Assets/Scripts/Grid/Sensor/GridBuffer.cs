@@ -24,33 +24,33 @@ namespace MBaske.Sensors.Grid
             /// <summary>
             /// The width of the grid.
             /// </summary>
-            public int Width;
+            public int SizeX;
 
             /// <summary>
             /// The height of the grid.
             /// </summary>
-            public int Height;
+            public int SizeZ;
 
             /// <summary>
             /// The grid size as Vector2Int.
             /// </summary>
             public Vector2Int Size
             {
-                get { return new Vector2Int(Width, Height); }
-                set { Width = value.x; Height = value.y; }
+                get { return new Vector2Int(SizeX, SizeZ); }
+                set { SizeX = value.x; SizeZ = value.y; }
             }
 
             /// <summary>
             /// Creates a <see cref="Shape"/> instance.
             /// </summary>
             /// <param name="numChannels">Number of grid channels</param>
-            /// <param name="width">Grid width</param>
-            /// <param name="height">Grid height</param>
-            public Shape(int numChannels, int width, int height)
+            /// <param name="sizeX">Grid width</param>
+            /// <param name="sizeZ">Grid height</param>
+            public Shape(int numChannels, int sizeX, int sizeZ)
             {
                 NumChannels = numChannels;
-                Width = width;
-                Height = height;
+                SizeX = sizeX;
+                SizeZ = sizeZ;
             }
 
             /// <summary>
@@ -71,20 +71,20 @@ namespace MBaske.Sensors.Grid
                     throw new UnityAgentsException("Grid buffer has no channels.");
                 }
 
-                if (Width < 1)
+                if (SizeX < 1)
                 {
-                    throw new UnityAgentsException("Invalid grid buffer width " + Width);
+                    throw new UnityAgentsException("Invalid grid buffer width " + SizeX);
                 }
 
-                if (Height < 1)
+                if (SizeZ < 1)
                 {
-                    throw new UnityAgentsException("Invalid grid buffer height " + Height);
+                    throw new UnityAgentsException("Invalid grid buffer height " + SizeZ);
                 }
             }
 
             public override string ToString()
             {
-                return $"Grid {NumChannels} x {Width} x {Height}";
+                return $"Grid {NumChannels} x {SizeX} x {SizeZ}";
             }
         }
 
@@ -94,7 +94,7 @@ namespace MBaske.Sensors.Grid
         /// <returns>Grid shape</returns>
         public Shape GetShape()
         {
-            return new Shape(m_NumChannels, m_Width, m_Height);
+            return new Shape(m_NumChannels, _mSizeX, _mSizeZ);
         }
 
         /// <summary>
@@ -110,32 +110,32 @@ namespace MBaske.Sensors.Grid
         /// <summary>
         /// The width of the grid.
         /// </summary>
-        public int Width
+        public int SizeX
         {
-            get { return m_Width; }
-            set { m_Width = value; Initialize(); }
+            get { return _mSizeX; }
+            set { _mSizeX = value; Initialize(); }
         }
-        private int m_Width;
+        private int _mSizeX;
 
         /// <summary>
         /// The height of the grid.
         /// </summary>
-        public int Height
+        public int SizeZ
         {
-            get { return m_Height; }
-            set { m_Height = value; Initialize(); }
+            get { return _mSizeZ; }
+            set { _mSizeZ = value; Initialize(); }
         }
-        private int m_Height;
+        private int _mSizeZ;
         
         // [channel][y * width + x]
         private float[][] m_Values;
 
      
-        public GridBuffer(int numChannels, int width, int height)
+        public GridBuffer(int numChannels, int sizeX, int sizeZ)
         {
             m_NumChannels = numChannels;
-            m_Width = width;
-            m_Height = height;
+            _mSizeX = sizeX;
+            _mSizeZ = sizeZ;
 
             Initialize();
         }
@@ -144,7 +144,7 @@ namespace MBaske.Sensors.Grid
             : this(numChannels, size.x, size.y) { }
         
         public GridBuffer(Shape shape)
-            : this(shape.NumChannels, shape.Width, shape.Height) { }
+            : this(shape.NumChannels, shape.SizeX, shape.SizeZ) { }
 
 
         protected virtual void Initialize()
@@ -153,7 +153,7 @@ namespace MBaske.Sensors.Grid
 
             for (int i = 0; i < NumChannels; i++)
             {
-                m_Values[i] = new float[Width * Height];
+                m_Values[i] = new float[SizeX * SizeZ];
             }
         }
 
@@ -196,11 +196,11 @@ namespace MBaske.Sensors.Grid
         /// </summary>
         /// <param name="channel">The cell's channel index</param>
         /// <param name="x">The cell's x position</param>
-        /// <param name="y">The cell's y position</param>
+        /// <param name="z">The cell's y position</param>
         /// <param name="value">The value to write</param>
-        public virtual void Write(int channel, int x, int y, float value)
+        public virtual void Write(int channel, int x, int z, float value)
         {
-            m_Values[channel][y * Width + x] = value;
+            m_Values[channel][z * SizeX + x] = value;
             //IsDirty = true;
         }
 
@@ -225,15 +225,15 @@ namespace MBaske.Sensors.Grid
         /// </summary>
         /// <param name="channel">The cell's channel index</param>
         /// <param name="x">The cell's x position</param>
-        /// <param name="y">The cell's y position</param>
+        /// <param name="z">The cell's y position</param>
         /// <param name="value">The value to write</param>
         /// <returns>True if the specified cell exists, false otherwise</returns>
-        public virtual bool TryWrite(int channel, int x, int y, float value)
+        public virtual bool TryWrite(int channel, int x, int z, float value)
         {
-            bool hasPosition = Contains(x, y);
+            bool hasPosition = Contains(x, z);
             if (hasPosition)
             {
-                Write(channel, x, y, value);
+                Write(channel, x, z, value);
             }
             return hasPosition;
         }
@@ -255,11 +255,11 @@ namespace MBaske.Sensors.Grid
         /// </summary>
         /// <param name="channel">The cell's channel index</param>
         /// <param name="x">The cell's x position</param>
-        /// <param name="y">The cell's y position</param>
+        /// <param name="z">The cell's y position</param>
         /// <returns>Float value of the specified cell</returns>
-        public virtual float Read(int channel, int x, int y)
+        public virtual float Read(int channel, int x, int z)
         {
-            return m_Values[channel][y * Width + x];
+            return m_Values[channel][z * SizeX + x];
         }
         
         public virtual float Read(int channel, int index)
@@ -293,6 +293,7 @@ namespace MBaske.Sensors.Grid
         public virtual float Read(int channel, Vector2Int pos)
         {
             return Read(channel, pos.x, pos.y);
+            //return Read(channel, pos.y, pos.x);
         }
 
         /// <summary>
@@ -330,7 +331,7 @@ namespace MBaske.Sensors.Grid
         /// <returns>True if the specified position exists, false otherwise</returns>
         public virtual bool Contains(int x, int y)
         {
-            return x >= 0 && x < Width && y >= 0 && y < Height;
+            return x >= 0 && x < SizeX && y >= 0 && y < SizeZ;
         }
 
         /// <summary>
@@ -351,8 +352,8 @@ namespace MBaske.Sensors.Grid
         public Vector2Int NormalizedToGridPos(Vector2 norm)
         {
             return new Vector2Int(
-                (int)(norm.x * Width),
-                (int)(norm.y * Height)
+                (int)(norm.x * SizeX),
+                (int)(norm.y * SizeZ)
             );
         }
 
@@ -364,10 +365,10 @@ namespace MBaske.Sensors.Grid
         public RectInt NormalizedToGridRect(Rect norm)
         {
             return new RectInt(
-                (int)(norm.xMin * Width),
-                (int)(norm.yMin * Height),
-                (int)(norm.width * Width),
-                (int)(norm.height * Height)
+                (int)(norm.xMin * SizeX),
+                (int)(norm.yMin * SizeZ),
+                (int)(norm.width * SizeX),
+                (int)(norm.height * SizeZ)
             );
         }
 

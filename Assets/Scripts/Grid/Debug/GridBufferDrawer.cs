@@ -46,7 +46,7 @@ namespace MBaske.Sensors.Grid
         {
             ChannelData = channelData;
             Buffer = buffer;
-            GridSizeRatio = buffer.Height / (float)buffer.Width;
+            GridSizeRatio = buffer.SizeZ / (float)buffer.SizeX;
 
             Context = context;
             m_RepaintOnFirstUpdate = true;
@@ -165,7 +165,7 @@ namespace MBaske.Sensors.Grid
                 if (draw)
                 {
                     CalcRects(rect);
-                    ValidateTexture(m_Target.Buffer.Width, m_Target.Buffer.Height);
+                    ValidateTexture(m_Target.Buffer.SizeX, m_Target.Buffer.SizeZ);
 
                     if (m_Target.ChannelData.HasGridPositions)
                     {
@@ -272,7 +272,7 @@ namespace MBaske.Sensors.Grid
             var channelData = m_Target.ChannelData;
             var buffer = m_Target.Buffer;
             int n = buffer.NumChannels;
-            int w = buffer.Width;
+            int w = buffer.SizeX;
 
             m_Pixels.CopyFrom(m_Black);
 
@@ -306,8 +306,8 @@ namespace MBaske.Sensors.Grid
             var channelData = m_Target.ChannelData;
             var buffer = m_Target.Buffer;
             int n = buffer.NumChannels;
-            int w = buffer.Width;
-            int h = buffer.Height;
+            int w = buffer.SizeX;
+            int h = buffer.SizeZ;
 
             m_Pixels.CopyFrom(m_Black);
 

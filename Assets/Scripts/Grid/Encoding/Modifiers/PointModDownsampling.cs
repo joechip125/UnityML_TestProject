@@ -16,8 +16,8 @@ namespace MBaske.Sensors.Grid
             base.Initialize(buffer);
 
             m_Samples = new float[
-                Mathf.CeilToInt(buffer.Width / 2f),
-                Mathf.CeilToInt(buffer.Height / 2f)];
+                Mathf.CeilToInt(buffer.SizeX / 2f),
+                Mathf.CeilToInt(buffer.SizeZ / 2f)];
         }
 
         /// <inheritdoc/>

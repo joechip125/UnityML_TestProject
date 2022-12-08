@@ -200,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 14981072}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 15.11, y: 19.66, z: 5.84}
+  m_LocalPosition: {x: 19.5, y: 25.02, z: 8.66}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -565,7 +565,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.27
+      value: -1.36
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.y
@@ -573,7 +573,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.41
+      value: -1.41
       objectReference: {fileID: 0}
     - target: {fileID: 4108373170441605180, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
       propertyPath: m_LocalRotation.w
@@ -653,8 +653,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GridShape:
     NumChannels: 3
-    Width: 20
-    Height: 20
+    SizeX: 20
+    SizeZ: 20
   m_SensorName: GridSensor
   m_ChannelLabels:
   - Name: Collectable
@@ -695,7 +695,7 @@ MonoBehaviour:
   m_MaskActions: 0
   m_LookDistance: 10
   m_RewardDecrement: 0.25
-  m_StepDuration: 0.1
+  m_StepDuration: 0.5
 --- !u!114 &1936667397
 MonoBehaviour:
   m_ObjectHideFlags: 0

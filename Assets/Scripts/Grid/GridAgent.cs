@@ -58,14 +58,14 @@ public class GridAgent : Agent
 
     [SerializeField]
     [Tooltip("The animation duration for every agent step at inference.")]
-    [Range(0, 0.5f)] 
-    private float m_StepDuration = 0.1f;
+    [Range(0, 2f)] 
+    private float m_StepDuration = 2f;
     private float m_StepTime;
 
     private StrategyGridSensorComponent sensorComp;
     private Vector3 m_CellCenterOffset;
-    private Vector3 gridSize = new Vector3(20, 1, 20);
-
+    private Vector3Int gridSize = new Vector3Int(20, 1, 20);
+    private int _currentIndex;
 
     private void Start()
     {
@@ -101,13 +101,42 @@ public class GridAgent : Agent
         return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.z)), Mathf.RoundToInt(Mathf.Abs(comb.x)));
     }
     
+    public int GetIntIndexFromPosition(Vector3 pos)
+    {
+        var comb = (transform.position - pos) - m_CellCenterOffset;
+        var perm = new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
+        var result = perm.x * gridSize.z + perm.y;
+        //Debug.Log($"{comb},{perm}, {result}");
+        return result;
+    }
+    
     public override void CollectObservations(VectorSensor sensor)
     {
+    }
+
+    private int NextDirection(int direction)
+    {
+        switch (direction)
+        {
+            case 1:
+                break;
+            case 2:
+                return _currentIndex + 1;
+            case 3:
+                return _currentIndex - 1;
+            case 4:
+                return _currentIndex + gridSize.z;
+            case 5:
+                return _currentIndex - gridSize.z;
+        }
+
+        return _currentIndex;
     }
     
     public override void OnEpisodeBegin()
     {
         unitStore ??= Controller._unitStore;
+        _currentIndex = 0;
         
         m_SensorBuffer.Clear();
         if (_taskComplete && !_taskAssigned)
@@ -117,6 +146,7 @@ public class GridAgent : Agent
         else if(_taskAssigned && !_taskComplete)
         {
             m_GridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
+            _currentIndex = GetIntIndexFromPosition(_currentUnit.unitPos);
             m_LocalPosNext = _currentUnit.unitPos;
         }
         
@@ -189,10 +219,11 @@ public class GridAgent : Agent
         bool isDone = false;
         var action = actions.DiscreteActions[0];
         m_LocalPosNext += new Vector3(m_Directions[action].x, 0,m_Directions[action].y);
-        
+
         if (m_ValidActions.Contains(action))
         {
             m_GridPosition += m_Directions[action];
+            //_currentIndex += NextDirection(action);
         
             isDone = ValidatePosition(true);
 

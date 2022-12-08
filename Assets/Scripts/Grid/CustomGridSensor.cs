@@ -15,8 +15,7 @@ public class CustomGridSensor : ISensor, IDisposable
     string m_Name;
 
     Vector3 m_CellScale;
-    
-    //string[] m_DetectableTags;
+  
     private List<ChannelLabel> _labels = new();
 
     SensorCompressionType m_CompressionType;
@@ -52,15 +51,15 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         m_Name = name;
         m_CellScale = cellScale;
-        //m_DetectableTags = detectableTags;
         CompressionType = compression;
         m_ExternalBuffer = externalBuffer;
         _labels = labels;
         
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
-        m_NumCells = m_GridBuffer.Height * m_GridBuffer.Width;
-        m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Height, m_GridBuffer.Width, m_GridBuffer.NumChannels, m_ObservationType);
+        m_NumCells = m_GridBuffer.SizeZ * m_GridBuffer.SizeX;
+        //m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.Width, m_GridBuffer.Height, m_GridBuffer.NumChannels, m_ObservationType);
+        m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, m_ObservationType);
         
         HandleCompressionType();
 
@@ -132,10 +131,12 @@ public class CustomGridSensor : ISensor, IDisposable
 
         if (m_CompressionType == SensorCompressionType.PNG)
         {
+            //m_PerceptionTexture = new Texture2D(
+            //    m_GridBuffer.Height, m_GridBuffer.Width, TextureFormat.RGB24, false);
             m_PerceptionTexture = new Texture2D(
-                m_GridBuffer.Width, m_GridBuffer.Height, TextureFormat.RGB24, false);
+                m_GridBuffer.SizeX, m_GridBuffer.SizeZ, TextureFormat.RGB24, false);
             m_CompressedObs = new List<byte>(
-                m_GridBuffer.Width * m_GridBuffer.Height * m_GridBuffer.NumChannels);
+                m_GridBuffer.SizeX * m_GridBuffer.SizeZ * m_GridBuffer.NumChannels);
         }
     }
 
@@ -194,8 +195,8 @@ public class CustomGridSensor : ISensor, IDisposable
     public int Write(ObservationWriter writer)
     {
         int numWritten = 0;
-        int w = m_GridBuffer.Width;
-        int h = m_GridBuffer.Height;
+        int w = m_GridBuffer.SizeX;
+        int h = m_GridBuffer.SizeZ;
         int n = m_GridBuffer.NumChannels;
     
         for (int c = 0; c < n; c++)
@@ -209,7 +210,6 @@ public class CustomGridSensor : ISensor, IDisposable
                 }
             }
         }
-    
         return numWritten;
     }
 
