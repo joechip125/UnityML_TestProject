@@ -9,15 +9,15 @@ public class OverlapChecker
 {
     Vector3 m_CellScale;
     
-    Vector3Int m_GridSize;
+    Vector3Int _mGridSize;
     
-    LayerMask m_ColliderMask;
+    LayerMask _mColliderMask;
     
     GameObject m_CenterObject;
 
     private List<ChannelLabel> _labels = new();
     
-    int m_InitialColliderBufferSize;
+    int _mInitialColliderBufferSize;
     
     int m_MaxColliderBufferSize;
 
@@ -27,9 +27,9 @@ public class OverlapChecker
     
     Vector3 m_CellCenterOffset;
     
-    Vector3[] m_CellLocalPositions;
+    Vector3[] _mCellLocalPositions;
     
-    Collider[] m_ColliderBuffer;
+    Collider[] _mColliderBuffer;
 
     public event Action<GameObject, int> GridOverlapDetectedAll;
     public event Action<GameObject, int> GridOverlapDetectedClosest;
@@ -45,10 +45,10 @@ public class OverlapChecker
         List<ChannelLabel> labels)
     {
         m_CellScale = cellScale;
-        m_GridSize = gridSize;
-        m_ColliderMask = colliderMask;
+        _mGridSize = gridSize;
+        _mColliderMask = colliderMask;
         m_CenterObject = centerObject;
-        m_InitialColliderBufferSize = initialColliderBufferSize;
+        _mInitialColliderBufferSize = initialColliderBufferSize;
         m_MaxColliderBufferSize = maxColliderBufferSize;
         _labels = labels;
 
@@ -56,15 +56,15 @@ public class OverlapChecker
         m_HalfCellScale = new Vector3(cellScale.x / 2f, cellScale.y, cellScale.z / 2f);
         m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
 
-        m_ColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, m_InitialColliderBufferSize)];
+        _mColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, _mInitialColliderBufferSize)];
         
         InitCellLocalPositions();
     }
     
     public LayerMask ColliderMask
     {
-        get { return m_ColliderMask; }
-        set { m_ColliderMask = value; }
+        get { return _mColliderMask; }
+        set { _mColliderMask = value; }
     }
 
     /// <summary>
@@ -72,11 +72,11 @@ public class OverlapChecker
     /// </summary>
     void InitCellLocalPositions()
     {
-        m_CellLocalPositions = new Vector3[m_NumCells];
+        _mCellLocalPositions = new Vector3[m_NumCells];
 
         for (int i = 0; i < m_NumCells; i++)
         {
-            m_CellLocalPositions[i] = GetCellLocalPosition(i);
+            _mCellLocalPositions[i] = GetCellLocalPosition(i);
         }
     }
     
@@ -85,8 +85,8 @@ public class OverlapChecker
     /// <param name="cellIndex">The index of the cell</param>
     public Vector3 GetCellLocalPosition(int cellIndex)
     {
-        float z = (cellIndex / m_GridSize.z - m_CellCenterOffset.x) * m_CellScale.z;
-        float x = (cellIndex % m_GridSize.z - m_CellCenterOffset.z) * m_CellScale.x;
+        float z = (cellIndex / _mGridSize.z - m_CellCenterOffset.x) * m_CellScale.z;
+        float x = (cellIndex % _mGridSize.z - m_CellCenterOffset.z) * m_CellScale.x;
         //float x = (cellIndex / m_GridSize.z - m_CellCenterOffset.x) * m_CellScale.x;
         //float z = (cellIndex % m_GridSize.z - m_CellCenterOffset.z) * m_CellScale.z;
         return new Vector3(x, 0, z);
@@ -95,7 +95,7 @@ public class OverlapChecker
     
     internal Vector3 GetCellGlobalPosition(int cellIndex)
     {
-        return m_CellLocalPositions[cellIndex] + m_CenterObject.transform.position;
+        return _mCellLocalPositions[cellIndex] + m_CenterObject.transform.position;
     }
     
     /// <summary>
@@ -111,11 +111,11 @@ public class OverlapChecker
 
             if (GridOverlapDetectedAll != null)
             {
-                ParseCollidersAll(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedAll);
+                ParseCollidersAll(_mColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedAll);
             }
             if (GridOverlapDetectedClosest != null)
             { 
-                ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
+                ParseCollidersClosest(_mColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedClosest);
             }
         }
     }
@@ -129,7 +129,7 @@ public class OverlapChecker
             var cellCenter = GetCellGlobalPosition(cellIndex);
             var numFound = BufferResizingOverlapBoxNonAlloc(cellCenter, m_HalfCellScale);
 
-            ParseCollidersClosest(m_ColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebugGridBuffer);
+            ParseCollidersClosest(_mColliderBuffer, numFound, cellIndex, cellCenter, GridOverlapDetectedDebugGridBuffer);
         }
 
     }
@@ -141,11 +141,11 @@ public class OverlapChecker
             // until we're sure we can hold them all (or until we hit the max size).
             while (true)
             {
-                numFound = Physics.OverlapBoxNonAlloc(cellCenter, halfCellScale, m_ColliderBuffer, Quaternion.identity, m_ColliderMask);
-                if (numFound == m_ColliderBuffer.Length && m_ColliderBuffer.Length < m_MaxColliderBufferSize)
+                numFound = Physics.OverlapBoxNonAlloc(cellCenter, halfCellScale, _mColliderBuffer, Quaternion.identity, _mColliderMask);
+                if (numFound == _mColliderBuffer.Length && _mColliderBuffer.Length < m_MaxColliderBufferSize)
                 {
-                    m_ColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, m_ColliderBuffer.Length * 2)];
-                    m_InitialColliderBufferSize = m_ColliderBuffer.Length;
+                    _mColliderBuffer = new Collider[Math.Min(m_MaxColliderBufferSize, _mColliderBuffer.Length * 2)];
+                    _mInitialColliderBufferSize = _mColliderBuffer.Length;
                 }
                 else
                 {

@@ -9,154 +9,151 @@ using UnityEngine;
 public class StrategyGridSensorComponent : SensorComponent
 {
     // dummy sensor only used for debug gizmo
-    CustomGridSensor m_DebugSensor;
+    CustomGridSensor _mDebugSensor;
     
-    List<CustomGridSensor> m_Sensors;
+    List<CustomGridSensor> _mSensors;
     
-    internal OverlapChecker m_BoxOverlapChecker;
+    internal OverlapChecker MBoxOverlapChecker;
     
     public ColorGridBuffer GridBuffer
     {
-        get { return m_GridBuffer; }
-        set { m_GridBuffer = value; GridShape = value.GetShape(); }
+        get { return _mGridBuffer; }
+        set { _mGridBuffer = value; GridShape = value.GetShape(); }
     }
-    private ColorGridBuffer m_GridBuffer;
+    private ColorGridBuffer _mGridBuffer;
 
     public ColorGridBuffer ExternalBuffer;
     
     public GridBuffer.Shape GridShape
     {
-        get => m_GridShape;
-        set => m_GridShape = value;
+        get => mGridShape;
+        set => mGridShape = value;
     }
     [SerializeField]
-    private GridBuffer.Shape m_GridShape;
+    private GridBuffer.Shape mGridShape;
     
    
     [SerializeField]
-    protected internal string m_SensorName = "GridSensor";
+    protected internal string mSensorName = "GridSensor";
     public string SensorName
     {
-        get { return m_SensorName; }
-        set { m_SensorName = value; }
+        get { return mSensorName; }
+        set { mSensorName = value; }
     }
 
-    public List<ChannelLabel> ChannelLabels => m_ChannelLabels;
+    public List<ChannelLabel> ChannelLabels => mChannelLabels;
 
     [SerializeField]
-    protected List<ChannelLabel> m_ChannelLabels;
+    protected List<ChannelLabel> mChannelLabels;
 
     [SerializeField]
-    internal Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
+    internal Vector3 mCellScale = new Vector3(1f, 0.01f, 1f);
     
     public Vector3Int GridSize
     {
-        get { return m_GridSize; }
+        get { return mGridSize; }
         set
         {
             if (value.y != 1)
             {
-                m_GridSize = new Vector3Int(value.x, 1, value.z);
+                mGridSize = new Vector3Int(value.x, 1, value.z);
             }
             else
             {
-                m_GridSize = value;
+                mGridSize = value;
             }
         }
     }
 
     [SerializeField]
-    internal Vector3Int m_GridSize = new Vector3Int(20, 1, 20);
+    internal Vector3Int mGridSize = new Vector3Int(20, 1, 20);
     
     [SerializeField]
-    internal LayerMask m_ColliderMask;
+    internal LayerMask mColliderMask;
     
     [SerializeField]
-    internal int m_MaxColliderBufferSize = 500;
+    internal int mMaxColliderBufferSize = 500;
     
     [SerializeField]
-    internal int m_InitialColliderBufferSize = 4;
+    internal int mInitialColliderBufferSize = 4;
     
     [SerializeField]
-    internal float m_GizmoYOffset = 0f;
-    
-    [SerializeField]
-    internal bool m_ShowGizmos = false;
+    internal bool mShowGizmos = false;
 
     [SerializeField]
-    internal SensorCompressionType m_CompressionType = SensorCompressionType.PNG;
+    internal SensorCompressionType mCompressionType = SensorCompressionType.PNG;
     public SensorCompressionType CompressionType
     {
-        get { return m_CompressionType; }
-        set { m_CompressionType = value; UpdateSensor(); }
+        get => mCompressionType;
+        set { mCompressionType = value; UpdateSensor(); }
     }
 
     [SerializeField]
     [Range(1, 50)]
     [Tooltip("Number of frames of observations that will be stacked before being fed to the neural network.")]
-    internal int m_ObservationStacks = 1;
+    internal int mObservationStacks = 1;
 
-    [SerializeField] private int TotalNumberChannels = 3;
+    [SerializeField] private int totalNumberChannels = 3;
 
     public int ObservationStacks
     {
-        get { return m_ObservationStacks; }
-        set { m_ObservationStacks = value; }
+        get => mObservationStacks;
+        set => mObservationStacks = value;
     }
     
     /// <inheritdoc/>
     public override ISensor[] CreateSensors()
     {
-        m_BoxOverlapChecker = new OverlapChecker(
-            m_CellScale,
-            m_GridSize,
-            m_ColliderMask,
+        MBoxOverlapChecker = new OverlapChecker(
+            mCellScale,
+            mGridSize,
+            mColliderMask,
             gameObject,
-            m_InitialColliderBufferSize,
-            m_MaxColliderBufferSize,
-            m_ChannelLabels
+            mInitialColliderBufferSize,
+            mMaxColliderBufferSize,
+            mChannelLabels
         );
 
-        m_GridBuffer = new ColorGridBuffer(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
-        m_GridShape = new GridBuffer.Shape(TotalNumberChannels, m_GridSize.x, m_GridSize.z);
+        _mGridBuffer = new ColorGridBuffer(totalNumberChannels, mGridSize.x, mGridSize.z);
+        mGridShape = new GridBuffer.Shape(totalNumberChannels, mGridSize.x, mGridSize.z);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        m_DebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, m_GridBuffer, ExternalBuffer, ChannelLabels);
-        m_BoxOverlapChecker.RegisterDebugSensor(m_DebugSensor);
+        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ExternalBuffer, ChannelLabels);
+        MBoxOverlapChecker.RegisterDebugSensor(_mDebugSensor);
     
-        m_Sensors = GetGridSensors().ToList();
-        if (m_Sensors == null || m_Sensors.Count < 1)
+        _mSensors = GetGridSensors().ToList();
+        if (_mSensors == null || _mSensors.Count < 1)
         {
             throw new UnityAgentsException("GridSensorComponent received no sensors. Specify at least one observation type (OneHot/Counting) to use grid sensors." +
                 "If you're overriding GridSensorComponent.GetGridSensors(), return at least one grid sensor.");
         }
     
         // Only one sensor needs to reference the boxOverlapChecker, so that it gets updated exactly once
-        m_Sensors[0].m_BoxOverlapChecker = m_BoxOverlapChecker;
-        foreach (var sensor in m_Sensors)
+        _mSensors[0].m_BoxOverlapChecker = MBoxOverlapChecker;
+        foreach (var sensor in _mSensors)
         {
-            m_BoxOverlapChecker.RegisterSensor(sensor);
+            MBoxOverlapChecker.RegisterSensor(sensor);
         }
     
         if (ObservationStacks != 1)
         {
-            var sensors = new ISensor[m_Sensors.Count];
-            for (var i = 0; i < m_Sensors.Count; i++)
+            var sensors = new ISensor[_mSensors.Count];
+            for (var i = 0; i < _mSensors.Count; i++)
             {
-                sensors[i] = new StackingSensor(m_Sensors[i], ObservationStacks);
+                sensors[i] = new StackingSensor(_mSensors[i], ObservationStacks);
             }
             return sensors;
         }
         else
         {
-            return m_Sensors.ToArray();
+            return _mSensors.ToArray();
         }
     }
     
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(m_SensorName, m_CompressionType, m_GridBuffer, ExternalBuffer, ChannelLabels);
+        var sensor = new CustomGridSensor(mSensorName, mCompressionType, _mGridBuffer, ExternalBuffer, ChannelLabels);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
@@ -166,35 +163,34 @@ public class StrategyGridSensorComponent : SensorComponent
     /// </summary>
     internal void UpdateSensor()
     {
-        if (m_Sensors == null) return;
+        if (_mSensors == null) return;
         
-        m_BoxOverlapChecker.ColliderMask = m_ColliderMask;
-        foreach (var sensor in m_Sensors)
+        MBoxOverlapChecker.ColliderMask = mColliderMask;
+        foreach (var sensor in _mSensors)
         {
-            sensor.CompressionType = m_CompressionType;
+            sensor.CompressionType = mCompressionType;
         }
     }
     
     void OnDrawGizmos()
     {
-        if (!m_ShowGizmos) return;
-        if (m_BoxOverlapChecker == null || m_DebugSensor == null)
+        if (!mShowGizmos) return;
+        if (MBoxOverlapChecker == null || _mDebugSensor == null)
         {
             return;
         }
         
-        m_DebugSensor.ResetGridBuffer();
-        m_BoxOverlapChecker.UpdateGizmo();
-        var num = m_GridSize.x * m_GridSize.z;
-        var gizmoYOffset = new Vector3(0, m_GizmoYOffset, 0);
+        _mDebugSensor.ResetGridBuffer();
+        MBoxOverlapChecker.UpdateGizmo();
+        var num = mGridSize.x * mGridSize.z;
         for (var i = 0; i < num; i++)
         {
-            var cellPosition = m_BoxOverlapChecker.GetCellGlobalPosition(i);
+            var cellPosition = MBoxOverlapChecker.GetCellGlobalPosition(i);
             var debugRayColor = Color.white;
 
-            if (m_GridBuffer.ReadAll(i, out var channel, out var value))
+            if (_mGridBuffer.ReadAll(i, out var channel, out var value))
             {
-                debugRayColor =m_ChannelLabels[(int) channel].Color;
+                debugRayColor =mChannelLabels[(int) channel].Color;
             }
             
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);

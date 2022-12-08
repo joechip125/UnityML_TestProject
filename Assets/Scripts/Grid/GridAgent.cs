@@ -13,7 +13,7 @@ public class GridAgent : Agent
 {
     public event Action EpisodeBegin;
     
-    public Controller Controller;
+    public Controller controller;
 
     public UnitStore unitStore;
     private UnitValues _currentUnit;
@@ -21,51 +21,43 @@ public class GridAgent : Agent
     [SerializeField]
     [Tooltip("Select to enable action masking. Note that a model trained with action " +
              "masking turned on may not behave optimally when action masking is turned off.")]
-    private bool m_MaskActions;
+    private bool mMaskActions;
 
-    private const int c_Stay = 0; 
-    private const int c_Up = 1;
-    private const int c_Down = 2;
-    private const int c_Right = 3;
-    private const int c_Left = 4;
+    private const int CStay = 0; 
+    private const int CUp = 1;
+    private const int CDown = 2;
+    private const int CRight = 3;
+    private const int CLeft = 4;
 
-    private ColorGridBuffer m_SensorBuffer;
-    private ColorGridBuffer m_ReadBuffer;
+    private ColorGridBuffer _mSensorBuffer;
+    private ColorGridBuffer _mReadBuffer;
 
     // Current agent position on grid.
-    private Vector2Int m_GridPosition;
-    private Vector3 m_LocalPosNext;
-    private Vector3 m_LocalPosPrev;
-    private List<int> m_ValidActions;
-    private Vector2Int[] m_Directions;
+    private Vector2Int _mGridPosition;
+    private Vector3 _mLocalPosNext;
+    private Vector3 _mLocalPosPrev;
+    private List<int> _mValidActions;
+    private Vector2Int[] _mDirections;
         
-    private bool m_IsTraining;
+    private bool _mIsTraining;
     // Whether the agent is currently requesting decisions.
     // Agent is inactive during animation at inference.
-    private bool m_IsActive;
+    private bool _mIsActive;
     private bool _taskComplete;
     private bool _taskAssigned;
     
     [SerializeField]
-    private int m_LookDistance = 10;
-
-    [SerializeField]
-    [Tooltip("Amount by which rewards diminish for staying on, or repeat visits to grid " +
-             "positions. Initial reward is 0.5 for every move onto a position the agent hasn't" +
-             "visited before. Episodes end when rewards drop to -0.5 on any position.")]
     [Range(0, 1)] 
-    private float m_RewardDecrement = 0.25f;
+    private float mRewardDecrement = 0.25f;
 
     [SerializeField]
-    [Tooltip("The animation duration for every agent step at inference.")]
     [Range(0, 2f)] 
-    private float m_StepDuration = 2f;
-    private float m_StepTime;
+    private float mStepDuration = 2f;
+    private float _mStepTime;
 
-    private StrategyGridSensorComponent sensorComp;
-    private Vector3 m_CellCenterOffset;
-    private Vector3Int gridSize = new Vector3Int(20, 1, 20);
-    private int _currentIndex;
+    private StrategyGridSensorComponent _sensorComp;
+    private Vector3 _mCellCenterOffset;
+    private Vector3Int _gridSize = new Vector3Int(20, 1, 20);
 
     private void Start()
     {
@@ -74,13 +66,13 @@ public class GridAgent : Agent
 
     public override void Initialize()
     {
-        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
+        _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
         _taskComplete = true;
         _taskAssigned = false;
-        m_IsTraining = Academy.Instance.IsCommunicatorOn;
-        m_ValidActions = new List<int>(5);
+        _mIsTraining = Academy.Instance.IsCommunicatorOn;
+        _mValidActions = new List<int>(5);
 
-        m_Directions = new Vector2Int[]
+        _mDirections = new Vector2Int[]
         {
             Vector2Int.zero,
             Vector2Int.up,
@@ -89,86 +81,64 @@ public class GridAgent : Agent
             Vector2Int.right
         };
         
-        m_SensorBuffer = new ColorGridBuffer(3, 20, 20);
+        _mSensorBuffer = new ColorGridBuffer(3, 20, 20);
 
-        sensorComp = GetComponent<StrategyGridSensorComponent>();
-        sensorComp.ExternalBuffer = m_SensorBuffer;
+        _sensorComp = GetComponent<StrategyGridSensorComponent>();
+        _sensorComp.ExternalBuffer = _mSensorBuffer;
     }
     
     public Vector2Int GetCellIndexFromPosition(Vector3 pos)
     {
-        var comb = (transform.position - pos) - m_CellCenterOffset;
+        var comb = (transform.position - pos) - _mCellCenterOffset;
         return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
     }
     
     public int GetIntIndexFromPosition(Vector3 pos)
     {
-        var comb = (transform.position - pos) - m_CellCenterOffset;
+        var comb = (transform.position - pos) - _mCellCenterOffset;
         var perm = new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
-        var result = perm.x * gridSize.z + perm.y;
-        //Debug.Log($"{comb},{perm}, {result}");
+        var result = perm.x * _gridSize.z + perm.y;
         return result;
     }
     
     public override void CollectObservations(VectorSensor sensor)
     {
     }
-
-    private int NextDirection(int direction)
-    {
-        switch (direction)
-        {
-            case 1:
-                break;
-            case 2:
-                return _currentIndex + 1;
-            case 3:
-                return _currentIndex - 1;
-            case 4:
-                return _currentIndex + gridSize.z;
-            case 5:
-                return _currentIndex - gridSize.z;
-        }
-
-        return _currentIndex;
-    }
     
     public override void OnEpisodeBegin()
     {
-        unitStore ??= Controller._unitStore;
-        _currentIndex = 0;
-        
-        m_SensorBuffer.Clear();
+        unitStore ??= controller._unitStore;
+
+        _mSensorBuffer.Clear();
         if (_taskComplete && !_taskAssigned)
         {
             TryGetTask();
         }
         else if(_taskAssigned && !_taskComplete)
         {
-            m_GridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
-            _currentIndex = GetIntIndexFromPosition(_currentUnit.unitPos);
-            m_LocalPosNext = _currentUnit.unitPos;
+            _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
+            _mLocalPosNext = _currentUnit.unitPos;
         }
         
-        m_StepTime = 0;
+        _mStepTime = 0;
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        m_ValidActions.Clear();
-        m_ValidActions.Add(c_Stay);
+        _mValidActions.Clear();
+        _mValidActions.Add(CStay);
         
         for (int action = 1; action < 5; action++)
         {
-            bool isValid = m_SensorBuffer.Contains( 
-                m_GridPosition.x + m_Directions[action].x,
-                m_GridPosition.y + m_Directions[action].y);
+            bool isValid = _mSensorBuffer.Contains( 
+                _mGridPosition.x + _mDirections[action].x,
+                _mGridPosition.y + _mDirections[action].y);
 
             if (isValid)
             {
-                m_ValidActions.Add(action);
+                _mValidActions.Add(action);
             }
-            else if (m_MaskActions)
+            else if (mMaskActions)
             {
                 actionMask.SetActionEnabled(0, action, false);
             }
@@ -178,20 +148,20 @@ public class GridAgent : Agent
     private bool ValidatePosition(bool rewardAgent)
     {
         // From 0 to +1. 
-        float visitValue = m_SensorBuffer.Read(2, m_GridPosition);
+        float visitValue = _mSensorBuffer.Read(2, _mGridPosition);
         
-        m_SensorBuffer.Write(2, m_GridPosition,
-            Mathf.Min(1, visitValue + m_RewardDecrement));
+        _mSensorBuffer.Write(2, _mGridPosition,
+            Mathf.Min(1, visitValue + mRewardDecrement));
         
         if (rewardAgent)
         {
             // From +0.5 to -0.5.
             AddReward(0.5f - visitValue);
 
-            if (sensorComp.GridBuffer.Read(0, m_GridPosition) > 0f)
+            if (_sensorComp.GridBuffer.Read(0, _mGridPosition) > 0f)
             {
-                Debug.Log(m_GridPosition);
-                Debug.Log(m_LocalPosNext);
+                Debug.Log(_mGridPosition);
+                Debug.Log(_mLocalPosNext);
                 TaskCompleted();
             }
         }
@@ -207,7 +177,7 @@ public class GridAgent : Agent
 
     private void TaskCompleted()
     {
-        _currentUnit.CallBack.Invoke(m_LocalPosNext);
+        _currentUnit.CallBack.Invoke(_mLocalPosNext);
         _taskComplete = true;
         _taskAssigned = false;
         AddReward(1);
@@ -218,13 +188,12 @@ public class GridAgent : Agent
     {
         bool isDone = false;
         var action = actions.DiscreteActions[0];
-        m_LocalPosNext += new Vector3(m_Directions[action].x, 0,m_Directions[action].y);
+        _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
 
-        if (m_ValidActions.Contains(action))
+        if (_mValidActions.Contains(action))
         {
-            m_GridPosition += m_Directions[action];
-            //_currentIndex += NextDirection(action);
-        
+            _mGridPosition += _mDirections[action];
+            
             isDone = ValidatePosition(true);
 
             if (isDone)
@@ -241,7 +210,7 @@ public class GridAgent : Agent
         
         if (_taskComplete && _taskAssigned)
         {
-            _currentUnit.CallBack.Invoke(m_LocalPosNext);
+            _currentUnit.CallBack.Invoke(_mLocalPosNext);
             EndEpisode();
         }
     }
@@ -264,37 +233,38 @@ public class GridAgent : Agent
             EndEpisode();
         }
         
-        if (m_IsActive && _taskAssigned)
+        if (_mIsActive && _taskAssigned)
         {
+            _mStepTime = 0;
             RequestDecision();
         }
-        else if (m_StepDuration > 0)
+        else if (mStepDuration > 0)
         {
-            m_StepTime += Time.fixedDeltaTime;
-            m_IsActive = m_StepTime >= m_StepDuration;
+            _mStepTime += Time.fixedDeltaTime;
+            _mIsActive = _mStepTime >= mStepDuration;
         }
     }
     
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
-        discreteActionsOut[0] = c_Stay;
+        discreteActionsOut[0] = CStay;
 
         if (Input.GetKey(KeyCode.D))
         {
-            discreteActionsOut[0] = c_Right;
+            discreteActionsOut[0] = CRight;
         }
         if (Input.GetKey(KeyCode.W))
         {
-            discreteActionsOut[0] = c_Up;
+            discreteActionsOut[0] = CUp;
         }
         if (Input.GetKey(KeyCode.A))
         {
-            discreteActionsOut[0] = c_Left;
+            discreteActionsOut[0] = CLeft;
         }
         if (Input.GetKey(KeyCode.S))
         {
-            discreteActionsOut[0] = c_Down;
+            discreteActionsOut[0] = CDown;
         }
     }
 }
