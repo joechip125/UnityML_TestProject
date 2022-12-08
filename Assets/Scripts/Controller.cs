@@ -38,14 +38,18 @@ namespace DefaultNamespace
         public UnitStore _unitStore;
         public GridAgent agent;
         public SpawnArea spawnArea;
+        public GameObject Collector;
+        
 
         private void Awake()
         {
             agent.unitStore = _unitStore;
-            agent.EpisodeBegin += OnEpisodeBegin;
+            agent.EpisodeBegin += OnResetArea;
         }
 
-        private void OnEpisodeBegin()
+        
+        
+        private void OnResetArea()
         {
             spawnArea.RespawnCollection();
         }
@@ -66,7 +70,7 @@ namespace DefaultNamespace
         
         private void OnApplicationQuit()
         {
-            agent.EpisodeBegin -= OnEpisodeBegin;
+            agent.EpisodeBegin -= OnResetArea;
             foreach (var u in _units)
             {
                 u.NeedDirectionEvent -= OnDirectionNeeded;

@@ -460,6 +460,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 1936667396}
   spawnArea: {fileID: 800677293}
+  Collector: {fileID: 0}
 --- !u!114 &800677293 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 340427973565806491, guid: 18c1744f47c35a246b63c139126fd096, type: 3}
@@ -651,7 +652,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_GridShape:
-    NumChannels: 4
+    NumChannels: 3
     Width: 20
     Height: 20
   m_SensorName: GridSensor
@@ -662,8 +663,6 @@ MonoBehaviour:
     Color: {r: 0.8301887, g: 0.016409677, b: 0, a: 0}
   - Name: Visited
     Color: {r: 0.6554808, g: 0, b: 0.83137256, a: 0}
-  - Name: Collector
-    Color: {r: 0.28864408, g: 0.2756853, b: 0.6037736, a: 0}
   m_CellScale: {x: 1, y: 0.01, z: 1}
   m_GridSize: {x: 20, y: 1, z: 20}
   m_ColliderMask:
@@ -675,7 +674,7 @@ MonoBehaviour:
   m_ShowGizmos: 1
   m_CompressionType: 1
   m_ObservationStacks: 1
-  TotalNumberChannels: 4
+  TotalNumberChannels: 3
 --- !u!114 &1936667396
 MonoBehaviour:
   m_ObjectHideFlags: 0

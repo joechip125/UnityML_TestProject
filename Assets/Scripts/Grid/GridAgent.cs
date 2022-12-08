@@ -63,9 +63,18 @@ public class GridAgent : Agent
     private float m_StepTime;
 
     private StrategyGridSensorComponent sensorComp;
+    private Vector3 m_CellCenterOffset;
+    private Vector3 gridSize = new Vector3(20, 1, 20);
+
+
+    private void Start()
+    {
+        EpisodeBegin?.Invoke();
+    }
 
     public override void Initialize()
     {
+        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
         _taskComplete = true;
         _taskAssigned = false;
         m_IsTraining = Academy.Instance.IsCommunicatorOn;
@@ -80,10 +89,17 @@ public class GridAgent : Agent
             Vector2Int.right
         };
         
-        m_SensorBuffer = new ColorGridBuffer(5, 20, 20);
+        m_SensorBuffer = new ColorGridBuffer(3, 20, 20);
 
         sensorComp = GetComponent<StrategyGridSensorComponent>();
         sensorComp.ExternalBuffer = m_SensorBuffer;
+    }
+    
+    public Vector2Int GetCellIndexFromPosition(Vector3 pos)
+    {
+        Debug.Log(transform.position - pos);
+        return new Vector2Int(Mathf.RoundToInt(pos.x - m_CellCenterOffset.x),
+            Mathf.RoundToInt(pos.z - m_CellCenterOffset.z));
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -92,30 +108,23 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
-        EpisodeBegin?.Invoke();
-
         unitStore ??= Controller._unitStore;
-        m_ReadBuffer ??= GetComponent<StrategyGridSensorComponent>().GridBuffer;
-
+        
         m_SensorBuffer.Clear();
-        if (_taskComplete)
+        if (_taskComplete && !_taskAssigned)
         {
             TryGetTask();
         }
-        else
+        else if(_taskAssigned && !_taskComplete)
         {
-          //  m_GridPosition = GetIndexFromPosition(_currentUnit.unitPos);
-          //  m_LocalPosNext = _currentUnit.unitPos;
+            m_GridPosition = new Vector2Int();
+            Debug.Log(GetCellIndexFromPosition(_currentUnit.unitPos));
+            m_LocalPosNext = _currentUnit.unitPos;
         }
         
         m_StepTime = 0;
     }
 
-    private Vector2Int GetIndexFromPosition(Vector3 pos)
-    {
-        return m_SensorBuffer.NormalizedToGridPos(new Vector2(pos.x, pos.z).normalized);
-    }
-    
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         m_ValidActions.Clear();
@@ -123,9 +132,9 @@ public class GridAgent : Agent
         
         for (int action = 1; action < 5; action++)
         {
-            bool isValid = m_SensorBuffer.TryRead(MyGrid.Wall, 
-                m_GridPosition + m_Directions[action],
-                out float value) && value == 0; // no wall
+            bool isValid = m_SensorBuffer.Contains( 
+                m_GridPosition.x + m_Directions[action].x,
+                m_GridPosition.y + m_Directions[action].y);
 
             if (isValid)
             {
@@ -175,11 +184,11 @@ public class GridAgent : Agent
         bool isDone = false;
         var action = actions.DiscreteActions[0];
         m_LocalPosNext += new Vector3(m_Directions[action].x, 0,m_Directions[action].y);
-
+        
         if (m_ValidActions.Contains(action))
         {
             m_GridPosition += m_Directions[action];
-
+        
             isDone = ValidatePosition(true);
         }
         
@@ -208,6 +217,12 @@ public class GridAgent : Agent
     
     private void FixedUpdate()
     {
+        if (_taskComplete && !_taskAssigned)
+        {
+            TryGetTask();
+            EndEpisode();
+        }
+        
         if (m_IsActive)
         {
             RequestDecision();
