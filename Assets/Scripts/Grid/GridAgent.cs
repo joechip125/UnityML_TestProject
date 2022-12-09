@@ -21,7 +21,7 @@ public class GridAgent : Agent
     [SerializeField]
     [Tooltip("Select to enable action masking. Note that a model trained with action " +
              "masking turned on may not behave optimally when action masking is turned off.")]
-    private bool mMaskActions;
+    private bool maskActions;
 
     private const int CStay = 0; 
     private const int CUp = 1;
@@ -48,11 +48,11 @@ public class GridAgent : Agent
     
     [SerializeField]
     [Range(0, 1)] 
-    private float mRewardDecrement = 0.25f;
+    private float rewardDecrement = 0.25f;
 
     [SerializeField]
     [Range(0, 2f)] 
-    private float mStepDuration = 2f;
+    private float stepDuration = 2f;
     private float _mStepTime;
 
     private StrategyGridSensorComponent _sensorComp;
@@ -66,9 +66,18 @@ public class GridAgent : Agent
 
     public override void Initialize()
     {
+        _sensorComp = GetComponent<StrategyGridSensorComponent>();
+        
+        _mSensorBuffer = new ColorGridBuffer(3, 20, 20);
+
+        _sensorComp.ExternalBuffer = _mSensorBuffer;
+        
+        _gridSize = _sensorComp.gridSize;
         _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
+        
         _taskComplete = true;
         _taskAssigned = false;
+        
         _mIsTraining = Academy.Instance.IsCommunicatorOn;
         _mValidActions = new List<int>(5);
 
@@ -80,11 +89,6 @@ public class GridAgent : Agent
             Vector2Int.left,
             Vector2Int.right
         };
-        
-        _mSensorBuffer = new ColorGridBuffer(3, 20, 20);
-
-        _sensorComp = GetComponent<StrategyGridSensorComponent>();
-        _sensorComp.ExternalBuffer = _mSensorBuffer;
     }
     
     public Vector2Int GetCellIndexFromPosition(Vector3 pos)
@@ -138,7 +142,7 @@ public class GridAgent : Agent
             {
                 _mValidActions.Add(action);
             }
-            else if (mMaskActions)
+            else if (maskActions)
             {
                 actionMask.SetActionEnabled(0, action, false);
             }
@@ -151,7 +155,7 @@ public class GridAgent : Agent
         float visitValue = _mSensorBuffer.Read(2, _mGridPosition);
         
         _mSensorBuffer.Write(2, _mGridPosition,
-            Mathf.Min(1, visitValue + mRewardDecrement));
+            Mathf.Min(1, visitValue + rewardDecrement));
         
         if (rewardAgent)
         {
@@ -238,10 +242,10 @@ public class GridAgent : Agent
             _mStepTime = 0;
             RequestDecision();
         }
-        else if (mStepDuration > 0)
+        else if (stepDuration > 0)
         {
             _mStepTime += Time.fixedDeltaTime;
-            _mIsActive = _mStepTime >= mStepDuration;
+            _mIsActive = _mStepTime >= stepDuration;
         }
     }
     

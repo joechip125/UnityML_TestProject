@@ -636,7 +636,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1936667393}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 7.18, y: 0.5, z: 6.02}
+  m_LocalPosition: {x: 5, y: 0.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -655,30 +655,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19b8c0d9cde88d54dad10e8670baa4b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_GridShape:
+  gridShape:
     NumChannels: 3
     SizeX: 20
     SizeZ: 20
-  m_SensorName: GridSensor
-  m_ChannelLabels:
+  sensorName: GridSensor
+  channelLabels:
   - Name: Collectable
-    Color: {r: 0.025072694, g: 1, b: 0, a: 0}
+    Color: {r: 0.025457732, g: 0.7924528, b: 0, a: 0}
   - Name: Poison
-    Color: {r: 0.8301887, g: 0.016409677, b: 0, a: 0}
+    Color: {r: 0.9245283, g: 0, b: 0, a: 0}
   - Name: Visited
-    Color: {r: 0.6554808, g: 0, b: 0.83137256, a: 0}
-  m_CellScale: {x: 1, y: 0.01, z: 1}
-  m_GridSize: {x: 20, y: 1, z: 20}
-  m_ColliderMask:
+    Color: {r: 0.66139144, g: 0.06664292, b: 0.6792453, a: 0}
+  cellScale: {x: 1, y: 0.01, z: 1}
+  gridSize: {x: 20, y: 1, z: 20}
+  colliderMask:
     serializedVersion: 2
     m_Bits: 2147483647
-  m_MaxColliderBufferSize: 500
-  m_InitialColliderBufferSize: 4
-  m_GizmoYOffset: 0
-  m_ShowGizmos: 1
-  m_CompressionType: 1
-  m_ObservationStacks: 1
-  TotalNumberChannels: 3
+  maxColliderBufferSize: 500
+  initialColliderBufferSize: 4
+  showGizmos: 1
+  compressionType: 1
+  observationStacks: 1
+  totalNumberChannels: 3
 --- !u!114 &1936667396
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -695,11 +694,10 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  Controller: {fileID: 781638721}
-  m_MaskActions: 0
-  m_LookDistance: 10
-  m_RewardDecrement: 0.25
-  m_StepDuration: 0.5
+  controller: {fileID: 781638721}
+  maskActions: 0
+  rewardDecrement: 0.25
+  stepDuration: 0.5
 --- !u!114 &1936667397
 MonoBehaviour:
   m_ObjectHideFlags: 0
