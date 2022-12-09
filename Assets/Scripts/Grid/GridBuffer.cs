@@ -185,6 +185,11 @@ namespace MBaske.Sensors.Grid
             return m_Values[channel].Count(x => x > minValue);
         }
 
+        public void GetQuadrant()
+        {
+            
+        }
+
         /// <summary>
         /// Clears grid values of a specified channel by setting them to 0.
         /// <param name="channel">The channel index</param>

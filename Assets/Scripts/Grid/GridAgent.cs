@@ -169,12 +169,10 @@ public class GridAgent : Agent
         if (rewardAgent)
         {
             // From +0.5 to -0.5.
-            AddReward(0.5f - visitValue);
+            //AddReward(0.5f - visitValue);
 
             if (_sensorComp.GridBuffer.Read(0, _mGridPosition) > 0f)
             {
-                Debug.Log(_mGridPosition);
-                Debug.Log(_mLocalPosNext);
                 TaskCompleted();
             }
         }
@@ -193,9 +191,7 @@ public class GridAgent : Agent
         _currentUnit.CallBack.Invoke(_mLocalPosNext);
         _taskComplete = true;
         _taskAssigned = false;
-        AddReward(1);
-        _tasksCompleted++;
-        
+        SetReward(1);
         EndEpisode();
     }
     
@@ -210,16 +206,19 @@ public class GridAgent : Agent
             _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
             
             isDone = ValidatePosition(true);
-
-            if (isDone)
-            {
-                EndEpisode();
-            }
+            
         }
-        
         else
         {
-            AddReward(-1.0f);
+            AddReward(-1);
+            
+            isDone = ValidatePosition(false);
+        }
+        
+        if (isDone)
+        {
+           
+            EndEpisode();
         }
     }
 
@@ -233,11 +232,7 @@ public class GridAgent : Agent
         
         _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
         _mLocalPosNext = _currentUnit.unitPos;
-
-        if (_tasksCompleted > 2)
-        {
-            _taskState |= TaskState.MaxCompleted;
-        }
+        
         _taskComplete = false;
         _taskAssigned = true;
         return true;

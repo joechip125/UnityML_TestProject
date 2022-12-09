@@ -33,11 +33,13 @@ public class MyGrid : MonoBehaviour
     public const int Wall = 4;
     
     private bool m_ShowGizmos = false;
-    [SerializeField] public Vector3 m_CellScale = new Vector3(1f, 0.01f, 1f);
+    [SerializeField] public Vector3 minCellScale = new Vector3(1f, 0.01f, 1f);
     [SerializeField] public int cellsX = 12;
     [SerializeField] public int cellsZ = 12;
     [HideInInspector, SerializeField]
     internal float m_GizmoYOffset = 0f;
+
+    public List<ChannelLabel> labels;
 
     private GridBuffer _gridBuffer;
 
@@ -63,52 +65,51 @@ public class MyGrid : MonoBehaviour
     private Color ScanCell(int indexX, int indexZ)
     {
         var pos = transform.position + 
-                  new Vector3(indexX * m_CellScale.x, 5, indexZ * m_CellScale.z);
+                  new Vector3(indexX * minCellScale.x, 5, indexZ * minCellScale.z);
 
         var ray = new Ray(pos, Vector3.down);
         Physics.SphereCast(ray, 0.5f,out var sphereHit, 12f);
         if (!sphereHit.collider) return Color.white;
         
         var gObj = sphereHit.collider.gameObject;
-        
-        if (gObj.CompareTag("Collectable"))
+
+
+        for (int i = 0; i < labels.Count; i++)
         {
-            _gridBuffer.Write(Collectable, indexX, indexZ, 1);
-            return Color.magenta;
+            if (gObj.CompareTag(labels[i].Name))
+            {
+                return labels[i].Color;
+            }
         }
-        if (gObj.CompareTag("Poison"))
-        {
-            _gridBuffer.Write(Poison, indexX, indexZ, 1);
-            return Color.red;
-        }
+       
         return Color.white;
+    }
+
+    public void DivideAnd()
+    {
+        
     }
     
     void OnDrawGizmos()
     {
-        if (Application.IsPlaying(gameObject))
-        {
-            _gridBuffer.Clear();
-            var scale = new Vector3(m_CellScale.x, 1, m_CellScale.z);
-            var placement = transform.position;
-    
-            for (int x = 0; x < cellsX; x++)
-            {
-                for (int z = 0; z < cellsZ; z++)
-                {
-                    var debugRayColor = ScanCell(x, z);
-                    var something = _gridBuffer.Read(1, x, z);
-                    if (something == 1)
-                    {
-                        debugRayColor = Color.green;
-                    }
-                    
-                    Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
-                    Gizmos.DrawCube(placement + new Vector3(0,0, scale.z * z), Vector3.one);
-                }
+        //if (!Application.IsPlaying(gameObject)) return;
+        var scale = new Vector3(minCellScale.x * 6 , 1, minCellScale.z * 6);
+        var placement = transform.position;
+     
+        var divide = 2;
 
-                placement += new Vector3(scale.x, 0, 0);
+
+        for (int x = 0; x < divide; x++)
+        {
+            for (int z = 0; z < divide; z++)
+            {
+                var debugRayColor = ScanCell(x, z);
+                
+                Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);
+                Gizmos.DrawCube(placement + new Vector3(0,0, scale.z * z), scale);
             }
+
+            placement += new Vector3(scale.x, 0, 0);
         }
     }
 }

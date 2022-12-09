@@ -2,22 +2,40 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 21980,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-21980.onnx",
-                "reward": -2.2435897435897436,
-                "creation_time": 1670607469.2596934,
+                "steps": 161921,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-161921.onnx",
+                "reward": 9.070588235294117,
+                "creation_time": 1670609146.7595193,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-21980.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-161921.pt"
+                ]
+            },
+            {
+                "steps": 227415,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-227415.onnx",
+                "reward": 11.173267326732674,
+                "creation_time": 1670609821.3924775,
+                "auxillary_file_paths": [
+                    "results\\StrategyRTS\\Strategy\\Strategy-227415.pt"
+                ]
+            },
+            {
+                "steps": 241273,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-241273.onnx",
+                "reward": 10.964673913043478,
+                "creation_time": 1670610032.2687354,
+                "auxillary_file_paths": [
+                    "results\\StrategyRTS\\Strategy\\Strategy-241273.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 21980,
+            "steps": 241273,
             "file_path": "results\\StrategyRTS\\Strategy.onnx",
-            "reward": -2.2435897435897436,
-            "creation_time": 1670607469.2596934,
+            "reward": 10.964673913043478,
+            "creation_time": 1670610032.2687354,
             "auxillary_file_paths": [
-                "results\\StrategyRTS\\Strategy\\Strategy-21980.pt"
+                "results\\StrategyRTS\\Strategy\\Strategy-241273.pt"
             ]
         }
     },
