@@ -142,17 +142,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             FoundObjectAct?.Invoke();
         }
     }
-
-    private void OnDrawGizmos()
-    {
-        foreach (var p in positions)
-        {
-            Gizmos.DrawWireSphere(p, 0.5f);
-            Gizmos.color = Color.red;
-        }
-    }
-
-
+    
     public int GetUnitScore()
     {
         return _unitScore;

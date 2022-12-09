@@ -203,11 +203,11 @@ public class GridAgent : Agent
     {
         bool isDone = false;
         var action = actions.DiscreteActions[0];
-        _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
 
         if (_mValidActions.Contains(action))
         {
             _mGridPosition += _mDirections[action];
+            _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
             
             isDone = ValidatePosition(true);
 
