@@ -87,8 +87,6 @@ public class OverlapChecker
     {
         float z = (cellIndex / _mGridSize.z - m_CellCenterOffset.x) * m_CellScale.z;
         float x = (cellIndex % _mGridSize.z - m_CellCenterOffset.z) * m_CellScale.x;
-        //float x = (cellIndex / m_GridSize.z - m_CellCenterOffset.x) * m_CellScale.x;
-        //float z = (cellIndex % m_GridSize.z - m_CellCenterOffset.z) * m_CellScale.z;
         return new Vector3(x, 0, z);
     }
     
