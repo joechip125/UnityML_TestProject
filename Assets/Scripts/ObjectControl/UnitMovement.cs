@@ -41,9 +41,6 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
 
     private void RequestDirection()
     {
-        var pos = transform.localPosition;
-        var normPos = new Vector2(pos.x, pos.z).normalized;
-
         if (NeedDirectionEvent != null)
         {
             _requestedDirection = true;

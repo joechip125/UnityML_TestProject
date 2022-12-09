@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DefaultNamespace;
+using DefaultNamespace.Grid;
+using Grid;
 using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -11,7 +13,7 @@ using UnityEngine;
 
 public class GridAgent : Agent
 {
-    public event Action EpisodeBegin;
+    public event Action ResetMap;
     
     public Controller controller;
 
@@ -29,19 +31,18 @@ public class GridAgent : Agent
     private const int CRight = 3;
     private const int CLeft = 4;
 
-    private ColorGridBuffer _mSensorBuffer;
+    //private ColorGridBuffer _mSensorBuffer;
     private ColorGridBuffer _mReadBuffer;
 
-    // Current agent position on grid.
+
     private Vector2Int _mGridPosition;
     private Vector3 _mLocalPosNext;
-    private Vector3 _mLocalPosPrev;
+
     private List<int> _mValidActions;
     private Vector2Int[] _mDirections;
         
     private bool _mIsTraining;
-    // Whether the agent is currently requesting decisions.
-    // Agent is inactive during animation at inference.
+    
     private bool _mIsActive;
     private bool _taskComplete;
     private bool _taskAssigned;
@@ -59,22 +60,29 @@ public class GridAgent : Agent
     private Vector3 _mCellCenterOffset;
     private Vector3Int _gridSize = new Vector3Int(20, 1, 20);
 
+    private int _tasksCompleted;
+
+    private TaskState _taskState;
+
+    private SingleChannel _pathChannel;
+
     private void Start()
     {
-        EpisodeBegin?.Invoke();
+        ResetMap?.Invoke();
     }
 
     public override void Initialize()
     {
         _sensorComp = GetComponent<StrategyGridSensorComponent>();
-        
-        _mSensorBuffer = new ColorGridBuffer(3, 20, 20);
 
-        _sensorComp.ExternalBuffer = _mSensorBuffer;
-        
         _gridSize = _sensorComp.gridSize;
-        _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
+        _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
+        _sensorComp.ExternalChannel = _pathChannel;
         
+        
+        _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
+
+        _taskState |= TaskState.Completed;
         _taskComplete = true;
         _taskAssigned = false;
         
@@ -111,9 +119,25 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
+        if (_tasksCompleted > 2)
+        {
+            ResetMap?.Invoke();
+            _tasksCompleted = 0;
+        }
+        
         unitStore ??= controller._unitStore;
 
-        _mSensorBuffer.Clear();
+        _pathChannel.Clear();
+        
+        //if ((_taskState & TaskState.Completed) == TaskState.Completed)
+        //{
+        //    TryGetTask();
+        //}
+        //else if((_taskState & TaskState.Assigned) == TaskState.Assigned)
+        //{
+        //    
+        //}
+        
         if (_taskComplete && !_taskAssigned)
         {
             TryGetTask();
@@ -121,6 +145,7 @@ public class GridAgent : Agent
         else if(_taskAssigned && !_taskComplete)
         {
             _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
+            Debug.Log(_currentUnit.unitPos);
             _mLocalPosNext = _currentUnit.unitPos;
         }
         
@@ -134,7 +159,7 @@ public class GridAgent : Agent
         
         for (int action = 1; action < 5; action++)
         {
-            bool isValid = _mSensorBuffer.Contains( 
+            bool isValid = _pathChannel.Contains( 
                 _mGridPosition.x + _mDirections[action].x,
                 _mGridPosition.y + _mDirections[action].y);
 
@@ -152,9 +177,9 @@ public class GridAgent : Agent
     private bool ValidatePosition(bool rewardAgent)
     {
         // From 0 to +1. 
-        float visitValue = _mSensorBuffer.Read(2, _mGridPosition);
+        var visitValue = _pathChannel.Read(_mGridPosition);
         
-        _mSensorBuffer.Write(2, _mGridPosition,
+        _pathChannel.Write(_mGridPosition,
             Mathf.Min(1, visitValue + rewardDecrement));
         
         if (rewardAgent)
@@ -185,6 +210,8 @@ public class GridAgent : Agent
         _taskComplete = true;
         _taskAssigned = false;
         AddReward(1);
+        _tasksCompleted++;
+        
         EndEpisode();
     }
     
@@ -211,7 +238,6 @@ public class GridAgent : Agent
             AddReward(-1.0f);
         }
         
-        
         if (_taskComplete && _taskAssigned)
         {
             _currentUnit.CallBack.Invoke(_mLocalPosNext);
@@ -222,8 +248,10 @@ public class GridAgent : Agent
     private bool TryGetTask()
     {
         if (unitStore.Unit.Count <= 0) return false;
-
+        
         _currentUnit = unitStore.Unit.Dequeue();
+        _taskState &= ~TaskState.Completed;
+        _taskState |= TaskState.Assigned;
         _taskComplete = false;
         _taskAssigned = true;
         return true;

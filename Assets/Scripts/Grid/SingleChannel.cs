@@ -1,82 +1,93 @@
 ﻿using System;
+using System.Collections.Generic;
 using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using UnityEngine;
 
 namespace DefaultNamespace.Grid
 {
-    [Serializable]
+  
     public class SingleChannel
     {
         public Vector2Int Size
         {
-            get { return new Vector2Int(Width, Height); }
+            get { return new Vector2Int(SizeX, SizeZ); }
             set
             {
-                Width = value.x;
-                Height = value.y;
+                SizeX = value.x;
+                SizeZ = value.y;
             }
         }
+
+        public int ChannelIndex
+        {
+            get => _channelIndex;
+            set => _channelIndex = value;
+        }
+
+        private int _channelIndex;
         
         public override string ToString()
         {
-            return $"Grid {Width} x {Height}";
+            return $"Grid {SizeX} x {SizeZ}";
         }
         
-        public int Width
+        public int SizeX
         {
-            get { return m_Width; }
+            get { return _mSizeX; }
             set
             {
-                m_Width = value;
+                _mSizeX = value;
                 Initialize();
             }
         }
 
-        private int m_Width;
+        private int _mSizeX;
         
-        public int Height
+        public int SizeZ
         {
-            get { return m_Height; }
+            get { return _mSizeZ; }
             set
             {
-                m_Height = value;
+                _mSizeZ = value;
                 Initialize();
             }
         }
 
-        private int m_Height;
+        private int _mSizeZ;
 
-        // [channel][y * width + x]
+        //[y * width + x]
         private float[] m_Values;
 
-
-        public SingleChannel(int width, int height)
+        //public HashSet<Vector2> m_GridPositions;
+        
+        public SingleChannel(int sizeX, int sizeZ, int channelIndex)
         {
-            m_Width = width;
-            m_Height = height;
+            _mSizeX = sizeX;
+            _mSizeZ = sizeZ;
+            ChannelIndex = channelIndex;
 
             Initialize();
         }
 
-        public SingleChannel(Vector2Int size)
-            : this(size.x, size.y)
+        public SingleChannel(Vector2Int size, int channelIndex)
+            : this(size.x, size.y, channelIndex)
         {
         }
         
         protected virtual void Initialize()
         {
-            m_Values = new float[Width * Height];
+            m_Values = new float[SizeX * SizeZ];
         }
         
-        public virtual void Clear(int channel)
+        public virtual void Clear()
         {
             Array.Clear(m_Values, 0, m_Values.Length);
         }
         
         public virtual void Write(int x, int y, float value)
         {
-            m_Values[y * Width + x] = value;
+            m_Values[y * SizeX + x] = value;
             //IsDirty = true;
         }
         
@@ -108,7 +119,7 @@ namespace DefaultNamespace.Grid
         
         public virtual float Read( int x, int y)
         {
-            return m_Values[y * Width + x];
+            return m_Values[y * SizeX + x];
         }
 
         public virtual float Read(int index)
@@ -136,7 +147,7 @@ namespace DefaultNamespace.Grid
         
         public virtual bool Contains(int x, int y)
         {
-            return x >= 0 && x < Width && y >= 0 && y < Height;
+            return x >= 0 && x < SizeX && y >= 0 && y < SizeZ;
         }
 
 
@@ -148,18 +159,18 @@ namespace DefaultNamespace.Grid
         public Vector2Int NormalizedToGridPos(Vector2 norm)
         {
             return new Vector2Int(
-                (int) (norm.x * Width),
-                (int) (norm.y * Height)
+                (int) (norm.x * SizeX),
+                (int) (norm.y * SizeZ)
             );
         }
         
         public RectInt NormalizedToGridRect(Rect norm)
         {
             return new RectInt(
-                (int) (norm.xMin * Width),
-                (int) (norm.yMin * Height),
-                (int) (norm.width * Width),
-                (int) (norm.height * Height)
+                (int) (norm.xMin * SizeX),
+                (int) (norm.yMin * SizeZ),
+                (int) (norm.width * SizeX),
+                (int) (norm.height * SizeZ)
             );
         }
     }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DefaultNamespace.Grid;
 using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
@@ -23,6 +24,8 @@ public class StrategyGridSensorComponent : SensorComponent
     private ColorGridBuffer _mGridBuffer;
 
     public ColorGridBuffer ExternalBuffer;
+
+    public SingleChannel ExternalChannel;
     
     public GridBuffer.Shape GridShape
     {
@@ -118,7 +121,7 @@ public class StrategyGridSensorComponent : SensorComponent
         gridShape = new GridBuffer.Shape(totalNumberChannels, gridSize.x, gridSize.z);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ExternalBuffer, ChannelLabels);
+        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ExternalBuffer, ChannelLabels, ExternalChannel);
         BoxOverlapChecker.RegisterDebugSensor(_mDebugSensor);
     
         _mSensors = GetGridSensors().ToList();
@@ -153,7 +156,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ExternalBuffer, ChannelLabels);
+        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ExternalBuffer, ChannelLabels, ExternalChannel);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }

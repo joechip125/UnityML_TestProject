@@ -44,7 +44,7 @@ namespace DefaultNamespace
         private void Awake()
         {
             agent.unitStore = _unitStore;
-            agent.EpisodeBegin += OnResetArea;
+            agent.ResetMap += OnResetArea;
         }
 
         
@@ -70,7 +70,7 @@ namespace DefaultNamespace
         
         private void OnApplicationQuit()
         {
-            agent.EpisodeBegin -= OnResetArea;
+            agent.ResetMap -= OnResetArea;
             foreach (var u in _units)
             {
                 u.NeedDirectionEvent -= OnDirectionNeeded;
@@ -80,7 +80,6 @@ namespace DefaultNamespace
         private void OnDirectionNeeded(Vector3 normPos, Action<Vector3> callBack)
         {
             _unitStore.Unit.Enqueue(new UnitValues(normPos, callBack));
-            //NeedDirectionEvent?.Invoke(normPos,  callBack);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace.Grid;
 using MBaske.Sensors.Grid;
 using Unity.Barracuda;
 using Unity.MLAgents;
@@ -28,27 +29,30 @@ public class CustomGridSensor : ISensor, IDisposable
     
     private  ColorGridBuffer m_GridBuffer;
     private  ColorGridBuffer m_ExternalBuffer;
-    private ColorGridBuffer _tempBuffer;
-    
+
+    private SingleChannel _externalChannel;
+
     private List<byte> m_CompressedObs;
 
     // Utility Constants Calculated on Init
     int m_NumCells;
     
     Vector3 m_CellCenterOffset;
-    private bool AutoDetectionEnabled;
-
-
+    
     public CustomGridSensor(
         string name,
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
         ColorGridBuffer externalBuffer,
-        List<ChannelLabel> labels)
+        List<ChannelLabel> labels,
+        SingleChannel externChannel)
     {
         m_Name = name;
         CompressionType = compression;
+        
         m_ExternalBuffer = externalBuffer;
+        _externalChannel = externChannel;
+        
         _labels = labels;
         
         gridBuffer.GetShape().Validate();
@@ -87,9 +91,9 @@ public class CustomGridSensor : ISensor, IDisposable
     {
         m_GridBuffer.Clear();
         
-        if (m_ExternalBuffer != null)
+        if (_externalChannel != null)
         {
-            CombineBuffers(m_ExternalBuffer, m_GridBuffer);
+            CombineChannels();
         }
     }
 
@@ -101,6 +105,15 @@ public class CustomGridSensor : ISensor, IDisposable
             {
                 writeBuffer.Write(j, i,  readBuffer.Read(j, i));
             }
+        }
+    }
+
+    private void CombineChannels()
+    {
+        int channelIndex = _externalChannel.ChannelIndex;
+        for (var i = 0; i < m_NumCells; i++)
+        {
+            m_GridBuffer.Write(channelIndex, i,  _externalChannel.Read(i));
         }
     }
     
