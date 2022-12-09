@@ -79,7 +79,6 @@ public class GridAgent : Agent
         _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
         _sensorComp.ExternalChannel = _pathChannel;
         
-        
         _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
 
         _taskState |= TaskState.Completed;
@@ -119,36 +118,21 @@ public class GridAgent : Agent
     
     public override void OnEpisodeBegin()
     {
-        if (_tasksCompleted > 2)
+        if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
-            _tasksCompleted = 0;
         }
         
         unitStore ??= controller._unitStore;
 
         _pathChannel.Clear();
-        
-        //if ((_taskState & TaskState.Completed) == TaskState.Completed)
-        //{
-        //    TryGetTask();
-        //}
-        //else if((_taskState & TaskState.Assigned) == TaskState.Assigned)
-        //{
-        //    
-        //}
-        
-        if (_taskComplete && !_taskAssigned)
-        {
-            TryGetTask();
-        }
-        else if(_taskAssigned && !_taskComplete)
+
+        if (_taskAssigned)
         {
             _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
-            Debug.Log(_currentUnit.unitPos);
             _mLocalPosNext = _currentUnit.unitPos;
         }
-        
+
         _mStepTime = 0;
     }
 
@@ -237,12 +221,6 @@ public class GridAgent : Agent
         {
             AddReward(-1.0f);
         }
-        
-        if (_taskComplete && _taskAssigned)
-        {
-            _currentUnit.CallBack.Invoke(_mLocalPosNext);
-            EndEpisode();
-        }
     }
 
     private bool TryGetTask()
@@ -252,6 +230,14 @@ public class GridAgent : Agent
         _currentUnit = unitStore.Unit.Dequeue();
         _taskState &= ~TaskState.Completed;
         _taskState |= TaskState.Assigned;
+        
+        _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
+        _mLocalPosNext = _currentUnit.unitPos;
+
+        if (_tasksCompleted > 2)
+        {
+            _taskState |= TaskState.MaxCompleted;
+        }
         _taskComplete = false;
         _taskAssigned = true;
         return true;
@@ -262,7 +248,6 @@ public class GridAgent : Agent
         if (_taskComplete && !_taskAssigned)
         {
             TryGetTask();
-            EndEpisode();
         }
         
         if (_mIsActive && _taskAssigned)

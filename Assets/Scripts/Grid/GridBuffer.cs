@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Unity.MLAgents;
 using System;
+using System.Linq;
 
 namespace MBaske.Sensors.Grid
 {
@@ -177,6 +178,11 @@ namespace MBaske.Sensors.Grid
             {
                 ClearChannel(start + i);
             }
+        }
+
+        public int CountLayer(int channel, float minValue)
+        {
+            return m_Values[channel].Count(x => x > minValue);
         }
 
         /// <summary>

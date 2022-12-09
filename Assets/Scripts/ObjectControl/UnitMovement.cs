@@ -26,6 +26,9 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     public Action MoveStarted;
 
     public event Action<Vector3> GetDirectionEvent;
+    public event Action TargetReachedEvent;
+
+    private List<Vector3> positions = new();
 
     private void Awake()
     {
@@ -69,6 +72,7 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private void OnGetDirection(Vector3 newPos)
     {
         Goal = newPos;
+        positions.Add(newPos);
     }
     
     void Update()
@@ -138,7 +142,16 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
             FoundObjectAct?.Invoke();
         }
     }
-    
+
+    private void OnDrawGizmos()
+    {
+        foreach (var p in positions)
+        {
+            Gizmos.DrawWireSphere(p, 0.5f);
+            Gizmos.color = Color.red;
+        }
+    }
+
 
     public int GetUnitScore()
     {
