@@ -43,16 +43,20 @@ public class MyGrid : MonoBehaviour
     public List<ChannelLabel> labels;
 
     private GridBuffer _gridBuffer;
-    private Vector3 m_CellCenterOffset;
+    private Vector3 m_CellCenterOffset = new Vector3(0.5f, 0, 0.5f);
     private Vector3[] _mCellLocalPositions;
     
     Collider[] _mColliderBuffer;
     private List<Vector2Int> includeCells = new();
     private List<Vector4> includePositions = new();
+    private List<Vector4> nextPositions = new();
+    
+    private List<Vector2> positions = new();
 
-    private Vector3Int currentGridSize;
+    private Vector3Int currentGridSize = new Vector3Int(2, 1, 2);
     private int currentDivide = 2;
-    private int _numCells = 2;
+    private int _numCells = 4;
+    private Vector3 _gridAdjustment;
 
     // Start is called before the first frame update
     void Start()
@@ -75,29 +79,6 @@ public class MyGrid : MonoBehaviour
     private void Something()
     {
         
-    }
-
-    void InitCellLocalPositions()
-    {
-        _mCellLocalPositions = new Vector3[_numCells];
-
-        for (int i = 0; i < _numCells; i++)
-        {
-            _mCellLocalPositions[i] = GetCellLocalPosition(i);
-        }
-    }
-
-    private Vector3 GetCellLocalPosition(int cellIndex)
-    {
-        float z = (cellIndex / currentGridSize.z - m_CellCenterOffset.x) * cellScale.z;
-        float x = (cellIndex % currentGridSize.z - m_CellCenterOffset.z) * cellScale.x;
-        return new Vector3(x, 0, z);
-    }
-
-
-    private Vector3 GetCellGlobalPosition(int cellIndex)
-    {
-        return _mCellLocalPositions[cellIndex] + transform.position;
     }
 
     private Color ScanCell(int indexX, int indexZ)
@@ -125,7 +106,7 @@ public class MyGrid : MonoBehaviour
         
         return Color.white;
     }
-    
+
     private int ScanCell(int index)
     {
         var pos = GetCellGlobalPosition(index);
@@ -153,50 +134,119 @@ public class MyGrid : MonoBehaviour
 
     public void DivideAnd()
     {
-        InitCellLocalPositions();
-
+        
         for (int i = 0; i < _mCellLocalPositions.Length; i++)
         {
             
         }
     }
 
-    private void SetCellPositions(int division)
+    void InitCellLocalPositions(float division)
     {
-        var somethiong = 0;
-        currentDivide = 2;
-        _numCells = division * 2;
-        currentGridSize = new Vector3Int(division, 1, division);
-        m_CellCenterOffset = new Vector3((division - 1f) / 2, 0, (division - 1f) / 2);
         cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
-        InitCellLocalPositions();
+        _mCellLocalPositions = new Vector3[_numCells];
+
+        for (int i = 0; i < _numCells; i++)
+        {
+            _mCellLocalPositions[i] = GetCellLocalPosition(i);
+        }
     }
-    
-    private void GetCellTransform(int division, int index)
+
+    private Vector3 GetCellLocalPosition(int cellIndex)
     {
-        currentDivide = 2;
-        _numCells = division * 2;
-        m_CellCenterOffset = new Vector3((division - 1f) / 2, 0, (division - 1f) / 2);
-        cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
-        InitCellLocalPositions();
+        float z = (cellIndex / currentGridSize.z - m_CellCenterOffset.x) * cellScale.z;
+        float x = (cellIndex % currentGridSize.z - m_CellCenterOffset.z) * cellScale.x;
+        return new Vector3(x, 0, z);
+    }
+
+    private void SetNumberCells()
+    {
+        _numCells = 4;
+        
+        
+    }
+
+    private Vector3 GetCellGlobalPosition(int cellIndex) 
+    {
+        return _mCellLocalPositions[cellIndex] + _gridAdjustment;
+    }
+
+ 
+
+    private bool ScanCells(int divisions)
+    {
+        InitCellLocalPositions(divisions);
+        includePositions.Clear();
+        positions.Clear();
+        var hitResult = false;
+        
+        for (int i = 0; i < _numCells; i++)
+        {
+            var pos = GetCellGlobalPosition(i);
+            if (ScanCell(i) > 0)
+            {
+                positions.Add(new Vector2(i,1));
+                nextPositions.Add(new Vector4(pos.x, pos.z, cellScale.x, cellScale.z));
+                hitResult = true;
+            }
+            else
+            {
+                positions.Add(new Vector2(i,0));
+                includePositions.Add(new Vector4(pos.x, pos.z, cellScale.x, cellScale.z));
+            }
+        }
+
+        return hitResult;
     }
     
     void OnDrawGizmos()
     {
         //if (!Application.IsPlaying(gameObject)) return;
-        SetCellPositions(2);
+        var division = 1;
+        InitCellLocalPositions(division);
+        _gridAdjustment = transform.position;
+        
+        nextPositions.Clear();
+        var keep = ScanCells((int)Mathf.Pow(2, division));
+        
 
-        for (int i = 0; i < _numCells; i++)
+        var set = new Vector3();
+
+        foreach (var p in positions)
         {
-            var pos = GetCellGlobalPosition(i);
-            if(ScanCell(i) < 1)
+            var pos = GetCellGlobalPosition((int)p.x);
+            if (p.y == 0)
+            {
                 Gizmos.DrawCube(pos, cellScale);
+            }
             else
             {
-                var adjust = pos - transform.position;
-                
-                includePositions.Add(new Vector4(pos.x, pos.z, cellScale.x, cellScale.z));
+                set = (pos - transform.position);
             }
         }
+
+        if (!keep) return;
+        division = 2;
+        _gridAdjustment = transform.position + set;
+        InitCellLocalPositions((int)Mathf.Pow(2, division));
+        ScanCells((int)Mathf.Pow(2, division));
+        //if (!ScanCells(4)) return;
+
+
+        foreach (var p in positions)
+        {
+            var pos = GetCellGlobalPosition((int)p.x);
+            if (p.y == 0)
+            {
+                //Gizmos.DrawCube(pos, cellScale);
+                //Gizmos.color = Color.magenta;
+            }
+            else if(p.y == 1)
+            {
+                Gizmos.DrawCube(pos, cellScale);
+                Gizmos.color = Color.magenta;
+            }
+        }
+
     }
 }
