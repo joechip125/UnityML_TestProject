@@ -21,7 +21,7 @@ public class CellInfo
     public Vector3 location;
     public CellContents contents;
 }
-[ExecuteInEditMode]
+
 public class MyGrid : MonoBehaviour
 {
     
@@ -48,8 +48,8 @@ public class MyGrid : MonoBehaviour
     
     Collider[] _mColliderBuffer;
     private List<Vector2Int> includeCells = new();
-    private List<Vector4> includePositions = new();
-    private List<Vector4> nextPositions = new();
+    private List<Vector3> includePositions = new();
+    private List<Vector3> nextPositions = new();
     
     private List<Vector2> positions = new();
 
@@ -57,6 +57,9 @@ public class MyGrid : MonoBehaviour
     private int currentDivide = 2;
     private int _numCells = 4;
     private Vector3 _gridAdjustment;
+    private Vector3[][] posArray;
+    private Vector3[] adjustVecs ={new (-1,0, -1), new (1,0, -1), new (-1,0, 1), new(1,0,1)};
+    private List<int> extenders = new();
 
     // Start is called before the first frame update
     void Start()
@@ -141,7 +144,7 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    void InitCellLocalPositions(float division)
+    void InitCellLocalPositions(float division, int index)
     {
         cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
         _mCellLocalPositions = new Vector3[_numCells];
@@ -150,6 +153,9 @@ public class MyGrid : MonoBehaviour
         {
             _mCellLocalPositions[i] = GetCellLocalPosition(i);
         }
+
+        if(division > 1)
+            AdjustGrid(index, division -1);
     }
 
     private Vector3 GetCellLocalPosition(int cellIndex)
@@ -175,78 +181,142 @@ public class MyGrid : MonoBehaviour
 
     private bool ScanCells(int divisions)
     {
-        InitCellLocalPositions(divisions);
-        includePositions.Clear();
-        positions.Clear();
+        //InitCellLocalPositions(divisions);
         var hitResult = false;
+        positions.Clear();
+        includePositions.Clear();
         
         for (int i = 0; i < _numCells; i++)
         {
-            var pos = GetCellGlobalPosition(i);
+            includePositions.Add(GetCellGlobalPosition(i));
             if (ScanCell(i) > 0)
             {
                 positions.Add(new Vector2(i,1));
-                nextPositions.Add(new Vector4(pos.x, pos.z, cellScale.x, cellScale.z));
+                
                 hitResult = true;
+                extenders.Add(i);
             }
             else
             {
                 positions.Add(new Vector2(i,0));
-                includePositions.Add(new Vector4(pos.x, pos.z, cellScale.x, cellScale.z));
             }
         }
 
         return hitResult;
+    }
+
+    private void AdjustGrid(int index, float depth)
+    {
+        _gridAdjustment = transform.position + Vector3.Scale(cellScale, adjustVecs[index]* depth);
+    }
+    
+    private void ScanAll()
+    {
+        includePositions.Clear();
+        positions.Clear();
+        var keep = true;
+        var division = 1;
+        keep = ScanCells((int)Mathf.Pow(2, division));
+        int iterations = 0;
+        
+        var set = new Vector3();
+        while (keep)
+        {
+            ScanCells((int)Mathf.Pow(2, division));
+            if (iterations > 0 && positions.Count < 1) break;
+
+            foreach (var p in positions)
+            {
+                if (p.x > 0)
+                {
+                    
+                }
+                else
+                {
+                    
+                }
+            }
+            
+            for (int i = 0; i < _numCells; i++)
+            {
+                if (positions[i].x > 0)
+                {
+                    
+                }
+                
+            }
+
+            iterations++;
+            keep = false;
+        }
     }
     
     void OnDrawGizmos()
     {
         //if (!Application.IsPlaying(gameObject)) return;
         var division = 1;
-        InitCellLocalPositions(division);
         _gridAdjustment = transform.position;
         
-        nextPositions.Clear();
-        var keep = ScanCells((int)Mathf.Pow(2, division));
+        var keep = true;
         
-
-        var set = new Vector3();
-
-        foreach (var p in positions)
+        //var set = new Vector3();
+        //while (keep)
+        //{
+        //    keep = ScanCells((int)Mathf.Pow(2, division));
+        //    
+        //    
+        //
+        //    keep = false;
+        //}
+        var index = 0;
+        var divider = 1;
+        //InitCellLocalPositions(5);
+        
+        InitCellLocalPositions(1, 0);
+        Gizmos.color = new Color(255, 255, 255, 255 * 0.5f);
+        
+        for (int i = 0; i < _numCells; i++)
         {
-            var pos = GetCellGlobalPosition((int)p.x);
-            if (p.y == 0)
+            if (i != 3)
             {
-                Gizmos.DrawCube(pos, cellScale);
-            }
-            else
-            {
-                set = (pos - transform.position);
+                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
             }
         }
-
-        if (!keep) return;
-        division = 2;
-        _gridAdjustment = transform.position + set;
-        InitCellLocalPositions((int)Mathf.Pow(2, division));
-        ScanCells((int)Mathf.Pow(2, division));
-        //if (!ScanCells(4)) return;
-
-
-        foreach (var p in positions)
+        
+        InitCellLocalPositions(2, 3);
+        
+        for (int i = 0; i < _numCells; i++)
         {
-            var pos = GetCellGlobalPosition((int)p.x);
-            if (p.y == 0)
-            {
-                //Gizmos.DrawCube(pos, cellScale);
-                //Gizmos.color = Color.magenta;
-            }
-            else if(p.y == 1)
-            {
-                Gizmos.DrawCube(pos, cellScale);
-                Gizmos.color = Color.magenta;
-            }
+            if(i != 3)
+                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
+        }
+        
+        InitCellLocalPositions(4, 3);
+        
+        for (int i = 0; i < _numCells; i++)
+        {
+            if(i != 3)
+                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
         }
 
+        //foreach (var n in nextPositions)
+        //{
+        //    _gridAdjustment = n;
+        //    ScanCells((int)Mathf.Pow(2, 2));
+        //    for (int i = 0; i < _numCells; i++)
+        //    {
+        //        var pos = includePositions[i];
+        //        var choice = positions[i];
+        //    
+        //        if (choice.y > 0)
+        //        {
+        //            //nextPositions.Add(pos - transform.position);
+        //        }
+        //        else
+        //        {
+        //            Gizmos.DrawCube(pos, cellScale);
+        //        }
+        //    }
+        //}
     }
 }
