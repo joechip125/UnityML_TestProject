@@ -13,7 +13,7 @@ public enum CellContents
     Collectable,
     Poison
 }
-
+[System.Flags]
 public enum AdjustActions
 {
     None,
@@ -90,28 +90,7 @@ public class MyGrid : MonoBehaviour
     {
         m_ShowGizmos = true;
     }
-
-    // Update is called once per frame
-
-    void Update()
-    {
-        
-    }
-
-    private void Something()
-    {
-        
-    }
-
-    public void DivideAnd()
-    {
-        
-        for (int i = 0; i < _mCellLocalPositions.Length; i++)
-        {
-            
-        }
-    }
-
+    
     void InitCellLocalPositions(float division, int index)
     {
         cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
@@ -129,31 +108,21 @@ public class MyGrid : MonoBehaviour
         float x = (cellIndex % currentGridSize.z - m_CellCenterOffset.z) * cellScale.x;
         return new Vector3(x, 0, z);
     }
-
-    private void SetNumberCells()
-    {
-        _numCells = 4;
-        
-        
-    }
-
+    
     private Vector3 GetCellGlobalPosition(int cellIndex) 
     {
         return _mCellLocalPositions[cellIndex] + _gridAdjustment;
     }
 
-
-    private void AdjustGrid(int index, float depth, bool reset = false)
+    private void RollBackGrid()
     {
-        if (reset)
+        if (adjustVvectors.Count > 0)
         {
-            _gridAdjustment = transform.position;
+            _gridAdjustment -= adjustVvectors.Pop();
         }
-        
-        _gridAdjustment += Vector3.Scale(cellScale, adjustVecs[index]* depth);
     }
     
-    private void AdjustGridMemory(int index, float depth, AdjustActions actions, float division)
+    private void AdjustGridMemory(int index, AdjustActions actions, float division)
     {
         cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
         
@@ -163,81 +132,24 @@ public class MyGrid : MonoBehaviour
         }
         else if (actions.HasFlag(AdjustActions.Rollback))
         {
-            if (adjustVvectors.Count > 0)
-            {
-                _gridAdjustment -= adjustVvectors.Pop();
-            }
+            RollBackGrid();
         }
         
         else if (actions.HasFlag(AdjustActions.Add))
         {
-           var add = Vector3.Scale(cellScale, adjustVecs[index]* depth);
+           var add = Vector3.Scale(cellScale, adjustVecs[index]* 1f);
            _gridAdjustment += add;
-           
+           adjustVvectors.Push(add);
         }
     
-        InitCellLocalPositions(division, index);
+        _mCellLocalPositions = new Vector3[_numCells];
+
+        for (int i = 0; i < _numCells; i++)
+        {
+            _mCellLocalPositions[i] = GetCellLocalPosition(i);
+        }
     }
     
-    private void AdjustGrid()
-    {
-        var addVector = new Vector3();
-        var depth = 2;
-        _gridAdjustment = transform.position;
-        foreach (var a in adjustIndexes)
-        {
-            _gridAdjustment += Vector3.Scale(cellScale, adjustVecs[a]* depth);
-            depth *= 2;
-        }
-    }
-
-    private void ScanQuadrant(int startIndex)
-    {
-        ScanCells(2, startIndex);
-        List<Vector2> dontScan = new();
-
-        var keepGoing = true;
-
-        while (keepGoing)
-        {
-            for (int i = 0; i < positions.Count; i++)
-            {
-                if (positions[i].z != 0)
-                {
-                    
-                }
-                else
-                {
-                    dontScan.Add(new Vector2());
-                    Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
-                }
-            }
-            keepGoing = false;
-        }
-    }
-
-    private void Depth(int v)
-    {
-        linkedListArray = new LinkedList<int>[v];
-        var allFound = false;
-        var index = 0;
-        var forom = Mathf.Pow(4,2) + index;
-        
-        var depth = 1;
-        var sum = index * 64 + 2;
-        while (!allFound)
-        {
-            for (int i = 0; i < _numCells; i++)
-            {
-                var amount = ScanCell(i);
-                AddEdge(depth,i + 2);
-            }
-
-            allFound = true;
-        }
-        DFS();
-    }
-
     internal void DFS()
     {
         Debug.Log("DFS");
@@ -292,41 +204,11 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void ScanAll()
-    {
-        includePositions.Clear();
-        positions.Clear();
-        _cellInfos.Clear();
-        var keep = true;
-        var division = 1;
-        InitCellLocalPositions(1, 0);
-        
-        int iterations = 0;
-        var set = new Vector3();
-        while (keep)
-        {
-            if (iterations > 0 && positions.Count < 1) break;
-            
-            for (int i = 0; i < _numCells; i++)
-            {
-                if (positions[i].x > 0)
-                {
-                    
-                }
-            }
-            
-            division *= 2;
-            ScanCells(division, 3);
-            
-            iterations++;
-            keep = false;
-            
-        }
-    }
+   
 
     private void ScanSomething(int divisions, int index)
     {
-        ScanCells(divisions, index);
+        ScanCells(divisions);
         for (int i = 0; i < positions.Count; i++)
         {
             if (positions[i].z == 0)
@@ -341,27 +223,62 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void ScanMany(int divisions)
+  
+
+    private int ScanCell(int index, out Color hitColor)
     {
+        var pos = GetCellGlobalPosition(index);
+        var _mColliderBuffer = new Collider[4];
+        hitColor = new Color(255, 255, 255, 255 * 0.5f);
         
+        var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 2, _mColliderBuffer, Quaternion.identity);
+        var hitTags = 0;
+
+        for (int i = 0; i < numFound; i++)
+        {
+            var current = _mColliderBuffer[i].gameObject;
+            
+            for (int j = 0; j < labels.Count; j++)
+            {
+                if (current.CompareTag(labels[j].Name))
+                {
+                    hitTags++;
+                    hitColor = Color.green;
+                }
+            }
+        }
+        
+        return hitTags;
+    }
+
+    
+    private void AddWithMem(int index, int startDiv)
+    {
+        AdjustGridMemory(index, AdjustActions.Add, startDiv);
         for (int i = 0; i < 4; i++)
         {
-            if (!ScanCells(divisions, i))
+            AdjustGridMemory(i, AdjustActions.Rollback, startDiv);
+            AdjustGridMemory(i, AdjustActions.Add, startDiv);
+            
+            if (ScanCells(startDiv))
             {
-                
+                for (int j = 0; j < 4; j++)
+                {
+                    if(positions[j].z == 0)
+                        Gizmos.DrawCube(GetCellGlobalPosition(j), cellScale);
+                }
             }
         }
     }
 
-    private bool ScanCells(int divisions, int index)
+    private bool ScanCells(int divisions)
     {
-        InitCellLocalPositions(divisions, index);
         var hitResult = false;
         positions.Clear();
         
         for (int i = 0; i < _numCells; i++)
         {
-            if (ScanCell(i) > 0)
+            if (ScanCell(i, out var color) > 0)
             {
                 positions.Add(new Vector3(i,divisions,1));
                 
@@ -376,65 +293,47 @@ public class MyGrid : MonoBehaviour
         return hitResult;
     }
 
-    private int ScanCell(int index)
+    private void ScanFirst()
     {
-        var pos = GetCellGlobalPosition(index);
-        var _mColliderBuffer = new Collider[4];
-        
-        
-        var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 2, _mColliderBuffer, Quaternion.identity);
-        var hitTags = 0;
-
-        for (int i = 0; i < numFound; i++)
+        for (int i = 0; i < _numCells; i++)
         {
-            var current = _mColliderBuffer[i].gameObject;
+            var hits = ScanCell(i, out var color);
+            //Gizmos.color = color;
             
-            for (int j = 0; j < labels.Count; j++)
-            {
-                if (current.CompareTag(labels[j].Name))
-                {
-                    hitTags++;
-                }
-            }
-        }
-        
-        return hitTags;
-    }
-
-    private void UntilEnd(int index)
-    {
-        InitCellLocalPositions(2, index);
-        AdjustGrid(index, 0.5f);
-        var hits = ScanCell(index);
-        var div = 4;
-
-        while (hits < 0)
-        {
-            InitCellLocalPositions(div, index);
-            AdjustGrid(index, 0.5f);
-            hits = ScanCell(index);
-            
+            if(hits < 1)
+                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
         }
     }
     
     void OnDrawGizmos()
     {
         //if (!Application.IsPlaying(gameObject)) return;
-        var division = 1f;
-        _gridAdjustment = transform.position;
-        var keep = true;
+       
+        AdjustGridMemory(0, AdjustActions.Reset, 1);
+        ScanFirst();
         
-        ScanSomething(1,1);
-        AdjustGrid(0, 0.5f);
-     
-        ScanSomething(2,0);
-        AdjustGrid(0, 0.5f);
-        ScanSomething(4,0);
-        AdjustGrid(0, 0.5f);
-        ScanSomething(8,0);
-        ////ScanSomething(2,3);
-        //ScanSomething(4,3);
-        //ScanSomething(8,3);
-        //
+        AdjustGridMemory(0, AdjustActions.Reset, 2);
+        AddWithMem(0, 2);
+
+        for (int i = 0; i < 4; i++)
+        {
+            AdjustGridMemory(i, AdjustActions.Reset, 2);
+            AdjustGridMemory(i, AdjustActions.Add, 2);
+            AddWithMem(i, 4);
+        }
+        
+        
+        for (int i = 0; i < 4; i++)
+        {
+            AdjustGridMemory(i, AdjustActions.Reset, 2);
+            AdjustGridMemory(0, AdjustActions.Add, 2);
+            AdjustGridMemory(i, AdjustActions.Add, 4);
+            AddWithMem(i, 8);
+        }
+        
+        //AdjustGridMemory(0, AdjustActions.Reset, 2);
+        //AdjustGridMemory(0, AdjustActions.Add, 2);
+        //AdjustGridMemory(0, AdjustActions.Add, 4);
+        //AddWithMem(0, 8);
     }
 }

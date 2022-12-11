@@ -191,7 +191,7 @@ public class GridAgent : Agent
         _currentUnit.CallBack.Invoke(_mLocalPosNext);
         _taskComplete = true;
         _taskAssigned = false;
-        SetReward(1);
+        AddReward(1.0f);
         EndEpisode();
     }
     
@@ -229,7 +229,7 @@ public class GridAgent : Agent
         _currentUnit = unitStore.Unit.Dequeue();
         _taskState &= ~TaskState.Completed;
         _taskState |= TaskState.Assigned;
-        
+
         _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
         _mLocalPosNext = _currentUnit.unitPos;
         
