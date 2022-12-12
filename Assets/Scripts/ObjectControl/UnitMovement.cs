@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace;
 using Google.Protobuf.WellKnownTypes;
 using Interfaces;
 using UnityEngine;
@@ -29,6 +30,8 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     public event Action TargetReachedEvent;
 
     private List<Vector3> positions = new();
+    private Vector3 _currentStart;
+    public PositionStore _localPos;
 
     private void Awake()
     {
@@ -44,14 +47,15 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
 
     private void RequestDirection()
     {
-        if (NeedDirectionEvent != null)
-        {
-            _requestedDirection = true;
-            NeedDirectionEvent.Invoke(transform.localPosition, GetDirectionEvent);
-        }
-      
-    }
+        if (_localPos.positions.Count <= 0) return;
+        
+        Goal = _localPos.positions.Dequeue();
+        _currentStart = transform.localPosition;
+        var dir = (Goal - _currentStart).normalized;
+        // Debug.Log(dir);
 
+    }
+    
     public Vector3 Goal
     {
         get => _goal;
@@ -72,25 +76,28 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     private void OnGetDirection(Vector3 newPos)
     {
         Goal = newPos;
-        positions.Add(newPos);
+        _currentStart = transform.localPosition;
+        _requestedDirection = true;
     }
     
     void Update()
     {
         if (_moveToGoal)
         {
-            var currentPos = transform.localPosition;
-            transform.localPosition = Vector3.Lerp(currentPos, _goal, _goalT);
-            transform.rotation =Quaternion.Lerp(_currentRotation, _nextRotation, _goalR);
+            transform.localPosition = Vector3.Lerp(_currentStart, _goal, _goalT);
+            //transform.rotation =Quaternion.Lerp(_currentRotation, _nextRotation, _goalR);
 
-            if (Vector3.Distance(currentPos, _goal) < 0.05f)
+            if (Vector3.Distance(transform.localPosition, _goal) < 0.05f)
             {
+                RequestDirection();
                 _moveToGoal = false;
                 _goalT = 0;
             }
-            else _goalT += Time.deltaTime * moveSpeed;
-
-            _goalR += Time.deltaTime * rotationSpeed;
+            else
+            {
+                _goalT += Time.deltaTime * moveSpeed;
+                //_goalR += Time.deltaTime * rotationSpeed;
+            }
         }
         if(!_moveToGoal && !_requestedDirection)
         {
@@ -102,20 +109,16 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
     {
         return Vector3.Distance(transform.localPosition, Goal) < tolerance;
     }
-    
-    public void SetGoal(Vector3 newPos)
-    {
-        _goal = newPos;
-    }
+
 
     public void MoveToLocation(Vector3 newLocation)
     {
-        Goal = newLocation;
+        throw new NotImplementedException();
     }
 
     public void AddVector(Vector3 addAmount)
     {
-        transform.localPosition += addAmount;
+        throw new NotImplementedException();
     }
 
     public Vector3 GetLocation()

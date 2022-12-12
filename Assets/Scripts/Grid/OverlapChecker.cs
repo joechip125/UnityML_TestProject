@@ -139,6 +139,7 @@ public class OverlapChecker
             // until we're sure we can hold them all (or until we hit the max size).
             while (true)
             {
+                halfCellScale /= 2;
                 numFound = Physics.OverlapBoxNonAlloc(cellCenter, halfCellScale, _mColliderBuffer, Quaternion.identity, _mColliderMask);
                 if (numFound == _mColliderBuffer.Length && _mColliderBuffer.Length < m_MaxColliderBufferSize)
                 {

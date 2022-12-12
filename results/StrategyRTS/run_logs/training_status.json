@@ -2,40 +2,31 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 161921,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-161921.onnx",
-                "reward": 9.070588235294117,
-                "creation_time": 1670609146.7595193,
+                "steps": 499984,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-499984.onnx",
+                "reward": -2.735698586987222,
+                "creation_time": 1670842433.138593,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-161921.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-499984.pt"
                 ]
             },
             {
-                "steps": 227415,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-227415.onnx",
-                "reward": 11.173267326732674,
-                "creation_time": 1670609821.3924775,
+                "steps": 736841,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-736841.onnx",
+                "reward": -2.843791891097136,
+                "creation_time": 1670844135.2144556,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-227415.pt"
-                ]
-            },
-            {
-                "steps": 241273,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-241273.onnx",
-                "reward": 10.964673913043478,
-                "creation_time": 1670610032.2687354,
-                "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-241273.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-736841.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 241273,
+            "steps": 736841,
             "file_path": "results\\StrategyRTS\\Strategy.onnx",
-            "reward": 10.964673913043478,
-            "creation_time": 1670610032.2687354,
+            "reward": -2.843791891097136,
+            "creation_time": 1670844135.2144556,
             "auxillary_file_paths": [
-                "results\\StrategyRTS\\Strategy\\Strategy-241273.pt"
+                "results\\StrategyRTS\\Strategy\\Strategy-736841.pt"
             ]
         }
     },

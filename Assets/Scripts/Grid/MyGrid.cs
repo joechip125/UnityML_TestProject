@@ -321,15 +321,24 @@ public class MyGrid : MonoBehaviour
             AdjustGridMemory(i, AdjustActions.Add, 2);
             AddWithMem(i, 4);
         }
-        
-        
+
         for (int i = 0; i < 4; i++)
         {
-            AdjustGridMemory(i, AdjustActions.Reset, 2);
-            AdjustGridMemory(0, AdjustActions.Add, 2);
-            AdjustGridMemory(i, AdjustActions.Add, 4);
-            AddWithMem(i, 8);
+            for (int j = 0; j < 4; j++)
+            {
+                AdjustGridMemory(j, AdjustActions.Reset, 2);
+                AdjustGridMemory(i, AdjustActions.Add, 2);
+                AdjustGridMemory(j, AdjustActions.Add, 4);
+                AddWithMem(j, 8);
+            }
         }
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    AdjustGridMemory(i, AdjustActions.Reset, 2);
+        //    AdjustGridMemory(0, AdjustActions.Add, 2);
+        //    AdjustGridMemory(i, AdjustActions.Add, 4);
+        //    AddWithMem(i, 8);
+        //}
         
         //AdjustGridMemory(0, AdjustActions.Reset, 2);
         //AdjustGridMemory(0, AdjustActions.Add, 2);

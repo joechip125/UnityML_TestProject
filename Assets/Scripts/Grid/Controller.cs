@@ -20,30 +20,32 @@ namespace DefaultNamespace
         public Action<Vector3> CallBack;
     }
     
+    
     [Serializable]
-    public class UnitStore
+    public class PositionStore
     {
-        public UnitStore()
+        public PositionStore()
         {
             
         }
 
-        public Queue<UnitValues> Unit = new();
+        public Queue<Vector3> positions = new();
     }
     
     public class Controller : MonoBehaviour
     {
         private float maxDistance = 12;
         private List<UnitMovement> _units = new ();
-        public UnitStore _unitStore;
+       
         public GridAgent agent;
         public SpawnArea spawnArea;
         public GameObject Collector;
+        private PositionStore _positionStore;
         
 
         private void Awake()
         {
-            agent.unitStore = _unitStore;
+            _positionStore = agent.positions;
             agent.ResetMap += OnResetArea;
         }
 
@@ -64,6 +66,7 @@ namespace DefaultNamespace
             foreach (var u in units)
             {
                 _units.Add(u);
+                u._localPos = _positionStore;
                 u.NeedDirectionEvent += OnDirectionNeeded;
             }
         }
@@ -79,7 +82,11 @@ namespace DefaultNamespace
         
         private void OnDirectionNeeded(Vector3 normPos, Action<Vector3> callBack)
         {
-            _unitStore.Unit.Enqueue(new UnitValues(normPos, callBack));
+            
+            if (_positionStore.positions.Count > 0)
+            {
+                callBack.Invoke(_positionStore.positions.Dequeue());
+            }
         }
     }
 }

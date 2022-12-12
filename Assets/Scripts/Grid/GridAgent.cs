@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DefaultNamespace;
 using DefaultNamespace.Grid;
 using Grid;
@@ -16,20 +17,19 @@ public class GridAgent : Agent
     public event Action ResetMap;
     
     public Controller controller;
-
-    public UnitStore unitStore;
-    private UnitValues _currentUnit;
+    
+    public PositionStore positions;
 
     [SerializeField]
     [Tooltip("Select to enable action masking. Note that a model trained with action " +
              "masking turned on may not behave optimally when action masking is turned off.")]
     private bool maskActions;
 
-    private const int CStay = 0; 
-    private const int CUp = 1;
-    private const int CDown = 2;
-    private const int CRight = 3;
-    private const int CLeft = 4;
+    //private const int CStay = 0; 
+    private const int CUp = 0;
+    private const int CDown = 1;
+    private const int CRight = 2;
+    private const int CLeft = 3;
 
     //private ColorGridBuffer _mSensorBuffer;
     private ColorGridBuffer _mReadBuffer;
@@ -66,6 +66,8 @@ public class GridAgent : Agent
 
     private SingleChannel _pathChannel;
 
+    public Transform startPoint;
+
     private void Start()
     {
         ResetMap?.Invoke();
@@ -90,7 +92,7 @@ public class GridAgent : Agent
 
         _mDirections = new Vector2Int[]
         {
-            Vector2Int.zero,
+            //Vector2Int.zero,
             Vector2Int.up,
             Vector2Int.down,
             Vector2Int.left,
@@ -123,14 +125,12 @@ public class GridAgent : Agent
             ResetMap?.Invoke();
         }
         
-        unitStore ??= controller._unitStore;
-
         _pathChannel.Clear();
 
         if (_taskAssigned)
         {
-            _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
-            _mLocalPosNext = _currentUnit.unitPos;
+            _mGridPosition = new Vector2Int(0,0);
+            _mLocalPosNext = startPoint.localPosition;
         }
 
         _mStepTime = 0;
@@ -139,9 +139,9 @@ public class GridAgent : Agent
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         _mValidActions.Clear();
-        _mValidActions.Add(CStay);
+        //_mValidActions.Add(CStay);
         
-        for (int action = 1; action < 5; action++)
+        for (int action = 0; action < 4; action++)
         {
             bool isValid = _pathChannel.Contains( 
                 _mGridPosition.x + _mDirections[action].x,
@@ -168,30 +168,32 @@ public class GridAgent : Agent
         
         if (rewardAgent)
         {
-            // From +0.5 to -0.5.
             //AddReward(0.5f - visitValue);
 
             if (_sensorComp.GridBuffer.Read(0, _mGridPosition) > 0f)
             {
+                //AddReward(0.5f - visitValue);
                 TaskCompleted();
             }
         }
 
-        if (rewardAgent)
-        {
-            // From +0.5 to -0.5.
-            AddReward(0.5f - visitValue);
-        }
-
+        
         return visitValue == 1;
     }
 
     private void TaskCompleted()
     {
-        _currentUnit.CallBack.Invoke(_mLocalPosNext);
+        if (!positions.positions.Contains(_mLocalPosNext))
+        {
+            if (!positions.positions.Any(x => Vector3.Distance(x, _mLocalPosNext) < 1))
+            {
+                positions.positions.Enqueue(_mLocalPosNext);
+            }
+        }
+
         _taskComplete = true;
         _taskAssigned = false;
-        AddReward(1.0f);
+        SetReward(1.0f);
         EndEpisode();
     }
     
@@ -199,6 +201,7 @@ public class GridAgent : Agent
     {
         bool isDone = false;
         var action = actions.DiscreteActions[0];
+       // AddReward(-0.005f);
 
         if (_mValidActions.Contains(action))
         {
@@ -224,14 +227,13 @@ public class GridAgent : Agent
 
     private bool TryGetTask()
     {
-        if (unitStore.Unit.Count <= 0) return false;
+        if (positions.positions.Count > 7) return false;
         
-        _currentUnit = unitStore.Unit.Dequeue();
         _taskState &= ~TaskState.Completed;
         _taskState |= TaskState.Assigned;
 
-        _mGridPosition = GetCellIndexFromPosition(_currentUnit.unitPos);
-        _mLocalPosNext = _currentUnit.unitPos;
+        _mGridPosition = new Vector2Int(0,0);
+        _mLocalPosNext = startPoint.localPosition;
         
         _taskComplete = false;
         _taskAssigned = true;
@@ -260,7 +262,7 @@ public class GridAgent : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
-        discreteActionsOut[0] = CStay;
+       // discreteActionsOut[0] = CStay;
 
         if (Input.GetKey(KeyCode.D))
         {

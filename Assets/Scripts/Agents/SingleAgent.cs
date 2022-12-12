@@ -23,7 +23,7 @@ public class SingleAgent : Agent
      public override void OnEpisodeBegin()
      {
          transform.localPosition = startTrans.localPosition;
-         _movement.SetGoal(startTrans.localPosition);
+         
          _numberCollect = 0;
          _numberPoison = 0;
          _wallHits = 0;
