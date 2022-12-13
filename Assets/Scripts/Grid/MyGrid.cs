@@ -34,7 +34,7 @@ public class CellInfo
 public class MyGrid : MonoBehaviour
 {
     private bool m_ShowGizmos = false;
-    [SerializeField] public Vector3 minCellScale = new Vector3(1f, 0.01f, 1f);
+    [SerializeField] public Vector3 minCellScale = new Vector3(1f, 1, 1f);
     private Vector3 cellScale = new Vector3(1f, 0.01f, 1f);
     
     [SerializeField] private Vector3Int gridSize = new Vector3Int(12, 1, 12);
@@ -78,9 +78,8 @@ public class MyGrid : MonoBehaviour
         m_ShowGizmos = true;
     }
     
-    void InitCellLocalPositions(float division, int index)
+    void InitCellLocalPositions()
     {
-        cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
         _mCellLocalPositions = new Vector3[_numCells];
 
         for (int i = 0; i < _numCells; i++)
@@ -163,8 +162,40 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void GetSmallGrid(int centerIndex, int maxX, int maxZ)
+    private void GetSmallGrid(int centerIndex, int sizeX, int sizeZ)
     {
+        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
+        _numCells = gridSize.x * gridSize.z;
+        _gridAdjustment = transform.position;
+        currentGridSize = gridSize;
+        cellScale = minCellScale;
+        InitCellLocalPositions();
+        var count = sizeX * sizeZ;
+        var start = centerIndex;
+        var pos = new Vector3();
+        var xCount = 0;
+        var zCount = 0;
+        
+        for (int i = 0; i < count; i++)
+        {
+            var curr = start + zCount * gridSize.x + xCount;
+            if (curr > 0 && curr < _numCells)
+            {
+                pos = GetCellGlobalPosition(curr);
+                Gizmos.color = new Color(255, 255, 255, 0.5f);
+                Gizmos.DrawCube(pos, minCellScale);
+            }
+
+            if (xCount + 1 == sizeX)
+            {
+                xCount = 0;
+                zCount++;
+            }
+            else
+            {
+                xCount++;
+            }
+        }
         
     }
     
@@ -258,8 +289,11 @@ public class MyGrid : MonoBehaviour
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if(positions[j].z == 0)
+                    if (positions[j].z == 0)
+                    {
+                        Gizmos.color = new Color(255, 255, 255, 255 * 0.5f);
                         Gizmos.DrawCube(GetCellGlobalPosition(j), cellScale);
+                    }
                 }
             }
         }
@@ -303,28 +337,30 @@ public class MyGrid : MonoBehaviour
     {
         //if (!Application.IsPlaying(gameObject)) return;
        
-        AdjustGridMemory(0, AdjustActions.Reset, 1);
-        ScanFirst();
+        //AdjustGridMemory(0, AdjustActions.Reset, 1);
+        //ScanFirst();
+        //
+        //AdjustGridMemory(0, AdjustActions.Reset, 2);
+        //AddWithMem(0, 2);
+        //
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    AdjustGridMemory(i, AdjustActions.Reset, 2);
+        //    AdjustGridMemory(i, AdjustActions.Add, 2);
+        //    AddWithMem(i, 4);
+        //}
+        //
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    for (int j = 0; j < 4; j++)
+        //    {
+        //        AdjustGridMemory(j, AdjustActions.Reset, 2);
+        //        AdjustGridMemory(i, AdjustActions.Add, 2);
+        //        AdjustGridMemory(j, AdjustActions.Add, 4);
+        //        AddWithMem(j, 8);
+        //    }
+        //}
         
-        AdjustGridMemory(0, AdjustActions.Reset, 2);
-        AddWithMem(0, 2);
-
-        for (int i = 0; i < 4; i++)
-        {
-            AdjustGridMemory(i, AdjustActions.Reset, 2);
-            AdjustGridMemory(i, AdjustActions.Add, 2);
-            AddWithMem(i, 4);
-        }
-
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                AdjustGridMemory(j, AdjustActions.Reset, 2);
-                AdjustGridMemory(i, AdjustActions.Add, 2);
-                AdjustGridMemory(j, AdjustActions.Add, 4);
-                AddWithMem(j, 8);
-            }
-        }
+        GetSmallGrid(0, 4, 4);
     }
 }
