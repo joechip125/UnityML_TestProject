@@ -80,6 +80,11 @@ public class MyGrid : MonoBehaviour
     
     void InitCellLocalPositions()
     {
+        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
+        _numCells = gridSize.x * gridSize.z;
+        _gridAdjustment = transform.position;
+        currentGridSize = gridSize;
+        cellScale = minCellScale;
         _mCellLocalPositions = new Vector3[_numCells];
 
         for (int i = 0; i < _numCells; i++)
@@ -162,31 +167,28 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void GetSmallGrid(int centerIndex, int sizeX, int sizeZ)
+    private void GetSmallGrid(int centerIndex, int extent)
     {
-        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
-        _numCells = gridSize.x * gridSize.z;
-        _gridAdjustment = transform.position;
-        currentGridSize = gridSize;
-        cellScale = minCellScale;
         InitCellLocalPositions();
-        var count = sizeX * sizeZ;
-        var start = centerIndex;
-        var pos = new Vector3();
+        var count = (extent * 2 + 1) * (extent * 2 + 1);
+        var start = centerIndex - (extent  + gridSize.x * extent);
+        extent = (extent *  2) + 1;
         var xCount = 0;
         var zCount = 0;
+        var pos =  GetCellGlobalPosition(centerIndex);
+        Gizmos.color = new Color(0, 255, 0, 0.5f);
+        Gizmos.DrawCube(pos, minCellScale);
         
         for (int i = 0; i < count; i++)
         {
             var curr = start + zCount * gridSize.x + xCount;
-            if (curr > 0 && curr < _numCells)
+            if (curr > 0 && curr < _numCells && curr != centerIndex)
             {
-                pos = GetCellGlobalPosition(curr);
-                Gizmos.color = new Color(255, 255, 255, 0.5f);
-                Gizmos.DrawCube(pos, minCellScale);
+                Gizmos.color = new Color(255, 0, 0, 0.5f);
+                Gizmos.DrawCube(GetCellGlobalPosition(curr), minCellScale);
             }
 
-            if (xCount + 1 == sizeX)
+            if (xCount + 1 == extent)
             {
                 xCount = 0;
                 zCount++;
@@ -335,6 +337,12 @@ public class MyGrid : MonoBehaviour
     
     void OnDrawGizmos()
     {
+        for (int i = 0; i < _numCells; i++)
+        {
+            Gizmos.color = new Color(255, 255, 255, 0.5f);
+            Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
+        }
+        
         //if (!Application.IsPlaying(gameObject)) return;
        
         //AdjustGridMemory(0, AdjustActions.Reset, 1);
@@ -361,6 +369,6 @@ public class MyGrid : MonoBehaviour
         //    }
         //}
         
-        GetSmallGrid(0, 4, 4);
+        GetSmallGrid(64, 1);
     }
 }
