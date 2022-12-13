@@ -33,21 +33,12 @@ public class CellInfo
 
 public class MyGrid : MonoBehaviour
 {
-    
-    public const int NumChannels = 4;
-    // Buffer channels.
-    public const int Collectable = 1;
-    public const int Poison = 2;
-    public const int Visit = 3;
-    public const int Wall = 4;
-    
     private bool m_ShowGizmos = false;
     [SerializeField] public Vector3 minCellScale = new Vector3(1f, 0.01f, 1f);
     private Vector3 cellScale = new Vector3(1f, 0.01f, 1f);
     
     [SerializeField] private Vector3Int gridSize = new Vector3Int(12, 1, 12);
     [HideInInspector, SerializeField]
-    internal float m_GizmoYOffset = 0f;
 
     public List<ChannelLabel> labels;
 
@@ -56,6 +47,8 @@ public class MyGrid : MonoBehaviour
     private Vector3[] _mCellLocalPositions;
     
     Collider[] _mColliderBuffer;
+    private Vector4[] _targets;
+    private List<Vector4> _targetList = new();
     private List<Vector2Int> includeCells = new();
     private List<Vector3>includePositions = new();
     private List<Vector3> nextPositions = new();
@@ -79,13 +72,7 @@ public class MyGrid : MonoBehaviour
     private Stack<Vector3> adjustVvectors = new();
 
     private int[][] scanThese;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-       
-    }
-
+    
     private void Awake()
     {
         m_ShowGizmos = true;
@@ -176,6 +163,11 @@ public class MyGrid : MonoBehaviour
         }
     }
 
+    private void GetSmallGrid(int centerIndex, int maxX, int maxZ)
+    {
+        
+    }
+    
     public void AddEdge(int u, int v, bool blnBiDir = false)
     {
         if (linkedListArray[u] == null)
@@ -203,32 +195,11 @@ public class MyGrid : MonoBehaviour
             }
         }
     }
-
-   
-
-    private void ScanSomething(int divisions, int index)
-    {
-        ScanCells(divisions);
-        for (int i = 0; i < positions.Count; i++)
-        {
-            if (positions[i].z == 0)
-            {
-                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
-                _excludeIndex.Add(index);
-            }
-            else
-            {
-            
-            }
-        }
-    }
-
-  
-
+    
     private int ScanCell(int index, out Color hitColor)
     {
         var pos = GetCellGlobalPosition(index);
-        var _mColliderBuffer = new Collider[4];
+        _mColliderBuffer = new Collider[4];
         hitColor = new Color(255, 255, 255, 255 * 0.5f);
         
         var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 2, _mColliderBuffer, Quaternion.identity);
@@ -251,6 +222,29 @@ public class MyGrid : MonoBehaviour
         return hitTags;
     }
 
+    private void GatherColliders()
+    {
+        _mColliderBuffer = new Collider[50];
+        _targetList.Clear();
+        _targets = new Vector4[50];
+        var pos = transform.position;
+        var size = Vector3.Scale(cellScale, gridSize);
+        var numFound = Physics.OverlapBoxNonAlloc(pos, 
+            size / 2, _mColliderBuffer, Quaternion.identity);
+        
+        for (int i = 0; i < numFound; i++)
+        {
+            var current = _mColliderBuffer[i].gameObject;
+            
+            for (int j = 0; j < labels.Count; j++)
+            {
+                if (current.CompareTag(labels[j].Name))
+                {
+                    var loc = current.transform.position;
+                }
+            }
+        }
+    }
     
     private void AddWithMem(int index, int startDiv)
     {
@@ -332,17 +326,5 @@ public class MyGrid : MonoBehaviour
                 AddWithMem(j, 8);
             }
         }
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    AdjustGridMemory(i, AdjustActions.Reset, 2);
-        //    AdjustGridMemory(0, AdjustActions.Add, 2);
-        //    AdjustGridMemory(i, AdjustActions.Add, 4);
-        //    AddWithMem(i, 8);
-        //}
-        
-        //AdjustGridMemory(0, AdjustActions.Reset, 2);
-        //AdjustGridMemory(0, AdjustActions.Add, 2);
-        //AdjustGridMemory(0, AdjustActions.Add, 4);
-        //AddWithMem(0, 8);
     }
 }

@@ -2,31 +2,31 @@
     "Strategy": {
         "checkpoints": [
             {
-                "steps": 499984,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-499984.onnx",
-                "reward": -2.735698586987222,
-                "creation_time": 1670842433.138593,
+                "steps": 71003,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-71003.onnx",
+                "reward": 18.671779141104295,
+                "creation_time": 1670850024.5016708,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-499984.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-71003.pt"
                 ]
             },
             {
-                "steps": 736841,
-                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-736841.onnx",
-                "reward": -2.843791891097136,
-                "creation_time": 1670844135.2144556,
+                "steps": 362757,
+                "file_path": "results\\StrategyRTS\\Strategy\\Strategy-362757.onnx",
+                "reward": 19.02734375,
+                "creation_time": 1670852281.1188567,
                 "auxillary_file_paths": [
-                    "results\\StrategyRTS\\Strategy\\Strategy-736841.pt"
+                    "results\\StrategyRTS\\Strategy\\Strategy-362757.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 736841,
+            "steps": 362757,
             "file_path": "results\\StrategyRTS\\Strategy.onnx",
-            "reward": -2.843791891097136,
-            "creation_time": 1670844135.2144556,
+            "reward": 19.02734375,
+            "creation_time": 1670852281.1188567,
             "auxillary_file_paths": [
-                "results\\StrategyRTS\\Strategy\\Strategy-736841.pt"
+                "results\\StrategyRTS\\Strategy\\Strategy-362757.pt"
             ]
         }
     },

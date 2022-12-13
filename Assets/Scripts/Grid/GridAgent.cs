@@ -168,7 +168,7 @@ public class GridAgent : Agent
         
         if (rewardAgent)
         {
-            //AddReward(0.5f - visitValue);
+            AddReward(0.5f - visitValue);
 
             if (_sensorComp.GridBuffer.Read(0, _mGridPosition) > 0f)
             {
@@ -193,7 +193,7 @@ public class GridAgent : Agent
 
         _taskComplete = true;
         _taskAssigned = false;
-        SetReward(1.0f);
+        AddReward(1.0f);
         EndEpisode();
     }
     
