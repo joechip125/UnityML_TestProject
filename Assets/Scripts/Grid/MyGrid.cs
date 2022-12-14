@@ -194,27 +194,16 @@ public class MyGrid : MonoBehaviour
         var cosAngle = 1;
         var sinAngle = 1;
         GridIndexes = new int[8];
-        Debug.Log("start");
-        Debug.Log(index);
         
         for (int i = 0; i < 8; i++)
         {
             var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle);
             var aCos = Mathf.Cos(Mathf.Deg2Rad * cosAngle);
             var newIndex = index + new Vector2Int(Mathf.RoundToInt(aCos), Mathf.RoundToInt(aSin));
-            Debug.Log($"sin{aSin} round {Mathf.RoundToInt(aSin)} sinAngle{sinAngle} aCos {aCos}, " +
-                      $"round {Mathf.RoundToInt(aCos)} cosAngle {cosAngle}, newIndex {newIndex}");
             cosAngle += 45;
             sinAngle += 45;
-            if (newIndex.x < 0 || newIndex.x > gridSize.x -1)
-            {
-               // Debug.Log(newIndex);
-                continue;
-            }
-            else
-            {
-               // Debug.Log(newIndex);
-            }
+            if (newIndex.x < 0 || newIndex.x > gridSize.x -1) continue;
+            
             var anIndex = newIndex.y * gridSize.x + newIndex.x;
             Gizmos.color = new Color(255, 0, 0, 0.5f);
             if(anIndex  > 0  && anIndex < _numCells)
