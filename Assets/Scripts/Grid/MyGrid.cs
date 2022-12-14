@@ -38,9 +38,8 @@ public class MyGrid : MonoBehaviour
     private Vector3 cellScale = new Vector3(1f, 0.01f, 1f);
     
     [SerializeField] private Vector3Int gridSize = new Vector3Int(12, 1, 12);
-    [HideInInspector, SerializeField]
-
-    public List<ChannelLabel> labels;
+    
+    [SerializeField] List<ChannelLabel> labels;
 
     private GridBuffer _gridBuffer;
     private Vector3 m_CellCenterOffset = new Vector3(0.5f, 0, 0.5f);
@@ -70,8 +69,6 @@ public class MyGrid : MonoBehaviour
     private List<int> adjustIndexes = new();
     
     private Stack<Vector3> adjustVvectors = new();
-
-    private int[][] scanThese;
     
     private void Awake()
     {
@@ -92,7 +89,31 @@ public class MyGrid : MonoBehaviour
             _mCellLocalPositions[i] = GetCellLocalPosition(i);
         }
     }
-
+    
+    void InitCellLocalPositions2()
+    {
+        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
+        _numCells = gridSize.x * gridSize.z;
+        _gridAdjustment = transform.position;
+        currentGridSize = gridSize;
+        cellScale = minCellScale;
+        _mCellLocalPositions = new Vector3[_numCells];
+        var index = new Vector3Int();
+        var xCount = 0;
+        var zCount = 0;
+        
+        for (int i = 0; i < _numCells; i++)
+        {
+            var amount = (zCount * gridSize.x) + xCount++;
+            _mCellLocalPositions[i] = GetCellLocalPosition(amount);
+            if (xCount > gridSize.x)
+            {
+                xCount = 1;
+                zCount++;
+            }
+        }
+    }
+    
     private Vector3 GetCellLocalPosition(int cellIndex)
     {
         float z = (cellIndex / currentGridSize.z - m_CellCenterOffset.x) * cellScale.z;
@@ -167,38 +188,40 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void GetSmallGrid(int centerIndex, int extent)
+   
+    
+    private void GetSmallGrid(int extent, Vector2Int theCenter)
     {
         InitCellLocalPositions();
-        var count = (extent * 2 + 1) * (extent * 2 + 1);
-        var start = centerIndex - (extent  + gridSize.x * extent);
-        extent = (extent *  2) + 1;
-        var xCount = 0;
-        var zCount = 0;
-        var pos =  GetCellGlobalPosition(centerIndex);
-        Gizmos.color = new Color(0, 255, 0, 0.5f);
-        Gizmos.DrawCube(pos, minCellScale);
-        
-        for (int i = 0; i < count; i++)
-        {
-            var curr = start + zCount * gridSize.x + xCount;
-            if (curr > 0 && curr < _numCells && curr != centerIndex)
-            {
-                Gizmos.color = new Color(255, 0, 0, 0.5f);
-                Gizmos.DrawCube(GetCellGlobalPosition(curr), minCellScale);
-            }
+        var aCenter = (theCenter.y * gridSize.x) + theCenter.x;
+        var vIndex = new Vector2Int(theCenter.x -extent, theCenter.y -extent);
+        var start =  vIndex.y * gridSize.x + vIndex.x;
+        var xCount = theCenter.x -extent;
+        var zCount = theCenter.y -extent;
+        var startExtent = extent;
+        extent = (extent *  2 + 1);
 
-            if (xCount + 1 == extent)
+        for (int z = 0; z < extent; z++)
+        {
+            for (int x = 0; x < extent; x++)
             {
-                xCount = 0;
-                zCount++;
-            }
-            else
-            {
+                if (xCount > gridSize.x -1) break;
+                
+                if (xCount > 0 && xCount <= gridSize.x && start != aCenter)
+                {
+                    if (zCount <= 0 || zCount > gridSize.z) continue;
+                    Gizmos.color = new Color(255, 0, 0, 0.5f);
+                    start = zCount * gridSize.x + xCount;
+                    Gizmos.DrawCube(GetCellGlobalPosition(start), minCellScale);
+                }
+
                 xCount++;
+                start = zCount * gridSize.x + xCount;
             }
+            xCount = theCenter.x -startExtent;
+            zCount++;
         }
-        
+
     }
     
     public void AddEdge(int u, int v, bool blnBiDir = false)
@@ -229,12 +252,13 @@ public class MyGrid : MonoBehaviour
         }
     }
     
-    private int ScanCell(int index, out Color hitColor)
+    private int ScanCell(out Color hitColor, Vector2Int theIndex)
     {
+        var index = theIndex.y * gridSize.x + theIndex.x;
         var pos = GetCellGlobalPosition(index);
         _mColliderBuffer = new Collider[4];
         hitColor = new Color(255, 255, 255, 255 * 0.5f);
-        
+
         var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 2, _mColliderBuffer, Quaternion.identity);
         var hitTags = 0;
 
@@ -246,6 +270,7 @@ public class MyGrid : MonoBehaviour
             {
                 if (current.CompareTag(labels[j].Name))
                 {
+                    GetSmallGrid(1, theIndex);
                     hitTags++;
                     hitColor = Color.green;
                 }
@@ -308,16 +333,16 @@ public class MyGrid : MonoBehaviour
         
         for (int i = 0; i < _numCells; i++)
         {
-            if (ScanCell(i, out var color) > 0)
-            {
-                positions.Add(new Vector3(i,divisions,1));
-                
-                hitResult = true;
-            }
-            else
-            {
-                positions.Add(new Vector3(i,divisions,0));
-            }
+            //if (ScanCell(i, out var color) > 0)
+            //{
+            //    positions.Add(new Vector3(i,divisions,1));
+            //    
+            //    hitResult = true;
+            //}
+            //else
+            //{
+            //    positions.Add(new Vector3(i,divisions,0));
+            //}
         }
         
         return hitResult;
@@ -327,20 +352,32 @@ public class MyGrid : MonoBehaviour
     {
         for (int i = 0; i < _numCells; i++)
         {
-            var hits = ScanCell(i, out var color);
+            //var hits = ScanCell(i, out var color);
             //Gizmos.color = color;
             
-            if(hits < 1)
-                Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
+            //if(hits < 1)
+            //    Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
         }
     }
     
     void OnDrawGizmos()
     {
+        InitCellLocalPositions2();
+        for (int z = 0; z < gridSize.z; z++)
+        {
+            for (int x = 0; x < gridSize.x; x++)
+            {
+                ScanCell( out var color, new Vector2Int(x,z));    
+            }
+        }
+        
         for (int i = 0; i < _numCells; i++)
         {
+            //ScanCell(i, out var color);
             Gizmos.color = new Color(255, 255, 255, 0.5f);
             Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
+            //Debug.Log(GetCellLocalPosition(new Vector3Int(0,0,0)) + transform.position);
+            //Debug.Log(GetCellLocalPosition(new Vector3Int(1,0,0)) + transform.position);
         }
         
         //if (!Application.IsPlaying(gameObject)) return;
@@ -369,6 +406,6 @@ public class MyGrid : MonoBehaviour
         //    }
         //}
         
-        GetSmallGrid(64, 1);
+        //GetSmallGrid(1,new Vector2Int(5,5));
     }
 }
