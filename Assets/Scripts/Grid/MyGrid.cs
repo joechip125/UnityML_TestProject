@@ -189,25 +189,38 @@ public class MyGrid : MonoBehaviour
         }
     }
 
+
+    private void GetGridSize(Vector2Int minIndex, Vector2Int maxIndex)
+    {
+        var min = minIndex.y * gridSize.x + minIndex.x;
+        var max = maxIndex.y * gridSize.x + maxIndex.x;
+        
+        var minVec = GetCellGlobalPosition(min) - minCellScale / 2;
+        var maxVec = GetCellGlobalPosition(max) + minCellScale / 2;
+        var size = new Vector3(maxVec.x - minVec.x, 1, maxVec.z - maxVec.z);
+
+    }
     private void Get1DIndexes(Vector2Int index, int size)
     {
         var cosAngle = 1;
         var sinAngle = 1;
         GridIndexes = new int[8];
         
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 4; i++)
         {
-            var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle);
-            var aCos = Mathf.Cos(Mathf.Deg2Rad * cosAngle);
+            var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle) * size;
+            var aCos = Mathf.Cos(Mathf.Deg2Rad * cosAngle) * size;
             var newIndex = index + new Vector2Int(Mathf.RoundToInt(aCos), Mathf.RoundToInt(aSin));
-            cosAngle += 45;
-            sinAngle += 45;
+            cosAngle += 90;
+            sinAngle += 90;
             if (newIndex.x < 0 || newIndex.x > gridSize.x -1) continue;
             
             var anIndex = newIndex.y * gridSize.x + newIndex.x;
             Gizmos.color = new Color(255, 0, 0, 0.5f);
-            if(anIndex  > 0  && anIndex < _numCells)
+            if (anIndex > 0 && anIndex < _numCells)
+            {
                 Gizmos.DrawCube(GetCellGlobalPosition(anIndex), minCellScale);
+            }
         }
     }
         
