@@ -69,6 +69,7 @@ public class MyGrid : MonoBehaviour
     private List<int> adjustIndexes = new();
     
     private Stack<Vector3> adjustVvectors = new();
+    private int[] GridIndexes;
     
     private void Awake()
     {
@@ -188,27 +189,42 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-    private void Get1DIndexes(Vector2Int index)
+    private void Get1DIndexes(Vector2Int index, int size)
     {
-        var cosAngle = 90.0f;
-        var sinAngle = 0.0f;
-        
+        var cosAngle = 1;
+        var sinAngle = 1;
+        GridIndexes = new int[8];
         Debug.Log("start");
+        Debug.Log(index);
+        
         for (int i = 0; i < 8; i++)
         {
             var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle);
-            var aCos = Mathf.Sin(Mathf.Deg2Rad * cosAngle);
-       
-            
-            
+            var aCos = Mathf.Cos(Mathf.Deg2Rad * cosAngle);
+            var newIndex = index + new Vector2Int(Mathf.RoundToInt(aCos), Mathf.RoundToInt(aSin));
+            Debug.Log($"sin{aSin} round {Mathf.RoundToInt(aSin)} sinAngle{sinAngle} aCos {aCos}, " +
+                      $"round {Mathf.RoundToInt(aCos)} cosAngle {cosAngle}, newIndex {newIndex}");
             cosAngle += 45;
             sinAngle += 45;
+            if (newIndex.x < 0 || newIndex.x > gridSize.x -1)
+            {
+               // Debug.Log(newIndex);
+                continue;
+            }
+            else
+            {
+               // Debug.Log(newIndex);
+            }
+            var anIndex = newIndex.y * gridSize.x + newIndex.x;
+            Gizmos.color = new Color(255, 0, 0, 0.5f);
+            if(anIndex  > 0  && anIndex < _numCells)
+                Gizmos.DrawCube(GetCellGlobalPosition(anIndex), minCellScale);
         }
     }
         
     private void GetSmallGrid(int extent, Vector2Int theCenter)
     {
-        Get1DIndexes(new Vector2Int(0,0));
+        Get1DIndexes(theCenter, 2);
         InitCellLocalPositions();
         var aCenter = (theCenter.y * gridSize.x) + theCenter.x;
         var vIndex = new Vector2Int(theCenter.x -extent, theCenter.y -extent);
@@ -227,9 +243,9 @@ public class MyGrid : MonoBehaviour
                 if (xCount > 0 && xCount <= gridSize.x && start != aCenter)
                 {
                     if (zCount <= 0 || zCount > gridSize.z) continue;
-                    Gizmos.color = new Color(255, 0, 0, 0.5f);
-                    start = zCount * gridSize.x + xCount;
-                    Gizmos.DrawCube(GetCellGlobalPosition(start), minCellScale);
+                    //Gizmos.color = new Color(255, 0, 0, 0.5f);
+                    //start = zCount * gridSize.x + xCount;
+                    //Gizmos.DrawCube(GetCellGlobalPosition(start), minCellScale);
                 }
 
                 xCount++;
@@ -276,7 +292,7 @@ public class MyGrid : MonoBehaviour
         _mColliderBuffer = new Collider[4];
         hitColor = new Color(255, 255, 255, 255 * 0.5f);
 
-        var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 2, _mColliderBuffer, Quaternion.identity);
+        var numFound = Physics.OverlapBoxNonAlloc(pos, cellScale / 4, _mColliderBuffer, Quaternion.identity);
         var hitTags = 0;
 
         for (int i = 0; i < numFound; i++)
