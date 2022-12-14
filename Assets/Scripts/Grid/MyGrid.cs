@@ -188,10 +188,27 @@ public class MyGrid : MonoBehaviour
         }
     }
 
-   
-    
+    private void Get1DIndexes(Vector2Int index)
+    {
+        var cosAngle = 90.0f;
+        var sinAngle = 0.0f;
+        
+        Debug.Log("start");
+        for (int i = 0; i < 8; i++)
+        {
+            var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle);
+            var aCos = Mathf.Sin(Mathf.Deg2Rad * cosAngle);
+       
+            
+            
+            cosAngle += 45;
+            sinAngle += 45;
+        }
+    }
+        
     private void GetSmallGrid(int extent, Vector2Int theCenter)
     {
+        Get1DIndexes(new Vector2Int(0,0));
         InitCellLocalPositions();
         var aCenter = (theCenter.y * gridSize.x) + theCenter.x;
         var vIndex = new Vector2Int(theCenter.x -extent, theCenter.y -extent);
