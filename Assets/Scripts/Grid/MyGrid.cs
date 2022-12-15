@@ -54,12 +54,12 @@ public class MyGrid : MonoBehaviour
     
     private List<Vector3> positions = new();
 
-    private Vector3Int currentGridSize = new Vector3Int(2, 1, 2);
+    private Vector3Int minorGridSize = new Vector3Int(2, 1, 2);
     private int currentDivide = 2;
     private int _numCells = 4;
     private Vector3 _gridAdjustment;
     private Vector3[][] posArray;
-    private Vector3[] adjustVecs ={new (-1,0, -1), new (1,0, -1), new (-1,0, 1), new(1,0,1)};
+    private readonly Vector3Int[] _adjustVectors ={new (-1,0, -1), new (1,0, -1), new (-1,0, 1), new(1,0,1)};
     private List<int> extenders = new();
     private List<CellInfo> _cellInfos = new();
     LinkedList<int>[] linkedListArray;
@@ -72,6 +72,8 @@ public class MyGrid : MonoBehaviour
     private int[] GridIndexes;
 
     private List<Vector4> _cubers = new();
+    private Vector3Int _minorMin;
+    private Vector3Int _minorMax;
     
     private void Awake()
     {
@@ -83,7 +85,7 @@ public class MyGrid : MonoBehaviour
         m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
         _numCells = gridSize.x * gridSize.z;
         _gridAdjustment = transform.position;
-        currentGridSize = gridSize;
+        minorGridSize = gridSize;
         cellScale = minCellScale;
         _mCellLocalPositions = new Vector3[_numCells];
 
@@ -98,7 +100,7 @@ public class MyGrid : MonoBehaviour
         m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
         _numCells = gridSize.x * gridSize.z;
         _gridAdjustment = transform.position;
-        currentGridSize = gridSize;
+        minorGridSize = gridSize;
         cellScale = minCellScale;
         _mCellLocalPositions = new Vector3[_numCells];
         var index = new Vector3Int();
@@ -119,8 +121,8 @@ public class MyGrid : MonoBehaviour
     
     private Vector3 GetCellLocalPosition(int cellIndex)
     {
-        float z = (cellIndex / currentGridSize.z - m_CellCenterOffset.x) * cellScale.z;
-        float x = (cellIndex % currentGridSize.z - m_CellCenterOffset.z) * cellScale.x;
+        float z = (cellIndex / minorGridSize.z - m_CellCenterOffset.x) * cellScale.z;
+        float x = (cellIndex % minorGridSize.z - m_CellCenterOffset.z) * cellScale.x;
         return new Vector3(x, 0, z);
     }
     
@@ -152,7 +154,7 @@ public class MyGrid : MonoBehaviour
         
         else if (actions.HasFlag(AdjustActions.Add))
         {
-           var add = Vector3.Scale(cellScale, adjustVecs[index]* 1f);
+           var add = Vector3.Scale(cellScale, (Vector3)_adjustVectors[index]* 1f);
            _gridAdjustment += add;
            adjustVvectors.Push(add);
         }
@@ -191,20 +193,57 @@ public class MyGrid : MonoBehaviour
         }
     }
 
+    private void StackGrids()
+    {
+        _cubers.Clear();
+        _minorMin = new Vector3Int(5, 0,5);
+        _minorMax = new Vector3Int(14, 0,14);
+        minorGridSize = gridSize;
+        
+        GetGridSize(new Vector2Int(5, 5),new Vector2Int(14, 14));
+
+        ChangeGridShape(0);
+       // ChangeGridShape(3);
+    }
+
+    private Vector3Int GetCosPos(float angleS, float angleC, int size)
+    {
+        var aSin = Mathf.Sin(Mathf.Deg2Rad * angleS);
+        var aCos = Mathf.Cos(Mathf.Deg2Rad * angleC);
+        return new Vector3Int(Mathf.RoundToInt(aSin) * size, 0, Mathf.RoundToInt(aCos) * size);
+    }
+    
     private void ChangeGridShape(int index)
-    { 
+    {
+        minorGridSize = gridSize;
+        if (minorGridSize.x % 2 != 0)
+        {
+            
+        }
+        else
+        {
+            minorGridSize /= 2;
+        }
+
+        var newCenter = minorGridSize + _adjustVectors[index] * minorGridSize / 2;
+        _minorMin = _adjustVectors[index] * minorGridSize / 2;
+        var posMod = GetCosPos(270, 180, 5);
+        Debug.Log( new Vector3Int(5, 0,5)+ GetCosPos(270,180,5));
+        Debug.Log( new Vector3Int(15, 0,15) + GetCosPos(270,180,5));
+    //    Debug.Log(GetCosPos(270,180,10));
+
         var mid = gridSize / 2;
-        var adjust = adjustVecs[index];
-        var one = new Vector2(adjust.x * gridSize.x, adjust.z * gridSize.z);
-        var two = new Vector2(one.x + mid.x, one.y + mid.z);
-        var  min = new Vector2Int();
-        var  max = new Vector2Int();
-         
-        //GetGridSize();    
+        var adjuster = mid + _adjustVectors[index] * gridSize / 2;
+        var adjuster2 = mid + _adjustVectors[3] * gridSize / 2;
+        var adjust = mid + _adjustVectors[index] * gridSize / 2;
+        var minIndex =  new Vector2Int(minorGridSize.x, minorGridSize.z);
+        var one = new Vector2Int(newCenter.x - 4, newCenter.z - 4);
+        var two = new Vector2Int(one.x + mid.x - 1, one.y + mid.z - 1);
+        
+        GetGridSize(one, two);    
     }
     private void GetGridSize(Vector2Int minIndex, Vector2Int maxIndex)
     {
-        _cubers.Clear();
         var min = minIndex.y * gridSize.x + minIndex.x;
         var max = maxIndex.y * gridSize.x + maxIndex.x;
         
@@ -216,6 +255,7 @@ public class MyGrid : MonoBehaviour
 
         _cubers.Add(new Vector4(theSize.x, theSize.z, theCenter.x, theCenter.z));
     }
+    
     private void Get1DIndexes(Vector2Int index, int size)
     {
         var cosAngle = 1;
@@ -405,19 +445,19 @@ public class MyGrid : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.D))
         {
-           GetGridSize(new Vector2Int(10,10), new Vector2Int(19,19));
+           ChangeGridShape(0);
         }
         if (Input.GetKey(KeyCode.W))
         {
-            
+            ChangeGridShape(1);
         }
         if (Input.GetKey(KeyCode.A))
         {
-           
+            ChangeGridShape(2);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            
+            ChangeGridShape(3);
         }
     }
 
@@ -425,7 +465,8 @@ public class MyGrid : MonoBehaviour
     void OnDrawGizmos()
     {
         InitCellLocalPositions2();
-        GetGridSize(new Vector2Int(0,0), new Vector2Int(gridSize.x - 1,gridSize.z - 1));
+        //GetGridSize(new Vector2Int(0,0), new Vector2Int(gridSize.x - 1,gridSize.z - 1));
+        StackGrids();
         
         var pos = transform.position;
         foreach (var c in _cubers)
