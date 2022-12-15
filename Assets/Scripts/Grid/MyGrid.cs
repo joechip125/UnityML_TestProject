@@ -5,6 +5,7 @@ using MBaske.Sensors.Grid;
 using UnityEngine;
 using Unity.MLAgents.Sensors;
 using Unity.VisualScripting;
+using Random = UnityEngine.Random;
 
 public enum CellContents
 {
@@ -196,13 +197,45 @@ public class MyGrid : MonoBehaviour
     private void StackGrids()
     {
         _cubers.Clear();
-        _minorMin = new Vector3Int(5, 0,5);
+        _minorMin = new Vector3Int(0, 0,0);
         _minorMax = new Vector3Int(14, 0,14);
         minorGridSize = gridSize;
         
-        GetGridSize(new Vector2Int(5, 5),new Vector2Int(14, 14));
+        //GetGridSize(new Vector3Int(5,0, 5),new Vector3Int(14,0, 14));
+        var sizeCount = gridSize.x / 2;
+        //ChangeGridShape(1,1, 9);
+        ChangeGridShape(0,0, sizeCount);
+        Debug.Log(_minorMin);
+        var size = new Vector3(_cubers[0].x, 1, _cubers[0].y);
+        var pos = new Vector3(_cubers[0].z, 1, _cubers[0].w);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawCube(pos, size);
 
-        ChangeGridShape(0);
+        sizeCount /= 2;
+        ChangeGridShape(sizeCount,0, sizeCount);
+        size = new Vector3(_cubers[1].x, 1, _cubers[1].y);
+        pos = new Vector3(_cubers[1].z, 1, _cubers[1].w);
+        Gizmos.color = Color.green;
+        Gizmos.DrawCube(pos, size);
+     
+        
+        ChangeGridShape(sizeCount - 3,sizeCount - 3, sizeCount - 2);
+        size = new Vector3(_cubers[2].x, 1, _cubers[2].y);
+        pos = new Vector3(_cubers[2].z, 1, _cubers[2].w);
+        Gizmos.color = Color.red;
+        Gizmos.DrawCube(pos, size);
+        
+        //ChangeGridShape(1,1, 2);
+        //size = new Vector3(_cubers[3].x, 1, _cubers[3].y);
+        //pos = new Vector3(_cubers[3].z, 1, _cubers[3].w);
+        //Gizmos.color = Color.magenta;
+        //Gizmos.DrawCube(pos, size);
+        //
+        //ChangeGridShape(1,0, 1);
+        //size = new Vector3(_cubers[4].x, 1, _cubers[4].y);
+        //pos = new Vector3(_cubers[4].z, 1, _cubers[4].w);
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawCube(pos, size);
        // ChangeGridShape(3);
     }
 
@@ -212,7 +245,19 @@ public class MyGrid : MonoBehaviour
         var aCos = Mathf.Cos(Mathf.Deg2Rad * angleC);
         return new Vector3Int(Mathf.RoundToInt(aSin) * size, 0, Mathf.RoundToInt(aCos) * size);
     }
-    
+  
+    private void ChangeGridShape(int stepX, int stepZ, int size, bool moveMin = true)
+    {
+       
+        if(moveMin)
+            _minorMin += new Vector3Int(stepX, 0, stepZ);
+        
+        var maxX = Mathf.Clamp(_minorMin.x + size - 1, 0, gridSize.x - 1);
+        var maxZ = Mathf.Clamp(_minorMin.z + size -1, 0, gridSize.z - 1);
+        var newMax = new Vector3Int(maxX, 0, maxZ);
+        
+        GetGridSize(_minorMin, newMax);    
+    }
     private void ChangeGridShape(int index)
     {
         minorGridSize = gridSize;
@@ -224,13 +269,11 @@ public class MyGrid : MonoBehaviour
         {
             minorGridSize /= 2;
         }
-
+        
         var newCenter = minorGridSize + _adjustVectors[index] * minorGridSize / 2;
-        _minorMin = _adjustVectors[index] * minorGridSize / 2;
-        var posMod = GetCosPos(270, 180, 5);
-        Debug.Log( new Vector3Int(5, 0,5)+ GetCosPos(270,180,5));
-        Debug.Log( new Vector3Int(15, 0,15) + GetCosPos(270,180,5));
-    //    Debug.Log(GetCosPos(270,180,10));
+        _minorMin +=GetCosPos(270,180,5);
+        _minorMax +=GetCosPos(270,180,5);
+        //    Debug.Log(GetCosPos(270,180,10));
 
         var mid = gridSize / 2;
         var adjuster = mid + _adjustVectors[index] * gridSize / 2;
@@ -240,12 +283,12 @@ public class MyGrid : MonoBehaviour
         var one = new Vector2Int(newCenter.x - 4, newCenter.z - 4);
         var two = new Vector2Int(one.x + mid.x - 1, one.y + mid.z - 1);
         
-        GetGridSize(one, two);    
+        GetGridSize(_minorMin, _minorMax);    
     }
-    private void GetGridSize(Vector2Int minIndex, Vector2Int maxIndex)
+    private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex)
     {
-        var min = minIndex.y * gridSize.x + minIndex.x;
-        var max = maxIndex.y * gridSize.x + maxIndex.x;
+        var min = minIndex.z * gridSize.x + minIndex.x;
+        var max = maxIndex.z * gridSize.x + maxIndex.x;
         
         var minVec = GetCellGlobalPosition(min) - minCellScale / 2;
         var maxVec = GetCellGlobalPosition(max) + minCellScale / 2;
@@ -272,7 +315,7 @@ public class MyGrid : MonoBehaviour
             if (newIndex.x < 0 || newIndex.x > gridSize.x -1) continue;
             
             var anIndex = newIndex.y * gridSize.x + newIndex.x;
-            Gizmos.color = new Color(255, 0, 0, 0.5f);
+            Gizmos.color = new Color(Random.Range(0,1), Random.Range(0,1), 0, 0.5f);
             if (anIndex > 0 && anIndex < _numCells)
             {
                 Gizmos.DrawCube(GetCellGlobalPosition(anIndex), minCellScale);
@@ -471,8 +514,9 @@ public class MyGrid : MonoBehaviour
         var pos = transform.position;
         foreach (var c in _cubers)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawCube(new Vector3(c.z, pos.y, c.w), new Vector3(c.x, 1, c.y));
+            //var color = new Vector4(c.x, c.y, c.z).normalized;
+            //Gizmos.color =new Vector4(color.x * 255, color.y * 255, color.z * 255, 255);
+            //Gizmos.DrawCube(new Vector3(c.z, pos.y, c.w), new Vector3(c.x, 1, c.y));
         }
         
         for (int z = 0; z < gridSize.z; z++)
@@ -486,8 +530,8 @@ public class MyGrid : MonoBehaviour
         for (int i = 0; i < _numCells; i++)
         {
              //ScanCell(i, out var color);
-           // Gizmos.color = new Color(255, 255, 255, 0.5f);
-           // Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
+            Gizmos.color = new Color(255, 255, 255, 0.5f);
+            Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
         }
         
         //if (!Application.IsPlaying(gameObject)) return;
