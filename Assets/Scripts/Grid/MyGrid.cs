@@ -66,23 +66,24 @@ public class MyGrid : MonoBehaviour
             Color.cyan
         };
         
-        ChangeGridShape(1,1);
-        ChangeGridShape(1,0);
-        ChangeGridShape(1,0);
-        ChangeGridShape(1,1);
-        ChangeGridShape(1,1);
+        GetNewGridShape(1,1);
+        GetNewGridShape(1,0);
+        GetNewGridShape(1,0);
+        GetNewGridShape(1,1);
+        GetNewGridShape(1,1);
+        var currentY = transform.position.y;
         
        for (int i = 0; i < _cubers.Count; i++)
        {
            var size = new Vector3(_cubers[i].x, 1, _cubers[i].y);
-           var pos = new Vector3(_cubers[i].z, 1, _cubers[i].w);
+           var pos = new Vector3(_cubers[i].z, currentY, _cubers[i].w);
            Gizmos.color = colors[i];
            Gizmos.DrawCube(pos, size);
        }
     
     }
     
-    private void ChangeGridShape(int stepX, int stepZ, bool moveMin = true)
+    private Vector4 GetNewGridShape(int stepX, int stepZ, bool moveMin = true)
     {
         if (_smallGridSize % 2 != 0)
         {
@@ -99,7 +100,8 @@ public class MyGrid : MonoBehaviour
         var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize -1, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
         
-        GetGridSize(_minorMin, newMax);    
+        GetGridSize(_minorMin, newMax);
+        return new Vector4(_minorMin.x, _minorMin.z, newMax.x, newMax.z);
     }
  
     private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex)
