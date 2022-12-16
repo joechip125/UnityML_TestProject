@@ -132,42 +132,7 @@ public class MyGrid : MonoBehaviour
     {
         return _mCellLocalPositions[cellIndex] + _gridAdjustment;
     }
-
-    private void RollBackGrid()
-    {
-        if (adjustVvectors.Count > 0)
-        {
-            _gridAdjustment -= adjustVvectors.Pop();
-        }
-    }
     
-    private void AdjustGridMemory(int index, AdjustActions actions, float division)
-    {
-        cellScale = new Vector3((gridSize.x / division) * minCellScale.x, 1, (gridSize.z / division) * minCellScale.z);
-        
-        if (actions.HasFlag(AdjustActions.Reset))
-        {
-            _gridAdjustment = transform.position;
-        }
-        else if (actions.HasFlag(AdjustActions.Rollback))
-        {
-            RollBackGrid();
-        }
-        
-        else if (actions.HasFlag(AdjustActions.Add))
-        {
-           var add = Vector3.Scale(cellScale, (Vector3)_adjustVectors[index]* 1f);
-           _gridAdjustment += add;
-           adjustVvectors.Push(add);
-        }
-    
-        _mCellLocalPositions = new Vector3[_numCells];
-
-        for (int i = 0; i < _numCells; i++)
-        {
-            _mCellLocalPositions[i] = GetCellLocalPosition(i);
-        }
-    }
     
     internal void DFS()
     {
@@ -226,14 +191,7 @@ public class MyGrid : MonoBehaviour
        }
     
     }
-
-    private Vector3Int GetCosPos(float angleS, float angleC, int size)
-    {
-        var aSin = Mathf.Sin(Mathf.Deg2Rad * angleS);
-        var aCos = Mathf.Cos(Mathf.Deg2Rad * angleC);
-        return new Vector3Int(Mathf.RoundToInt(aSin) * size, 0, Mathf.RoundToInt(aCos) * size);
-    }
-  
+    
     private void ChangeGridShape(int stepX, int stepZ, bool moveMin = true)
     {
         if (_smallGridSize % 2 != 0)
@@ -411,58 +369,6 @@ public class MyGrid : MonoBehaviour
             }
         }
     }
-    
-    private void AddWithMem(int index, int startDiv)
-    {
-        AdjustGridMemory(index, AdjustActions.Add, startDiv);
-        for (int i = 0; i < 4; i++)
-        {
-            AdjustGridMemory(i, AdjustActions.Rollback, startDiv);
-            AdjustGridMemory(i, AdjustActions.Add, startDiv);
-            
-            if (ScanCells(startDiv))
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    if (positions[j].z == 0)
-                    {
-                        Gizmos.color = new Color(255, 255, 255, 255 * 0.5f);
-                        Gizmos.DrawCube(GetCellGlobalPosition(j), cellScale);
-                    }
-                }
-            }
-        }
-    }
-
-    private bool ScanCells(int divisions)
-    {
-        var hitResult = false;
-        positions.Clear();
-        
-        for (int i = 0; i < _numCells; i++)
-        {
-            //if (ScanCell(i, out var color) > 0)
-            //{
-            //    positions.Add(new Vector3(i,divisions,1));
-            //    
-            //    hitResult = true;
-            //}
-            //else
-            //{
-            //    positions.Add(new Vector3(i,divisions,0));
-            //}
-        }
-        
-        return hitResult;
-    }
-
-
-
-    private void FixedUpdate()
-    {
-       
-    }
-
     
     void OnDrawGizmos()
     {
