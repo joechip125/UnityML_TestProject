@@ -298,39 +298,32 @@ public class MyGrid : MonoBehaviour
         
     private void GetSmallGrid(int size, Vector2Int index)
     {
-        //Get1DIndexes(index, 2);
         InitCellLocalPositions();
-        Mathf.Clamp(index.x - size, 0, 19);
         var start = index - new Vector2Int(size, size);
         var end = index + new Vector2Int(size + 1, size + 1);
         var numX = end.x - start.x;
         var numZ = end.y - start.y;
         var xCount = start.x;
         var zCount = start.y;
-        Debug.Log($"zCount{zCount} start {start} end {end} numX{numX} numZ{numZ}");
 
         for (int z = 0; z < numZ; z++)
         {
             for (int x = 0; x < numX; x++)
             {
-                //Debug.Log($"x{xCount} z{zCount}");
-                //if (xCount > gridSize.x -1) break;
-
                 if (xCount < 0 || xCount >= gridSize.x)
                 {
+                    xCount++;
                     continue;
                 }
 
-                if (zCount < 0 || zCount > gridSize.z)
+                if (zCount < 0 || zCount >= gridSize.z)
                 {
-                    Debug.Log($"x{xCount} z{zCount}");
                     break;
                 }
                 Gizmos.color = new Color(255, 0, 0, 0.5f);
                 var start2 = zCount * gridSize.x + xCount;
                 Gizmos.DrawCube(GetCellGlobalPosition(start2), minCellScale);
                 
-
                 xCount++;
             }
             xCount = start.x;
