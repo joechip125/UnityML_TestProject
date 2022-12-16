@@ -75,6 +75,7 @@ public class MyGrid : MonoBehaviour
     private List<Vector4> _cubers = new();
     private Vector3Int _minorMin;
     private Vector3Int _minorMax;
+    private int _smallGridSize;
     
     private void Awake()
     {
@@ -200,43 +201,29 @@ public class MyGrid : MonoBehaviour
         _minorMin = new Vector3Int(0, 0,0);
         _minorMax = new Vector3Int(14, 0,14);
         minorGridSize = gridSize;
+        _smallGridSize = gridSize.x;
+        List<Color> colors = new List<Color>()
+        {
+            Color.green,
+            Color.blue,
+            Color.red,
+            Color.yellow,
+            Color.magenta,
+            Color.cyan
+        };
         
-        //GetGridSize(new Vector3Int(5,0, 5),new Vector3Int(14,0, 14));
         var sizeCount = gridSize.x / 2;
-        //ChangeGridShape(1,1, 9);
         ChangeGridShape(0,0, sizeCount);
-        Debug.Log(_minorMin);
-        var size = new Vector3(_cubers[0].x, 1, _cubers[0].y);
-        var pos = new Vector3(_cubers[0].z, 1, _cubers[0].w);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawCube(pos, size);
+        
 
-        sizeCount /= 2;
-        ChangeGridShape(sizeCount,0, sizeCount);
-        size = new Vector3(_cubers[1].x, 1, _cubers[1].y);
-        pos = new Vector3(_cubers[1].z, 1, _cubers[1].w);
-        Gizmos.color = Color.green;
-        Gizmos.DrawCube(pos, size);
-     
-        
-        ChangeGridShape(sizeCount - 3,sizeCount - 3, sizeCount - 2);
-        size = new Vector3(_cubers[2].x, 1, _cubers[2].y);
-        pos = new Vector3(_cubers[2].z, 1, _cubers[2].w);
-        Gizmos.color = Color.red;
-        Gizmos.DrawCube(pos, size);
-        
-        //ChangeGridShape(1,1, 2);
-        //size = new Vector3(_cubers[3].x, 1, _cubers[3].y);
-        //pos = new Vector3(_cubers[3].z, 1, _cubers[3].w);
-        //Gizmos.color = Color.magenta;
-        //Gizmos.DrawCube(pos, size);
-        //
-        //ChangeGridShape(1,0, 1);
-        //size = new Vector3(_cubers[4].x, 1, _cubers[4].y);
-        //pos = new Vector3(_cubers[4].z, 1, _cubers[4].w);
-        //Gizmos.color = Color.yellow;
-        //Gizmos.DrawCube(pos, size);
-       // ChangeGridShape(3);
+       for (int i = 0; i < _cubers.Count; i++)
+       {
+           var size = new Vector3(_cubers[i].x, 1, _cubers[i].y);
+           var pos = new Vector3(_cubers[i].z, 1, _cubers[i].w);
+           Gizmos.color = colors[i];
+           Gizmos.DrawCube(pos, size);
+       }
+    
     }
 
     private Vector3Int GetCosPos(float angleS, float angleC, int size)
@@ -248,7 +235,15 @@ public class MyGrid : MonoBehaviour
   
     private void ChangeGridShape(int stepX, int stepZ, int size, bool moveMin = true)
     {
-       
+        if (_smallGridSize % 2 != 0)
+        {
+            _smallGridSize -= 1;
+        }
+        else
+        {
+            _smallGridSize /= 2;
+        }
+        
         if(moveMin)
             _minorMin += new Vector3Int(stepX, 0, stepZ);
         
