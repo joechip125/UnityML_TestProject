@@ -10,12 +10,8 @@ using Random = UnityEngine.Random;
 
 public class MyGrid : MonoBehaviour
 {
-    private bool m_ShowGizmos = false;
- 
-   [SerializeField]private Vector3 cellScale = new(1f, 0.01f, 1f);
-    
+    [SerializeField]private Vector3 cellScale = new(1f, 1, 1f);
     [SerializeField] private Vector3Int gridSize = new Vector3Int(12, 1, 12);
-    
     [SerializeField] List<ChannelLabel> labels;
 
     private GridBuffer _gridBuffer;
@@ -24,36 +20,17 @@ public class MyGrid : MonoBehaviour
     
     Collider[] _mColliderBuffer;
     private Vector4[] _targets;
-    private List<Vector4> _targetList = new();
-
-    private Vector3Int minorGridSize = new Vector3Int(2, 1, 2);
-    private int currentDivide = 2;
-    private int _numCells = 4;
-    private Vector3 _gridAdjustment;
-    private Vector3[][] posArray;
-
-    LinkedList<int>[] linkedListArray;
-
-    private List<int> _excludeIndex;
     
-    private int[] GridIndexes;
+    private int _numCells = 4;
 
     private List<Vector4> _cubers = new();
     private Vector3Int _minorMin;
-    private Vector3Int _minorMax;
     private int _smallGridSize;
-    
-    private void Awake()
-    {
-        m_ShowGizmos = true;
-    }
     
     void InitCellLocalPositions()
     {
         m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
         _numCells = gridSize.x * gridSize.z;
-        _gridAdjustment = transform.position;
-        minorGridSize = gridSize;
         _mCellLocalPositions = new Vector3[_numCells];
 
         for (int i = 0; i < _numCells; i++)
@@ -62,73 +39,22 @@ public class MyGrid : MonoBehaviour
         }
     }
     
-    void InitCellLocalPositions2()
-    {
-        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
-        _numCells = gridSize.x * gridSize.z;
-        _gridAdjustment = transform.position;
-        minorGridSize = gridSize;
-        _mCellLocalPositions = new Vector3[_numCells];
-        var index = new Vector3Int();
-        var xCount = 0;
-        var zCount = 0;
-        
-        for (int i = 0; i < _numCells; i++)
-        {
-            var amount = (zCount * gridSize.x) + xCount++;
-            _mCellLocalPositions[i] = GetCellLocalPosition(amount);
-            if (xCount > gridSize.x)
-            {
-                xCount = 1;
-                zCount++;
-            }
-        }
-    }
-    
     private Vector3 GetCellLocalPosition(int cellIndex)
     {
-        float z = (cellIndex / minorGridSize.z - m_CellCenterOffset.x) * cellScale.z;
-        float x = (cellIndex % minorGridSize.z - m_CellCenterOffset.z) * cellScale.x;
+        float z = (cellIndex / gridSize.z - m_CellCenterOffset.x) * cellScale.z;
+        float x = (cellIndex % gridSize.z - m_CellCenterOffset.z) * cellScale.x;
         return new Vector3(x, 0, z);
     }
     
     private Vector3 GetCellGlobalPosition(int cellIndex) 
     {
-        return _mCellLocalPositions[cellIndex] + _gridAdjustment;
+        return _mCellLocalPositions[cellIndex] + transform.position;;
     }
     
-    
-    internal void DFS()
-    {
-        Debug.Log("DFS");
-        //Console.WriteLine("DFS");
-        bool[] visited = new bool[linkedListArray.Length + 1];
-        DFSHelper(1, visited);
-
-    }
-
-    internal void DFSHelper(int src, bool[] visited)
-    {
-        visited[src] = true;
-        //Console.Write(src + "->");
-        Debug.Log(src + "->");
-        if (linkedListArray[src] != null)
-        {
-            foreach (var item in linkedListArray[src])
-            {
-                if (!visited[item] == true)
-                {
-                    DFSHelper(item, visited);
-                }
-            }
-        }
-    }
-
     private void StackGrids()
     {
         _cubers.Clear();
         _minorMin = new Vector3Int(0, 0,0);
-        minorGridSize = gridSize;
         _smallGridSize = gridSize.x;
         List<Color> colors = new List<Color>()
         {
@@ -190,34 +116,6 @@ public class MyGrid : MonoBehaviour
         _cubers.Add(new Vector4(theSize.x, theSize.z, theCenter.x, theCenter.z));
     }
     
-    private void Get1DIndexes(Vector2Int index, int size)
-    {
-        var cosAngle = 1;
-        var sinAngle = 1;
-        GridIndexes = new int[8];
-        var start = index - new Vector2Int(size, size);
-        var end = index + new Vector2Int(size, size);
-        var numX = end.x - start.x;
-        var numZ = end.y - start.y;
-        
-        for (int i = 0; i < 4; i++)
-        {
-            var aSin = Mathf.Sin(Mathf.Deg2Rad * sinAngle) * size;
-            var aCos = Mathf.Cos(Mathf.Deg2Rad * cosAngle) * size;
-            var newIndex = index + new Vector2Int(Mathf.RoundToInt(aCos), Mathf.RoundToInt(aSin));
-            cosAngle += 90;
-            sinAngle += 90;
-            if (newIndex.x < 0 || newIndex.x > gridSize.x -1) continue;
-            
-            var anIndex = newIndex.y * gridSize.x + newIndex.x;
-            Gizmos.color = new Color(Random.Range(0,1), Random.Range(0,1), 0, 0.5f);
-            if (anIndex > 0 && anIndex < _numCells)
-            {
-                Gizmos.DrawCube(GetCellGlobalPosition(anIndex), cellScale);
-            }
-        }
-    }
-        
     private void GetSmallGrid(int size, Vector2Int index)
     {
         InitCellLocalPositions();
@@ -254,34 +152,6 @@ public class MyGrid : MonoBehaviour
 
     }
     
-    public void AddEdge(int u, int v, bool blnBiDir = false)
-    {
-        if (linkedListArray[u] == null)
-        {
-            linkedListArray[u] = new LinkedList<int>();
-            linkedListArray[u].AddFirst(v);
-        }
-        else
-        {
-            var last = linkedListArray[u].Last;
-            linkedListArray[u].AddAfter(last, v);
-        }
-
-        if (blnBiDir)
-        {
-            if (linkedListArray[v] == null)
-            {
-                linkedListArray[v] = new LinkedList<int>();
-                linkedListArray[v].AddFirst(u);
-            }
-            else
-            {
-                var last = linkedListArray[v].Last;
-                linkedListArray[v].AddAfter(last, u);
-            }
-        }
-    }
-    
     private int ScanCell(out Color hitColor, Vector2Int theIndex)
     {
         var index = theIndex.y * gridSize.x + theIndex.x;
@@ -309,33 +179,10 @@ public class MyGrid : MonoBehaviour
         
         return hitTags;
     }
-
-    private void GatherColliders()
-    {
-        _mColliderBuffer = new Collider[50];
-        _targetList.Clear();
-        var pos = transform.position;
-        var size = Vector3.Scale(cellScale, gridSize);
-        var numFound = Physics.OverlapBoxNonAlloc(pos, 
-            size / 2, _mColliderBuffer, Quaternion.identity);
-        
-        for (int i = 0; i < numFound; i++)
-        {
-            var current = _mColliderBuffer[i].gameObject;
-            
-            for (int j = 0; j < labels.Count; j++)
-            {
-                if (current.CompareTag(labels[j].Name))
-                {
-                    var loc = current.transform.position;
-                }
-            }
-        }
-    }
     
     void OnDrawGizmos()
     {
-        InitCellLocalPositions2();
+        InitCellLocalPositions();
         StackGrids();
         
         for (int z = 0; z < gridSize.z; z++)
