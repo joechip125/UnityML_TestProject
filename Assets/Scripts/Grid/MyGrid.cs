@@ -211,7 +211,7 @@ public class MyGrid : MonoBehaviour
             Color.cyan
         };
         
-        ChangeGridShape(0,0);
+        ChangeGridShape(1,1);
         ChangeGridShape(1,0);
         ChangeGridShape(1,0);
         ChangeGridShape(1,1);
@@ -273,6 +273,10 @@ public class MyGrid : MonoBehaviour
         var cosAngle = 1;
         var sinAngle = 1;
         GridIndexes = new int[8];
+        var start = index - new Vector2Int(size, size);
+        var end = index + new Vector2Int(size, size);
+        var numX = end.x - start.x;
+        var numZ = end.y - start.y;
         
         for (int i = 0; i < 4; i++)
         {
@@ -292,36 +296,44 @@ public class MyGrid : MonoBehaviour
         }
     }
         
-    private void GetSmallGrid(int extent, Vector2Int theCenter)
+    private void GetSmallGrid(int size, Vector2Int index)
     {
-        Get1DIndexes(theCenter, 2);
+        //Get1DIndexes(index, 2);
         InitCellLocalPositions();
-        var aCenter = (theCenter.y * gridSize.x) + theCenter.x;
-        var vIndex = new Vector2Int(theCenter.x -extent, theCenter.y -extent);
-        var start =  vIndex.y * gridSize.x + vIndex.x;
-        var xCount = theCenter.x -extent;
-        var zCount = theCenter.y -extent;
-        var startExtent = extent;
-        extent = (extent *  2 + 1);
+        Mathf.Clamp(index.x - size, 0, 19);
+        var start = index - new Vector2Int(size, size);
+        var end = index + new Vector2Int(size + 1, size + 1);
+        var numX = end.x - start.x;
+        var numZ = end.y - start.y;
+        var xCount = start.x;
+        var zCount = start.y;
+        Debug.Log($"zCount{zCount} start {start} end {end} numX{numX} numZ{numZ}");
 
-        for (int z = 0; z < extent; z++)
+        for (int z = 0; z < numZ; z++)
         {
-            for (int x = 0; x < extent; x++)
+            for (int x = 0; x < numX; x++)
             {
-                if (xCount > gridSize.x -1) break;
-                
-                if (xCount > 0 && xCount <= gridSize.x && start != aCenter)
+                //Debug.Log($"x{xCount} z{zCount}");
+                //if (xCount > gridSize.x -1) break;
+
+                if (xCount < 0 || xCount >= gridSize.x)
                 {
-                    if (zCount <= 0 || zCount > gridSize.z) continue;
-                    //Gizmos.color = new Color(255, 0, 0, 0.5f);
-                    //start = zCount * gridSize.x + xCount;
-                    //Gizmos.DrawCube(GetCellGlobalPosition(start), minCellScale);
+                    continue;
                 }
 
+                if (zCount < 0 || zCount > gridSize.z)
+                {
+                    Debug.Log($"x{xCount} z{zCount}");
+                    break;
+                }
+                Gizmos.color = new Color(255, 0, 0, 0.5f);
+                var start2 = zCount * gridSize.x + xCount;
+                Gizmos.DrawCube(GetCellGlobalPosition(start2), minCellScale);
+                
+
                 xCount++;
-                start = zCount * gridSize.x + xCount;
             }
-            xCount = theCenter.x -startExtent;
+            xCount = start.x;
             zCount++;
         }
 
@@ -462,16 +474,7 @@ public class MyGrid : MonoBehaviour
     void OnDrawGizmos()
     {
         InitCellLocalPositions2();
-        //GetGridSize(new Vector2Int(0,0), new Vector2Int(gridSize.x - 1,gridSize.z - 1));
         StackGrids();
-        
-        var pos = transform.position;
-        foreach (var c in _cubers)
-        {
-            //var color = new Vector4(c.x, c.y, c.z).normalized;
-            //Gizmos.color =new Vector4(color.x * 255, color.y * 255, color.z * 255, 255);
-            //Gizmos.DrawCube(new Vector3(c.z, pos.y, c.w), new Vector3(c.x, 1, c.y));
-        }
         
         for (int z = 0; z < gridSize.z; z++)
         {
@@ -483,37 +486,8 @@ public class MyGrid : MonoBehaviour
         
         for (int i = 0; i < _numCells; i++)
         {
-             //ScanCell(i, out var color);
             Gizmos.color = new Color(255, 255, 255, 0.5f);
             Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
         }
-        
-        //if (!Application.IsPlaying(gameObject)) return;
-       
-        //AdjustGridMemory(0, AdjustActions.Reset, 1);
-        //ScanFirst();
-        //
-        //AdjustGridMemory(0, AdjustActions.Reset, 2);
-        //AddWithMem(0, 2);
-        //
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    AdjustGridMemory(i, AdjustActions.Reset, 2);
-        //    AdjustGridMemory(i, AdjustActions.Add, 2);
-        //    AddWithMem(i, 4);
-        //}
-        //
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    for (int j = 0; j < 4; j++)
-        //    {
-        //        AdjustGridMemory(j, AdjustActions.Reset, 2);
-        //        AdjustGridMemory(i, AdjustActions.Add, 2);
-        //        AdjustGridMemory(j, AdjustActions.Add, 4);
-        //        AddWithMem(j, 8);
-        //    }
-        //}
-        
-        //GetSmallGrid(1,new Vector2Int(5,5));
     }
 }
