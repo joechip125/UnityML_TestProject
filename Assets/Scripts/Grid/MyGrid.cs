@@ -199,7 +199,6 @@ public class MyGrid : MonoBehaviour
     {
         _cubers.Clear();
         _minorMin = new Vector3Int(0, 0,0);
-        _minorMax = new Vector3Int(14, 0,14);
         minorGridSize = gridSize;
         _smallGridSize = gridSize.x;
         List<Color> colors = new List<Color>()
@@ -212,10 +211,12 @@ public class MyGrid : MonoBehaviour
             Color.cyan
         };
         
-        var sizeCount = gridSize.x / 2;
-        ChangeGridShape(0,0, sizeCount);
+        ChangeGridShape(0,0);
+        ChangeGridShape(1,0);
+        ChangeGridShape(1,0);
+        ChangeGridShape(1,1);
+        ChangeGridShape(1,1);
         
-
        for (int i = 0; i < _cubers.Count; i++)
        {
            var size = new Vector3(_cubers[i].x, 1, _cubers[i].y);
@@ -233,53 +234,26 @@ public class MyGrid : MonoBehaviour
         return new Vector3Int(Mathf.RoundToInt(aSin) * size, 0, Mathf.RoundToInt(aCos) * size);
     }
   
-    private void ChangeGridShape(int stepX, int stepZ, int size, bool moveMin = true)
+    private void ChangeGridShape(int stepX, int stepZ, bool moveMin = true)
     {
         if (_smallGridSize % 2 != 0)
         {
             _smallGridSize -= 1;
+            _minorMin += new Vector3Int(stepX, 0, stepZ);
         }
         else
         {
             _smallGridSize /= 2;
+            _minorMin += new Vector3Int(stepX *  _smallGridSize, 0, stepZ * _smallGridSize);
         }
         
-        if(moveMin)
-            _minorMin += new Vector3Int(stepX, 0, stepZ);
-        
-        var maxX = Mathf.Clamp(_minorMin.x + size - 1, 0, gridSize.x - 1);
-        var maxZ = Mathf.Clamp(_minorMin.z + size -1, 0, gridSize.z - 1);
+        var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize - 1, 0, gridSize.x - 1);
+        var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize -1, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
         
         GetGridSize(_minorMin, newMax);    
     }
-    private void ChangeGridShape(int index)
-    {
-        minorGridSize = gridSize;
-        if (minorGridSize.x % 2 != 0)
-        {
-            
-        }
-        else
-        {
-            minorGridSize /= 2;
-        }
-        
-        var newCenter = minorGridSize + _adjustVectors[index] * minorGridSize / 2;
-        _minorMin +=GetCosPos(270,180,5);
-        _minorMax +=GetCosPos(270,180,5);
-        //    Debug.Log(GetCosPos(270,180,10));
-
-        var mid = gridSize / 2;
-        var adjuster = mid + _adjustVectors[index] * gridSize / 2;
-        var adjuster2 = mid + _adjustVectors[3] * gridSize / 2;
-        var adjust = mid + _adjustVectors[index] * gridSize / 2;
-        var minIndex =  new Vector2Int(minorGridSize.x, minorGridSize.z);
-        var one = new Vector2Int(newCenter.x - 4, newCenter.z - 4);
-        var two = new Vector2Int(one.x + mid.x - 1, one.y + mid.z - 1);
-        
-        GetGridSize(_minorMin, _minorMax);    
-    }
+ 
     private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex)
     {
         var min = minIndex.z * gridSize.x + minIndex.x;
@@ -481,22 +455,7 @@ public class MyGrid : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.D))
-        {
-           ChangeGridShape(0);
-        }
-        if (Input.GetKey(KeyCode.W))
-        {
-            ChangeGridShape(1);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            ChangeGridShape(2);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            ChangeGridShape(3);
-        }
+       
     }
 
     
