@@ -15,7 +15,7 @@ public class MyGrid : MonoBehaviour
     [SerializeField] List<ChannelLabel> labels;
 
     private GridBuffer _gridBuffer;
-    private Vector3 m_CellCenterOffset = new Vector3(0.5f, 0, 0.5f);
+    private Vector3 _cellCenterOffset = new Vector3(0.5f, 0, 0.5f);
     private Vector3[] _mCellLocalPositions;
     
     Collider[] _mColliderBuffer;
@@ -29,7 +29,7 @@ public class MyGrid : MonoBehaviour
     
     void InitCellLocalPositions()
     {
-        m_CellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
+        _cellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
         _numCells = gridSize.x * gridSize.z;
         _mCellLocalPositions = new Vector3[_numCells];
 
@@ -41,8 +41,8 @@ public class MyGrid : MonoBehaviour
     
     private Vector3 GetCellLocalPosition(int cellIndex)
     {
-        float z = (cellIndex / gridSize.z - m_CellCenterOffset.x) * cellScale.z;
-        float x = (cellIndex % gridSize.z - m_CellCenterOffset.z) * cellScale.x;
+        float z = (cellIndex / gridSize.z - _cellCenterOffset.x) * cellScale.z;
+        float x = (cellIndex % gridSize.z - _cellCenterOffset.z) * cellScale.x;
         return new Vector3(x, 0, z);
     }
     
@@ -83,7 +83,7 @@ public class MyGrid : MonoBehaviour
     
     }
     
-    private Vector4 GetNewGridShape(int stepX, int stepZ, bool moveMin = true)
+    private Vector4 GetNewGridShape(int stepX, int stepZ)
     {
         if (_smallGridSize % 2 != 0)
         {
@@ -116,6 +116,12 @@ public class MyGrid : MonoBehaviour
         var  theCenter = minVec + theSize / 2;
 
         _cubers.Add(new Vector4(theSize.x, theSize.z, theCenter.x, theCenter.z));
+    }
+    
+    private void GetGridSize(Vector4 indexes)
+    {
+        GetGridSize(new Vector3Int((int)indexes.x, 0, (int)indexes.y)
+            , new Vector3Int((int)indexes.z, 0, (int)indexes.w));
     }
     
     private void GetSmallGrid(int size, Vector2Int index)
