@@ -7,36 +7,12 @@ using Unity.MLAgents.Sensors;
 using Unity.VisualScripting;
 using Random = UnityEngine.Random;
 
-public enum CellContents
-{
-    None,
-    Collector,
-    Collectable,
-    Poison
-}
-[System.Flags]
-public enum AdjustActions
-{
-    None,
-    Add,
-    Rollback,
-    Reset,
-}
-
-
-[Serializable]
-public class CellInfo
-{
-    public Vector3 scale;
-    public Vector3 location;
-    public Vector3 coordinates;
-}
 
 public class MyGrid : MonoBehaviour
 {
     private bool m_ShowGizmos = false;
-    [SerializeField] public Vector3 minCellScale = new Vector3(1f, 1, 1f);
-    private Vector3 cellScale = new Vector3(1f, 0.01f, 1f);
+ 
+   [SerializeField]private Vector3 cellScale = new(1f, 0.01f, 1f);
     
     [SerializeField] private Vector3Int gridSize = new Vector3Int(12, 1, 12);
     
@@ -49,27 +25,17 @@ public class MyGrid : MonoBehaviour
     Collider[] _mColliderBuffer;
     private Vector4[] _targets;
     private List<Vector4> _targetList = new();
-    private List<Vector2Int> includeCells = new();
-    private List<Vector3>includePositions = new();
-    private List<Vector3> nextPositions = new();
-    
-    private List<Vector3> positions = new();
 
     private Vector3Int minorGridSize = new Vector3Int(2, 1, 2);
     private int currentDivide = 2;
     private int _numCells = 4;
     private Vector3 _gridAdjustment;
     private Vector3[][] posArray;
-    private readonly Vector3Int[] _adjustVectors ={new (-1,0, -1), new (1,0, -1), new (-1,0, 1), new(1,0,1)};
-    private List<int> extenders = new();
-    private List<CellInfo> _cellInfos = new();
+
     LinkedList<int>[] linkedListArray;
 
     private List<int> _excludeIndex;
-
-    private List<int> adjustIndexes = new();
     
-    private Stack<Vector3> adjustVvectors = new();
     private int[] GridIndexes;
 
     private List<Vector4> _cubers = new();
@@ -88,7 +54,6 @@ public class MyGrid : MonoBehaviour
         _numCells = gridSize.x * gridSize.z;
         _gridAdjustment = transform.position;
         minorGridSize = gridSize;
-        cellScale = minCellScale;
         _mCellLocalPositions = new Vector3[_numCells];
 
         for (int i = 0; i < _numCells; i++)
@@ -103,7 +68,6 @@ public class MyGrid : MonoBehaviour
         _numCells = gridSize.x * gridSize.z;
         _gridAdjustment = transform.position;
         minorGridSize = gridSize;
-        cellScale = minCellScale;
         _mCellLocalPositions = new Vector3[_numCells];
         var index = new Vector3Int();
         var xCount = 0;
@@ -217,8 +181,8 @@ public class MyGrid : MonoBehaviour
         var min = minIndex.z * gridSize.x + minIndex.x;
         var max = maxIndex.z * gridSize.x + maxIndex.x;
         
-        var minVec = GetCellGlobalPosition(min) - minCellScale / 2;
-        var maxVec = GetCellGlobalPosition(max) + minCellScale / 2;
+        var minVec = GetCellGlobalPosition(min) - cellScale / 2;
+        var maxVec = GetCellGlobalPosition(max) + cellScale / 2;
         var theSize = new Vector3(maxVec.x - minVec.x, 1, maxVec.z - minVec.z);
        
         var  theCenter = minVec + theSize / 2;
@@ -249,7 +213,7 @@ public class MyGrid : MonoBehaviour
             Gizmos.color = new Color(Random.Range(0,1), Random.Range(0,1), 0, 0.5f);
             if (anIndex > 0 && anIndex < _numCells)
             {
-                Gizmos.DrawCube(GetCellGlobalPosition(anIndex), minCellScale);
+                Gizmos.DrawCube(GetCellGlobalPosition(anIndex), cellScale);
             }
         }
     }
@@ -280,7 +244,7 @@ public class MyGrid : MonoBehaviour
                 }
                 Gizmos.color = new Color(255, 0, 0, 0.5f);
                 var start2 = zCount * gridSize.x + xCount;
-                Gizmos.DrawCube(GetCellGlobalPosition(start2), minCellScale);
+                Gizmos.DrawCube(GetCellGlobalPosition(start2), cellScale);
                 
                 xCount++;
             }
@@ -350,7 +314,6 @@ public class MyGrid : MonoBehaviour
     {
         _mColliderBuffer = new Collider[50];
         _targetList.Clear();
-        _targets = new Vector4[50];
         var pos = transform.position;
         var size = Vector3.Scale(cellScale, gridSize);
         var numFound = Physics.OverlapBoxNonAlloc(pos, 
@@ -386,7 +349,7 @@ public class MyGrid : MonoBehaviour
         for (int i = 0; i < _numCells; i++)
         {
             Gizmos.color = new Color(255, 255, 255, 0.5f);
-            Gizmos.DrawCube(GetCellGlobalPosition(i), minCellScale);
+            Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
         }
     }
 }
