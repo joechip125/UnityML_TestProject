@@ -8,6 +8,7 @@ public class TensorTile : MonoBehaviour
 {
     private TextMeshProUGUI _tileText;
     private float _tileNumber;
+    public int tileIndex;
     
     private void Awake()
     {
@@ -16,13 +17,13 @@ public class TensorTile : MonoBehaviour
 
     public void AddTileNum(float addNum)
     {
-        _tileNumber += addNum;
+        _tileNumber = Mathf.Clamp(_tileNumber + addNum, 0, 1);
         _tileText.text = $"{_tileNumber}";
     }
     
     public void SetTileNum(float tileNum)
     {
-        _tileNumber = tileNum;
+        _tileNumber = Mathf.Clamp(tileNum, 0, 1);
         _tileText.text = $"{tileNum}";
     }
 }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MBaske.Sensors.Grid;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class TensorVis : MonoBehaviour
 {
@@ -20,6 +22,8 @@ public class TensorVis : MonoBehaviour
     private int _smallGridSize;
     private Vector3Int _minorMin;
     private Collider[] _mColliderBuffer;
+    private Stack<Vector3Int> _minGridStack = new();
+    private Stack<int> _minSizeStack = new();
 
     void InitCellLocalPositions()
     {
@@ -46,10 +50,10 @@ public class TensorVis : MonoBehaviour
     }
     
     
-    private void DrawToGrid(Vector3Int start, Vector3Int end, float drawValue, bool setOrAdd = false)
+    private void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
     {
-        var numX = end.x - start.x;
-        var numZ = end.z - start.z;
+        var numX = size;
+        var numZ = size;
         var xCount = start.x;
         var zCount = start.z;
 
@@ -90,12 +94,35 @@ public class TensorVis : MonoBehaviour
                 GetCellGlobalPosition(i), Quaternion.identity, transform);
             temp.SetTileNum(0);
             temp.transform.localScale = cellScale / 10;
+            temp.tileIndex = i;
             _tiles.Add(i, temp);
         }
     }
     
-    private void GetNewGridShape(int stepX, int stepZ)
+    private bool GetNewGridShape(int index)
     {
+        var stepX = 0;
+        var stepZ = 0;
+
+        _minSizeStack.Push(_smallGridSize);
+        _minGridStack.Push(_minorMin);
+        
+        switch (index)
+        {
+            case 0:
+                break;
+            case 1:
+                stepX = 1;
+                break;
+            case 2:
+                stepZ = 1;
+                break;
+            case 3:
+                stepX = 1;
+                stepZ = 1;
+                break;
+        }
+
         if (_smallGridSize % 2 != 0)
         {
             _smallGridSize -= 1;
@@ -110,16 +137,15 @@ public class TensorVis : MonoBehaviour
         var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize, 0, gridSize.x - 1);
         var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
-        Debug.Log(newMax);
 
         GetGridSize(_minorMin, newMax, out var center, out var size);
-        var hits = ScanCell(center, size);
-       
+        var hits = ScanCell(center, size / 2);
+        
+        if (hits <= 0) return false;
+        
+        DrawToGrid(_minorMin, _smallGridSize, 0.1f);
+        return true;
 
-        if (hits > 0)
-        {
-            DrawToGrid(_minorMin, newMax, 0.2f);
-        }
     }
  
     private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex, out Vector3 center, out Vector3 size)
@@ -133,13 +159,36 @@ public class TensorVis : MonoBehaviour
        
         center = minVec + size / 2;
     }
+
+    private void RollBackMinorGrid(int amount)
+    {
+        for (var i = 0; i < amount; i++)
+        {
+            if (_minGridStack.Count <= 0) break;
+            _smallGridSize = _minSizeStack.Pop();
+            _minorMin = _minGridStack.Pop();
+        }
+    }
+    
+    private void ScanAll(int mainIndex)
+    {
+        var depthCount = 0;
+        
+        GetNewGridShape(mainIndex);
+
+        for (int i = 0; i < 4; i++)
+        {
+            GetNewGridShape(i);
+            RollBackMinorGrid(1);
+        }
+    }
     
     void Start()
     {
         _smallGridSize = gridSize.x;
         DrawGrid();
-        GetNewGridShape(0,0);
-        GetNewGridShape(0,0);
+        ScanAll(0);
+        ScanAll(0);
     }
     private int ScanCell(Vector3 center, Vector3 size)
     {
