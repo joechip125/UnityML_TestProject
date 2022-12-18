@@ -157,7 +157,6 @@ public class MyGrid : MonoBehaviour
             xCount = start.x;
             zCount++;
         }
-
     }
     
     private int ScanCell(out Color hitColor, Vector2Int theIndex)
