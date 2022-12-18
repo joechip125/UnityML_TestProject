@@ -19,11 +19,10 @@ public class TensorVis : MonoBehaviour
     private Vector3[] _mCellLocalPositions;
     private int _numCells = 4;
     private Dictionary<int, TensorTile> _tiles = new();
+    [SerializeField, HideInInspector]private List<TensorTile> tilesList = new();
     private int _smallGridSize;
     private Vector3Int _minorMin;
     private Collider[] _mColliderBuffer;
-    private Stack<Vector3Int> _minGridStack = new();
-    private Stack<int> _minSizeStack = new();
     private List<Vector3> _hitPositions = new();
     private Vector3 _currentCenter;
 
@@ -48,7 +47,7 @@ public class TensorVis : MonoBehaviour
     
     private Vector3 GetCellGlobalPosition(int cellIndex) 
     {
-        return _mCellLocalPositions[cellIndex] + transform.position;;
+        return _mCellLocalPositions[cellIndex] + transform.position;
     }
     
     
@@ -98,6 +97,7 @@ public class TensorVis : MonoBehaviour
             temp.transform.localScale = cellScale / 10;
             temp.tileIndex = i;
             _tiles.Add(i, temp);
+            tilesList.Add(temp);
         }
     }
     
@@ -161,8 +161,8 @@ public class TensorVis : MonoBehaviour
         _smallGridSize = gridSize.x;
         _currentCenter = transform.position;
         DrawGrid();
-        ScanCell(_currentCenter, gridSize / 2);
-        SortAll();
+        //ScanCell(_currentCenter, gridSize / 2);
+        //SortAll();
 
     }
 
@@ -210,7 +210,6 @@ public class TensorVis : MonoBehaviour
         _mColliderBuffer = new Collider[800];
         _hitPositions.Clear();
         
-        
         var numFound = Physics.OverlapBoxNonAlloc(center, size, _mColliderBuffer, Quaternion.identity);
         var hitTags = 0;
 
@@ -229,6 +228,26 @@ public class TensorVis : MonoBehaviour
         }
         
         return hitTags;
+    }
+
+    private void ClearTensorVis()
+    {
+        foreach (var t in tilesList)
+        {
+            t.SetTileNum(0);
+        }
+    }
+    
+    private void UpdateTensorVis()
+    {
+        ClearTensorVis();   
+        ScanCell(_currentCenter, gridSize / 2);
+        SortAll();
+    }
+
+    private void FixedUpdate()
+    {
+        UpdateTensorVis();
     }
 
     private void OnDrawGizmos()
