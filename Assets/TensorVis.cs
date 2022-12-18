@@ -105,9 +105,6 @@ public class TensorVis : MonoBehaviour
     {
         var stepX = 0;
         var stepZ = 0;
-
-        _minSizeStack.Push(_smallGridSize);
-        _minGridStack.Push(_minorMin);
         
         switch (index)
         {
@@ -115,7 +112,6 @@ public class TensorVis : MonoBehaviour
                 break;
             case 1:
                 stepX = 1;
-                Debug.Log("x forward");
                 break;
             case 2:
                 stepZ = 1;
@@ -158,29 +154,6 @@ public class TensorVis : MonoBehaviour
         size = new Vector3(maxVec.x - minVec.x, 1, maxVec.z - minVec.z);
        
         center = minVec + size / 2;
-    }
-
-    private void RollBackMinorGrid(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-        {
-            if (_minGridStack.Count <= 0) break;
-            _smallGridSize = _minSizeStack.Pop();
-            _minorMin = _minGridStack.Pop();
-        }
-    }
-    
-    private void ScanAll(int mainIndex)
-    {
-        var depthCount = 0;
-        
-        GetNewGridShape(mainIndex);
-
-        for (int i = 0; i < 4; i++)
-        {
-            GetNewGridShape(i);
-            RollBackMinorGrid(1);
-        }
     }
     
     void Start()
@@ -229,7 +202,6 @@ public class TensorVis : MonoBehaviour
             }
             
             norm = hit - _currentCenter;
-            Debug.Log(norm);
         }
     }
     
