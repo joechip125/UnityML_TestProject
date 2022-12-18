@@ -24,6 +24,8 @@ public class TensorVis : MonoBehaviour
     private Collider[] _mColliderBuffer;
     private Stack<Vector3Int> _minGridStack = new();
     private Stack<int> _minSizeStack = new();
+    private List<Vector3> _hitPositions = new();
+    private Vector3 _currentCenter;
 
     void InitCellLocalPositions()
     {
@@ -113,6 +115,7 @@ public class TensorVis : MonoBehaviour
                 break;
             case 1:
                 stepX = 1;
+                Debug.Log("x forward");
                 break;
             case 2:
                 stepZ = 1;
@@ -137,11 +140,8 @@ public class TensorVis : MonoBehaviour
         var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize, 0, gridSize.x - 1);
         var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
-
         GetGridSize(_minorMin, newMax, out var center, out var size);
-        var hits = ScanCell(center, size / 2);
-        
-        if (hits <= 0) return false;
+        _currentCenter = center;
         
         DrawToGrid(_minorMin, _smallGridSize, 0.1f);
         return true;
@@ -186,13 +186,58 @@ public class TensorVis : MonoBehaviour
     void Start()
     {
         _smallGridSize = gridSize.x;
+        _currentCenter = transform.position;
         DrawGrid();
-        ScanAll(0);
-        ScanAll(0);
+        ScanCell(_currentCenter, gridSize / 2);
+        SortAll();
+
     }
+
+    private void SortAll()
+    {
+        var mainCenter = transform.position;
+        foreach (var h in _hitPositions)
+        {
+            SortThis(h);
+            _currentCenter = mainCenter;
+            _smallGridSize = gridSize.x;
+            _minorMin = new Vector3Int(0, 0, 0);
+        }
+    }
+    
+    private void SortThis(Vector3 hit)
+    {
+        var norm = hit - _currentCenter;
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (norm.x < 0)
+            {
+                if (norm.z < 0)
+                    GetNewGridShape(0);
+                
+                else if (norm.z > 0)
+                    GetNewGridShape(2);
+            }
+            else if (norm.x > 0)
+            {
+                if (norm.z < 0)
+                    GetNewGridShape(1);
+                
+                else if (norm.z > 0)
+                    GetNewGridShape(3);
+            }
+            
+            norm = hit - _currentCenter;
+            Debug.Log(norm);
+        }
+    }
+    
     private int ScanCell(Vector3 center, Vector3 size)
     {
         _mColliderBuffer = new Collider[800];
+        _hitPositions.Clear();
+        
         
         var numFound = Physics.OverlapBoxNonAlloc(center, size, _mColliderBuffer, Quaternion.identity);
         var hitTags = 0;
@@ -206,6 +251,7 @@ public class TensorVis : MonoBehaviour
                 if (current.CompareTag(labels[j].Name))
                 {
                     hitTags++;
+                    _hitPositions.Add(current.transform.position);
                 }
             }
         }
