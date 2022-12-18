@@ -19,6 +19,7 @@ public class TensorVis : MonoBehaviour
     private Dictionary<int, TensorTile> _tiles = new();
     private int _smallGridSize;
     private Vector3Int _minorMin;
+    private Collider[] _mColliderBuffer;
 
     void InitCellLocalPositions()
     {
@@ -44,14 +45,13 @@ public class TensorVis : MonoBehaviour
         return _mCellLocalPositions[cellIndex] + transform.position;;
     }
     
-    private void GetSmallGrid(int size, Vector2Int index)
+    
+    private void DrawToGrid(Vector3Int start, Vector3Int end, float drawValue, bool setOrAdd = false)
     {
-        var start = index - new Vector2Int(size, size);
-        var end = index + new Vector2Int(size + 1, size + 1);
         var numX = end.x - start.x;
-        var numZ = end.y - start.y;
+        var numZ = end.z - start.z;
         var xCount = start.x;
-        var zCount = start.y;
+        var zCount = start.z;
 
         for (int z = 0; z < numZ; z++)
         {
@@ -67,9 +67,11 @@ public class TensorVis : MonoBehaviour
                 {
                     break;
                 }
-
+                
                 var singleIndex = zCount * gridSize.x + xCount;
-                _tiles[singleIndex].AddTileNum(0.25f);
+                
+                if(setOrAdd) _tiles[singleIndex].SetTileNum(drawValue);
+                else _tiles[singleIndex].AddTileNum(drawValue);
                 
                 xCount++;
             }
@@ -77,7 +79,6 @@ public class TensorVis : MonoBehaviour
             zCount++;
         }
     }
-    
 
     public void DrawGrid()
     {
@@ -93,7 +94,7 @@ public class TensorVis : MonoBehaviour
         }
     }
     
-    private Vector4 GetNewGridShape(int stepX, int stepZ)
+    private void GetNewGridShape(int stepX, int stepZ)
     {
         if (_smallGridSize % 2 != 0)
         {
@@ -105,29 +106,62 @@ public class TensorVis : MonoBehaviour
             _smallGridSize /= 2;
             _minorMin += new Vector3Int(stepX *  _smallGridSize, 0, stepZ * _smallGridSize);
         }
-        
-        var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize - 1, 0, gridSize.x - 1);
-        var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize -1, 0, gridSize.z - 1);
+
+        var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize, 0, gridSize.x - 1);
+        var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
-        
-        GetGridSize(_minorMin, newMax);
-        return new Vector4(_minorMin.x, _minorMin.z, newMax.x, newMax.z);
+        Debug.Log(newMax);
+
+        GetGridSize(_minorMin, newMax, out var center, out var size);
+        var hits = ScanCell(center, size);
+       
+
+        if (hits > 0)
+        {
+            DrawToGrid(_minorMin, newMax, 0.2f);
+        }
     }
  
-    private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex)
+    private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex, out Vector3 center, out Vector3 size)
     {
         var min = minIndex.z * gridSize.x + minIndex.x;
         var max = maxIndex.z * gridSize.x + maxIndex.x;
         
         var minVec = GetCellGlobalPosition(min) - cellScale / 2;
         var maxVec = GetCellGlobalPosition(max) + cellScale / 2;
-        
+        size = new Vector3(maxVec.x - minVec.x, 1, maxVec.z - minVec.z);
+       
+        center = minVec + size / 2;
     }
     
     void Start()
     {
+        _smallGridSize = gridSize.x;
         DrawGrid();
-        //GetSmallGrid(3, new Vector2Int(5,5));
+        GetNewGridShape(0,0);
+        GetNewGridShape(0,0);
+    }
+    private int ScanCell(Vector3 center, Vector3 size)
+    {
+        _mColliderBuffer = new Collider[800];
+        
+        var numFound = Physics.OverlapBoxNonAlloc(center, size, _mColliderBuffer, Quaternion.identity);
+        var hitTags = 0;
+
+        for (int i = 0; i < numFound; i++)
+        {
+            var current = _mColliderBuffer[i].gameObject;
+            
+            for (int j = 0; j < labels.Count; j++)
+            {
+                if (current.CompareTag(labels[j].Name))
+                {
+                    hitTags++;
+                }
+            }
+        }
+        
+        return hitTags;
     }
 
     private void OnDrawGizmos()
