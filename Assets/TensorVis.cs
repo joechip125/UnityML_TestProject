@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using DefaultNamespace.Grid;
 using MBaske.Sensors.Grid;
 using UnityEngine;
@@ -26,6 +27,9 @@ public class TensorVis : MonoBehaviour
     private List<Vector3> _hitPositions = new();
     private Vector3 _currentCenter;
     private SingleChannel _channel = new (new Vector2Int(20, 20), 0);
+    private List<Vector3> _tilePositions = new();
+    private List<Vector3> _tileScales = new();
+    private List<int> _colorIndexes = new();
 
     void InitCellLocalPositions()
     {
@@ -91,6 +95,39 @@ public class TensorVis : MonoBehaviour
             zCount++;
         }
     }
+    
+    private void DrawToGrid(Vector3Int start, int size)
+    {
+        _colorIndexes.Clear();
+        var numX = size;
+        var numZ = size;
+        var xCount = start.x;
+        var zCount = start.z;
+
+        for (int z = 0; z < numZ; z++)
+        {
+            for (int x = 0; x < numX; x++)
+            {
+                if (xCount < 0 || xCount >= gridSize.x)
+                {
+                    xCount++;
+                    continue;
+                }
+
+                if (zCount < 0 || zCount >= gridSize.z)
+                {
+                    break;
+                }
+                
+                var singleIndex = zCount * gridSize.x + xCount;
+                _colorIndexes.Add(singleIndex);
+                
+                xCount++;
+            }
+            xCount = start.x;
+            zCount++;
+        }
+    }
 
     public void DrawGrid()
     {
@@ -143,13 +180,60 @@ public class TensorVis : MonoBehaviour
         var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize, 0, gridSize.z - 1);
         var newMax = new Vector3Int(maxX, 0, maxZ);
         GetGridSize(_minorMin, newMax, out var center, out var size);
+   
         _currentCenter = center;
         _channel.DrawToGrid(_minorMin, _smallGridSize, 0.1f);
         DrawToGrid(_minorMin, _smallGridSize, 0.1f);
         return true;
 
     }
- 
+    
+    private void GetNewShape(int index)
+    {
+        var stepX = 0;
+        var stepZ = 0;
+        
+        switch (index)
+        {
+            case 0:
+                break;
+            case 1:
+                stepX = 1;
+                break;
+            case 2:
+                stepZ = 1;
+                break;
+            case 3:
+                stepX = 1;
+                stepZ = 1;
+                break;
+        }
+
+        if (_smallGridSize % 2 != 0)
+        {
+            _smallGridSize -= 1;
+            _minorMin += new Vector3Int(stepX, 0, stepZ);
+        }
+        else
+        {
+            _smallGridSize /= 2;
+            _minorMin += new Vector3Int(stepX *  _smallGridSize, 0, stepZ * _smallGridSize);
+        }
+
+        var maxX = Mathf.Clamp(_minorMin.x + _smallGridSize, 0, gridSize.x - 1);
+        var maxZ = Mathf.Clamp(_minorMin.z + _smallGridSize, 0, gridSize.z - 1);
+        var newMax = new Vector3Int(maxX, 0, maxZ);
+        GetGridSize(_minorMin, newMax, out var center, out var size);
+   
+        _currentCenter = center;
+        DrawToGrid(_minorMin, _smallGridSize);
+    }
+
+    private void AddVisTile(int indexX, int indexZ, int depth)
+    {
+        
+    }
+    
     private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex, out Vector3 center, out Vector3 size)
     {
         var min = minIndex.z * gridSize.x + minIndex.x;
@@ -229,7 +313,6 @@ public class TensorVis : MonoBehaviour
                 }
             }
         }
-        
         return hitTags;
     }
 
@@ -251,15 +334,39 @@ public class TensorVis : MonoBehaviour
     private void FixedUpdate()
     {
         UpdateTensorVis();
+        
+        if (Input.GetKey(KeyCode.Alpha0))
+        {
+            GetNewShape(0);
+        }
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            GetNewShape(1);
+        }
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            GetNewShape(2);
+        }
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            GetNewShape(3);
+        }
     }
 
     private void OnDrawGizmos()
     {
         InitCellLocalPositions();
-        
+
         for (int i = 0; i < _numCells; i++)
         {
-            Gizmos.color = new Color(255, 255, 255, 0.5f);
+            if (_colorIndexes.Contains(i))
+            {
+                Gizmos.color = new Color(0, 255, 255, 0.5f);
+            }
+            else
+            {
+                Gizmos.color = new Color(255, 255, 255, 0.5f);
+            }
             Gizmos.DrawCube(GetCellGlobalPosition(i), cellScale);
         }
     }
