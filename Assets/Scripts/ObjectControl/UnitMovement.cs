@@ -52,8 +52,6 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         Goal = _localPos.positions.Dequeue();
         _currentStart = transform.localPosition;
         var dir = (Goal - _currentStart).normalized;
-        // Debug.Log(dir);
-
     }
     
     public Vector3 Goal
