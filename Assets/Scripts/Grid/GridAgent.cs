@@ -100,19 +100,6 @@ public class GridAgent : Agent
         };
     }
     
-    public Vector2Int GetCellIndexFromPosition(Vector3 pos)
-    {
-        var comb = (transform.position - pos) - _mCellCenterOffset;
-        return new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
-    }
-    
-    public int GetIntIndexFromPosition(Vector3 pos)
-    {
-        var comb = (transform.position - pos) - _mCellCenterOffset;
-        var perm = new Vector2Int(Mathf.RoundToInt(Mathf.Abs(comb.x)), Mathf.RoundToInt(Mathf.Abs(comb.z)));
-        var result = perm.x * _gridSize.z + perm.y;
-        return result;
-    }
     
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -262,7 +249,6 @@ public class GridAgent : Agent
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
-       // discreteActionsOut[0] = CStay;
 
         if (Input.GetKey(KeyCode.D))
         {

@@ -27,9 +27,10 @@ public class TensorVis : MonoBehaviour
     private List<Vector3> _hitPositions = new();
     private Vector3 _currentCenter;
     private SingleChannel _channel = new (new Vector2Int(20, 20), 0);
-    private List<Vector3> _tilePositions = new();
-    private List<Vector3> _tileScales = new();
     private List<int> _colorIndexes = new();
+    private float _stepTime;
+    private bool _isActive;
+    private bool _buttonPressed;
 
     void InitCellLocalPositions()
     {
@@ -227,11 +228,7 @@ public class TensorVis : MonoBehaviour
    
         _currentCenter = center;
         DrawToGrid(_minorMin, _smallGridSize);
-    }
-
-    private void AddVisTile(int indexX, int indexZ, int depth)
-    {
-        
+        _buttonPressed = true;
     }
     
     private void GetGridSize(Vector3Int minIndex, Vector3Int maxIndex, out Vector3 center, out Vector3 size)
@@ -333,12 +330,23 @@ public class TensorVis : MonoBehaviour
 
     private void FixedUpdate()
     {
-        UpdateTensorVis();
+      //  UpdateTensorVis();
+        if (_buttonPressed)
+        {
+            _stepTime += Time.fixedDeltaTime;
+            if (_stepTime >= stepDuration)
+            {
+                _stepTime = 0;
+                _buttonPressed = false;
+            }
+            else return;
+        }
         
         if (Input.GetKey(KeyCode.Alpha0))
         {
             GetNewShape(0);
         }
+        
         if (Input.GetKey(KeyCode.Alpha1))
         {
             GetNewShape(1);
@@ -351,7 +359,21 @@ public class TensorVis : MonoBehaviour
         {
             GetNewShape(3);
         }
+        if (Input.GetKey(KeyCode.Alpha9))
+        {
+            ResetMinorGrid();
+        }
     }
+
+    private void ResetMinorGrid()
+    {
+        _currentCenter = transform.position;
+        _smallGridSize = gridSize.x;
+        _minorMin = new Vector3Int(0, 0, 0);
+        _colorIndexes.Clear();
+    }
+    
+    public float stepDuration = 2;
 
     private void OnDrawGizmos()
     {
