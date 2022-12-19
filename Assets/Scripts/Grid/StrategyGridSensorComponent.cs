@@ -9,7 +9,6 @@ using UnityEngine;
 
 public class StrategyGridSensorComponent : SensorComponent
 {
-    // dummy sensor only used for debug gizmo
     CustomGridSensor _mDebugSensor;
     
     List<CustomGridSensor> _mSensors;
@@ -22,9 +21,7 @@ public class StrategyGridSensorComponent : SensorComponent
         set { _mGridBuffer = value; GridShape = value.GetShape(); }
     }
     private ColorGridBuffer _mGridBuffer;
-
-    public ColorGridBuffer ExternalBuffer;
-
+    
     public SingleChannel ExternalChannel;
     
     public GridBuffer.Shape GridShape
@@ -121,7 +118,7 @@ public class StrategyGridSensorComponent : SensorComponent
         gridShape = new GridBuffer.Shape(totalNumberChannels, gridSize.x, gridSize.z);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ExternalBuffer, ChannelLabels, ExternalChannel);
+        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ChannelLabels, ExternalChannel);
         BoxOverlapChecker.RegisterDebugSensor(_mDebugSensor);
     
         _mSensors = GetGridSensors().ToList();
@@ -156,14 +153,11 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ExternalBuffer, ChannelLabels, ExternalChannel);
+        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ChannelLabels, ExternalChannel);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
 
-    /// <summary>
-    /// Update fields that are safe to change on the Sensor at runtime.
-    /// </summary>
     internal void UpdateSensor()
     {
         if (_mSensors == null) return;

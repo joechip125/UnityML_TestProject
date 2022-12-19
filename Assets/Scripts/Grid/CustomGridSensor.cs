@@ -28,7 +28,6 @@ public class CustomGridSensor : ISensor, IDisposable
     Texture2D m_PerceptionTexture;
     
     private  ColorGridBuffer m_GridBuffer;
-    private  ColorGridBuffer m_ExternalBuffer;
 
     private SingleChannel _externalChannel;
 
@@ -43,14 +42,12 @@ public class CustomGridSensor : ISensor, IDisposable
         string name,
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
-        ColorGridBuffer externalBuffer,
         List<ChannelLabel> labels,
         SingleChannel externChannel)
     {
         m_Name = name;
         CompressionType = compression;
         
-        m_ExternalBuffer = externalBuffer;
         _externalChannel = externChannel;
         
         _labels = labels;

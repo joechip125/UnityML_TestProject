@@ -5,10 +5,10 @@ namespace Grid
 {
     public class ChannelMask
     {
-        // [channel][y * width + x]
-        private float[] m_Values;
+        private float[] _channel;
         private readonly int _sizeX;
         private readonly int _sizeZ;
+        public Vector2Int[] Indexes;
 
         public ChannelMask(int sizeX, int sizeZ)
         {
@@ -25,17 +25,17 @@ namespace Grid
         
         protected virtual void Initialize()
         {
-            m_Values = new float[_sizeX * _sizeZ];
+            _channel = new float[_sizeX * _sizeZ];
         }
         
         public virtual void Clear()
         {
-            Array.Clear(m_Values, 0, m_Values.Length);
+            Array.Clear(_channel, 0, _channel.Length);
         }
         
         public virtual void Write(int x, int z, float value)
         {
-            m_Values[z * _sizeX + x] = value;
+            _channel[z * _sizeX + x] = value;
         }
 
         private void AddMask(int x, int z)

@@ -159,9 +159,6 @@ public class TensorVis : MonoBehaviour
         _smallGridSize = gridSize.x;
         _currentCenter = transform.position;
         DrawGrid();
-        //ScanCell(_currentCenter, gridSize / 2);
-        //SortAll();
-
     }
 
     private void SortAll()
