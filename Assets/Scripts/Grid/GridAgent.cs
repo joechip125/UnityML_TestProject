@@ -13,7 +13,7 @@ using UnityEngine;
 
 
 public class GridAgent : Agent
-{
+{ 
     public event Action ResetMap;
     
     public Controller controller;
@@ -21,17 +21,13 @@ public class GridAgent : Agent
     public PositionStore positions;
 
     [SerializeField]
-    [Tooltip("Select to enable action masking. Note that a model trained with action " +
-             "masking turned on may not behave optimally when action masking is turned off.")]
     private bool maskActions;
-
-    //private const int CStay = 0; 
+    
     private const int CUp = 0;
     private const int CDown = 1;
     private const int CRight = 2;
     private const int CLeft = 3;
-
-    //private ColorGridBuffer _mSensorBuffer;
+    
     private ColorGridBuffer _mReadBuffer;
 
 
@@ -61,9 +57,7 @@ public class GridAgent : Agent
     private Vector3Int _gridSize = new Vector3Int(20, 1, 20);
 
     private int _tasksCompleted;
-
-    private TaskState _taskState;
-
+    
     private SingleChannel _pathChannel;
 
     public Transform startPoint;
@@ -82,8 +76,7 @@ public class GridAgent : Agent
         _sensorComp.ExternalChannel = _pathChannel;
         
         _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
-
-        _taskState |= TaskState.Completed;
+        
         _taskComplete = true;
         _taskAssigned = false;
         
@@ -126,8 +119,7 @@ public class GridAgent : Agent
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         _mValidActions.Clear();
-        //_mValidActions.Add(CStay);
-        
+
         for (int action = 0; action < 4; action++)
         {
             bool isValid = _pathChannel.Contains( 
@@ -163,7 +155,6 @@ public class GridAgent : Agent
                 TaskCompleted();
             }
         }
-
         
         return visitValue == 1;
     }
@@ -192,6 +183,14 @@ public class GridAgent : Agent
 
         if (_mValidActions.Contains(action))
         {
+            if(!_pathChannel.GetNewGridShape(action, out var theIndex))
+            {
+                if (_sensorComp.GridBuffer.Read(0, theIndex) > 0)
+                {
+                    SetReward(1.0f);
+                    EndEpisode();
+                }
+            }
             _mGridPosition += _mDirections[action];
             _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
             
@@ -216,9 +215,6 @@ public class GridAgent : Agent
     {
         if (positions.positions.Count > 7) return false;
         
-        _taskState &= ~TaskState.Completed;
-        _taskState |= TaskState.Assigned;
-
         _mGridPosition = new Vector2Int(0,0);
         _mLocalPosNext = startPoint.localPosition;
         

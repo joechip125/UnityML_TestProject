@@ -11,7 +11,7 @@ namespace DefaultNamespace.Grid
     {
         public Vector2Int Size
         {
-            get { return new Vector2Int(SizeX, SizeZ); }
+            get => new Vector2Int(SizeX, SizeZ);
             set
             {
                 SizeX = value.x;
@@ -19,14 +19,8 @@ namespace DefaultNamespace.Grid
             }
         }
 
-        public int ChannelIndex
-        {
-            get => _channelIndex;
-            set => _channelIndex = value;
-        }
+        public int ChannelIndex { get; set; }
 
-        private int _channelIndex;
-        
         public override string ToString()
         {
             return $"Grid {SizeX} x {SizeZ}";
@@ -34,7 +28,7 @@ namespace DefaultNamespace.Grid
         
         public int SizeX
         {
-            get { return _mSizeX; }
+            get => _mSizeX;
             set
             {
                 _mSizeX = value;
@@ -46,7 +40,7 @@ namespace DefaultNamespace.Grid
         
         public int SizeZ
         {
-            get { return _mSizeZ; }
+            get => _mSizeZ;
             set
             {
                 _mSizeZ = value;
@@ -57,6 +51,8 @@ namespace DefaultNamespace.Grid
         private int _mSizeZ;
 
         private float[] m_Values;
+        private int _smallGridSize;
+        private Vector3Int _minorMin;
 
         //public HashSet<Vector2> m_GridPositions;
         
@@ -84,10 +80,9 @@ namespace DefaultNamespace.Grid
             Array.Clear(m_Values, 0, m_Values.Length);
         }
         
-        public virtual void Write(int x, int y, float value)
+        public virtual void Write(int x, int z, float value)
         {
-            m_Values[y * SizeX + x] = value;
-            //IsDirty = true;
+            m_Values[z * SizeX + x] = value;
         }
         
         public virtual void Write(Vector2Int pos, float value)
@@ -172,8 +167,53 @@ namespace DefaultNamespace.Grid
                 (int) (norm.height * SizeZ)
             );
         }
+
+        public void ResetMinorGrid()
+        {
+            _smallGridSize = SizeX;
+            _minorMin = Vector3Int.zero;
+        }
         
-        public void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
+        public bool GetNewGridShape(int index, out int startIndex)
+        {
+            Clear();
+            var stepX = 0;
+            var stepZ = 0;
+        
+            switch (index)
+            {
+                case 0:
+                    break;
+                case 1:
+                    stepX = 1;
+                    break;
+                case 2:
+                    stepZ = 1;
+                    break;
+                case 3:
+                    stepX = 1;
+                    stepZ = 1;
+                    break;
+            }
+
+            if (_smallGridSize % 2 != 0)
+            {
+                _smallGridSize -= 1;
+                _minorMin += new Vector3Int(stepX, 0, stepZ);
+            }
+            else
+            {
+                _smallGridSize /= 2;
+                _minorMin += new Vector3Int(stepX *  _smallGridSize, 0, stepZ * _smallGridSize);
+            }
+            
+            startIndex = _minorMin.z * SizeX + _minorMin.x;
+            
+            DrawToGrid(_minorMin, _smallGridSize, 0.5f);
+            return _smallGridSize != 1;
+        }
+
+        private void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
         {
             var numX = size;
             var numZ = size;

@@ -183,7 +183,6 @@ public class TensorVis : MonoBehaviour
         GetGridSize(_minorMin, newMax, out var center, out var size);
    
         _currentCenter = center;
-        _channel.DrawToGrid(_minorMin, _smallGridSize, 0.1f);
         DrawToGrid(_minorMin, _smallGridSize, 0.1f);
         return true;
 
