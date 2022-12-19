@@ -16,27 +16,13 @@ public class GridAgent : Agent
 { 
     public event Action ResetMap;
     
-    public Controller controller;
-    
     public PositionStore positions;
-
-    [SerializeField]
-    private bool maskActions;
     
-    private const int CUp = 0;
-    private const int CDown = 1;
-    private const int CRight = 2;
-    private const int CLeft = 3;
+    private const int Zero = 0;
+    private const int One = 1;
+    private const int Two = 2;
+    private const int Three = 3;
     
-    private ColorGridBuffer _mReadBuffer;
-
-
-    private Vector2Int _mGridPosition;
-    private Vector3 _mLocalPosNext;
-
-    private List<int> _mValidActions;
-    private Vector2Int[] _mDirections;
-        
     private bool _mIsTraining;
     
     private bool _mIsActive;
@@ -44,24 +30,17 @@ public class GridAgent : Agent
     private bool _taskAssigned;
     
     [SerializeField]
-    [Range(0, 1)] 
-    private float rewardDecrement = 0.25f;
-
-    [SerializeField]
     [Range(0, 2f)] 
     private float stepDuration = 2f;
     private float _mStepTime;
 
     private StrategyGridSensorComponent _sensorComp;
-    private Vector3 _mCellCenterOffset;
     private Vector3Int _gridSize = new Vector3Int(20, 1, 20);
 
     private int _tasksCompleted;
     
     private SingleChannel _pathChannel;
-
-    public Transform startPoint;
-
+    
     private void Start()
     {
         ResetMap?.Invoke();
@@ -75,22 +54,10 @@ public class GridAgent : Agent
         _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
         _sensorComp.ExternalChannel = _pathChannel;
         
-        _mCellCenterOffset = new Vector3((_gridSize.x - 1f) / 2, 0, (_gridSize.z - 1f) / 2);
-        
         _taskComplete = true;
         _taskAssigned = false;
         
         _mIsTraining = Academy.Instance.IsCommunicatorOn;
-        _mValidActions = new List<int>(5);
-
-        _mDirections = new Vector2Int[]
-        {
-            //Vector2Int.zero,
-            Vector2Int.up,
-            Vector2Int.down,
-            Vector2Int.left,
-            Vector2Int.right
-        };
     }
     
     
@@ -109,66 +76,23 @@ public class GridAgent : Agent
 
         if (_taskAssigned)
         {
-            _mGridPosition = new Vector2Int(0,0);
-            _mLocalPosNext = startPoint.localPosition;
+            _pathChannel.ResetMinorGrid();
         }
 
         _mStepTime = 0;
     }
 
-    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
-    {
-        _mValidActions.Clear();
-
-        for (int action = 0; action < 4; action++)
-        {
-            bool isValid = _pathChannel.Contains( 
-                _mGridPosition.x + _mDirections[action].x,
-                _mGridPosition.y + _mDirections[action].y);
-
-            if (isValid)
-            {
-                _mValidActions.Add(action);
-            }
-            else if (maskActions)
-            {
-                actionMask.SetActionEnabled(0, action, false);
-            }
-        }
-    }
     
-    private bool ValidatePosition(bool rewardAgent)
+    private void TaskComplete(int hitIndex)
     {
-        // From 0 to +1. 
-        var visitValue = _pathChannel.Read(_mGridPosition);
-        
-        _pathChannel.Write(_mGridPosition,
-            Mathf.Min(1, visitValue + rewardDecrement));
-        
-        if (rewardAgent)
+        var cellPos = _sensorComp.GetCellPosition(hitIndex);
+        if (!positions.positions.Contains(cellPos))
         {
-            AddReward(0.5f - visitValue);
-
-            if (_sensorComp.GridBuffer.Read(0, _mGridPosition) > 0f)
+            if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1))
             {
-                //AddReward(0.5f - visitValue);
-                TaskCompleted();
+                positions.positions.Enqueue(cellPos);
             }
         }
-        
-        return visitValue == 1;
-    }
-
-    private void TaskCompleted()
-    {
-        if (!positions.positions.Contains(_mLocalPosNext))
-        {
-            if (!positions.positions.Any(x => Vector3.Distance(x, _mLocalPosNext) < 1))
-            {
-                positions.positions.Enqueue(_mLocalPosNext);
-            }
-        }
-
         _taskComplete = true;
         _taskAssigned = false;
         AddReward(1.0f);
@@ -177,54 +101,25 @@ public class GridAgent : Agent
     
     public override void OnActionReceived(ActionBuffers actions)
     {
-        bool isDone = false;
         var action = actions.DiscreteActions[0];
-       // AddReward(-0.005f);
-
-        if (_mValidActions.Contains(action))
-        {
-            if(!_pathChannel.GetNewGridShape(action, out var theIndex))
-            {
-                if (_sensorComp.GridBuffer.Read(0, theIndex) > 0)
-                {
-                    SetReward(1.0f);
-                    var cellPos = _sensorComp.GetCellPosition(theIndex);
-                    if (!positions.positions.Contains(cellPos))
-                    {
-                        if (!positions.positions.Any(x => Vector3.Distance(x, _mLocalPosNext) < 1))
-                        {
-                            positions.positions.Enqueue(_mLocalPosNext);
-                        }
-                    }
-                    EndEpisode();
-                }
-            }
-            _mGridPosition += _mDirections[action];
-            _mLocalPosNext += new Vector3(_mDirections[action].x, 0,_mDirections[action].y);
-            
-            isDone = ValidatePosition(true);
-            
-        }
-        else
-        {
-            AddReward(-1);
-            
-            isDone = ValidatePosition(false);
-        }
         
-        if (isDone)
+        if(!_pathChannel.GetNewGridShape(action, out var theIndex))
         {
-           
-            EndEpisode();
+            if (_sensorComp.GridBuffer.Read(0, theIndex) > 0)
+            {
+                TaskComplete(theIndex);
+            }
+            else
+            {
+                SetReward(-1);
+                EndEpisode();
+            }
         }
     }
 
     private bool TryGetTask()
     {
         if (positions.positions.Count > 7) return false;
-        
-        _mGridPosition = new Vector2Int(0,0);
-        _mLocalPosNext = startPoint.localPosition;
         
         _taskComplete = false;
         _taskAssigned = true;
@@ -254,21 +149,21 @@ public class GridAgent : Agent
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
 
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.Alpha0))
         {
-            discreteActionsOut[0] = CRight;
+            discreteActionsOut[0] = Zero;
         }
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.Alpha1))
         {
-            discreteActionsOut[0] = CUp;
+            discreteActionsOut[0] = One;
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.Alpha2))
         {
-            discreteActionsOut[0] = CLeft;
+            discreteActionsOut[0] = Two;
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.Alpha3))
         {
-            discreteActionsOut[0] = CDown;
+            discreteActionsOut[0] = Three;
         }
     }
 }
