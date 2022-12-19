@@ -18,7 +18,6 @@ public class TensorVis : MonoBehaviour
     private Vector3 _cellCenterOffset = new Vector3(0.5f, 0, 0.5f);
     private Vector3[] _mCellLocalPositions;
     private int _numCells = 4;
-    private Dictionary<int, TensorTile> _tiles = new();
     [SerializeField, HideInInspector]private List<TensorTile> tilesList = new();
     private int _smallGridSize;
     private Vector3Int _minorMin;
@@ -75,8 +74,8 @@ public class TensorVis : MonoBehaviour
                 
                 var singleIndex = zCount * gridSize.x + xCount;
                 
-                if(setOrAdd) _tiles[singleIndex].SetTileNum(drawValue);
-                else _tiles[singleIndex].AddTileNum(drawValue);
+                if(setOrAdd) tilesList[singleIndex].SetTileNum(drawValue);
+                else tilesList[singleIndex].AddTileNum(drawValue);
                 
                 xCount++;
             }
@@ -96,7 +95,6 @@ public class TensorVis : MonoBehaviour
             temp.SetTileNum(0);
             temp.transform.localScale = cellScale / 10;
             temp.tileIndex = i;
-            _tiles.Add(i, temp);
             tilesList.Add(temp);
         }
     }
