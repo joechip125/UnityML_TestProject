@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using DefaultNamespace.Grid;
 using MBaske.Sensors.Grid;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -24,6 +25,7 @@ public class TensorVis : MonoBehaviour
     private Collider[] _mColliderBuffer;
     private List<Vector3> _hitPositions = new();
     private Vector3 _currentCenter;
+    private SingleChannel _channel = new (new Vector2Int(20, 20), 0);
 
     void InitCellLocalPositions()
     {
@@ -73,9 +75,15 @@ public class TensorVis : MonoBehaviour
                 }
                 
                 var singleIndex = zCount * gridSize.x + xCount;
-                
-                if(setOrAdd) tilesList[singleIndex].SetTileNum(drawValue);
-                else tilesList[singleIndex].AddTileNum(drawValue);
+
+                if (setOrAdd)
+                {
+                    tilesList[singleIndex].SetTileNum(drawValue);
+                }
+                else
+                {
+                    tilesList[singleIndex].AddTileNum(drawValue);
+                }
                 
                 xCount++;
             }

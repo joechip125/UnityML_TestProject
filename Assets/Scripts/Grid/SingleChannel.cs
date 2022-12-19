@@ -56,7 +56,6 @@ namespace DefaultNamespace.Grid
 
         private int _mSizeZ;
 
-        //[y * width + x]
         private float[] m_Values;
 
         //public HashSet<Vector2> m_GridPositions;
@@ -101,12 +100,12 @@ namespace DefaultNamespace.Grid
             m_Values[index] = value;
         }
         
-        public virtual bool TryWrite(int x, int y, float value)
+        public virtual bool TryWrite(int x, int z, float value)
         {
-            bool hasPosition = Contains(x, y);
+            bool hasPosition = Contains(x, z);
             if (hasPosition)
             {
-                Write(x, y, value);
+                Write(x, z, value);
             }
 
             return hasPosition;
@@ -117,9 +116,9 @@ namespace DefaultNamespace.Grid
             return TryWrite(pos.x, pos.y, value);
         }
         
-        public virtual float Read( int x, int y)
+        public virtual float Read( int x, int z)
         {
-            return m_Values[y * SizeX + x];
+            return m_Values[z * SizeX + x];
         }
 
         public virtual float Read(int index)
@@ -132,10 +131,10 @@ namespace DefaultNamespace.Grid
             return Read( pos.x, pos.y);
         }
         
-        public virtual bool TryRead(int x, int y, out float value)
+        public virtual bool TryRead(int x, int z, out float value)
         {
-            bool hasPosition = Contains(x, y);
-            value = hasPosition ? Read( x, y) : 0;
+            bool hasPosition = Contains(x, z);
+            value = hasPosition ? Read( x, z) : 0;
             return hasPosition;
         }
 
@@ -145,9 +144,9 @@ namespace DefaultNamespace.Grid
             return TryRead(pos.x, pos.y, out value);
         }
         
-        public virtual bool Contains(int x, int y)
+        public virtual bool Contains(int x, int z)
         {
-            return x >= 0 && x < SizeX && y >= 0 && y < SizeZ;
+            return x >= 0 && x < SizeX && z >= 0 && z < SizeZ;
         }
 
 
@@ -172,6 +171,44 @@ namespace DefaultNamespace.Grid
                 (int) (norm.width * SizeX),
                 (int) (norm.height * SizeZ)
             );
+        }
+        
+        public void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
+        {
+            var numX = size;
+            var numZ = size;
+            var xCount = start.x;
+            var zCount = start.z;
+
+            for (int z = 0; z < numZ; z++)
+            {
+                for (int x = 0; x < numX; x++)
+                {
+                    if (xCount < 0 || xCount >= SizeX)
+                    {
+                        xCount++;
+                        continue;
+                    }
+
+                    if (zCount < 0 || zCount >= SizeZ)
+                    {
+                        break;
+                    }
+                    
+                    if (setOrAdd)
+                    {
+                        Write(xCount, zCount, drawValue);
+                    }
+                    else
+                    {
+                        Write(xCount, zCount, Mathf.Clamp(Read(xCount, zCount) + drawValue,0 ,1));
+                    }
+                
+                    xCount++;
+                }
+                xCount = start.x;
+                zCount++;
+            }
         }
     }
 }
