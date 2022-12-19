@@ -95,7 +95,7 @@ public class GridAgent : Agent
         }
         _taskComplete = true;
         _taskAssigned = false;
-        AddReward(1.0f);
+        SetReward(1.0f);
         EndEpisode();
     }
     
@@ -120,7 +120,7 @@ public class GridAgent : Agent
     private bool TryGetTask()
     {
         if (positions.positions.Count > 7) return false;
-        
+        _pathChannel.ResetMinorGrid();
         _taskComplete = false;
         _taskAssigned = true;
         return true;
