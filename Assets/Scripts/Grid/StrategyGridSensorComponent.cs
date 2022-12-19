@@ -168,6 +168,11 @@ public class StrategyGridSensorComponent : SensorComponent
             sensor.CompressionType = compressionType;
         }
     }
+
+    public Vector3 GetCellPosition(int cellIndex)
+    {
+       return BoxOverlapChecker.GetCellGlobalPosition(cellIndex);
+    }
     
     void OnDrawGizmos()
     {

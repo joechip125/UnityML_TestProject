@@ -188,6 +188,14 @@ public class GridAgent : Agent
                 if (_sensorComp.GridBuffer.Read(0, theIndex) > 0)
                 {
                     SetReward(1.0f);
+                    var cellPos = _sensorComp.GetCellPosition(theIndex);
+                    if (!positions.positions.Contains(cellPos))
+                    {
+                        if (!positions.positions.Any(x => Vector3.Distance(x, _mLocalPosNext) < 1))
+                        {
+                            positions.positions.Enqueue(_mLocalPosNext);
+                        }
+                    }
                     EndEpisode();
                 }
             }
