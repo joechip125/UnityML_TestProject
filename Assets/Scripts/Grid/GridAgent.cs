@@ -103,6 +103,12 @@ public class GridAgent : Agent
         EndEpisode();
     }
     
+    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
+    {
+        if(_pathChannel.SmallGridSize > 10)
+            actionMask.SetActionEnabled(0, 4, false);
+    }
+    
     public override void OnActionReceived(ActionBuffers actions)
     {
         var action = actions.DiscreteActions[0];
@@ -136,8 +142,6 @@ public class GridAgent : Agent
                 AddReward(-1.0f);
             }
         }
-
-
     }
 
     private bool TryGetTask()
