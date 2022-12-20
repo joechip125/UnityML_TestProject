@@ -136,7 +136,7 @@ public class GridAgent : Agent
         {
             if (hits > 0)
             {
-                AddReward(0.1f);
+                //AddReward(0.1f);
             }
             else
             {
