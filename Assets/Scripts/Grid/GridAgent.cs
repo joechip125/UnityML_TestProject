@@ -140,7 +140,7 @@ public class GridAgent : Agent
             }
             else
             {
-                AddReward(-0.1f);
+                AddReward(-1f);
             }
         }
     }
