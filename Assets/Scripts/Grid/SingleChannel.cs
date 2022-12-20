@@ -51,8 +51,8 @@ namespace DefaultNamespace.Grid
         private int _mSizeZ;
 
         private float[] m_Values;
-        private int _smallGridSize;
-        private Vector3Int _minorMin;
+        public int SmallGridSize;
+        public Vector3Int MinorMin;
         private Stack<Vector3Int> _pastIndex = new();
         private Stack<int> _pastSizes = new();
 
@@ -172,8 +172,8 @@ namespace DefaultNamespace.Grid
 
         public void ResetMinorGrid()
         {
-            _smallGridSize = SizeX;
-            _minorMin = Vector3Int.zero;
+            SmallGridSize = SizeX;
+            MinorMin = Vector3Int.zero;
             _pastIndex.Clear();
             _pastSizes.Clear();
         }
@@ -182,11 +182,11 @@ namespace DefaultNamespace.Grid
         {
             if (_pastIndex.Count <= 0) return;
             
-            _minorMin = _pastIndex.Pop();
-            _smallGridSize = _pastSizes.Pop();
+            MinorMin = _pastIndex.Pop();
+            SmallGridSize = _pastSizes.Pop();
         }
         
-        public bool GetNewGridShape(int index, out int startIndex, out Vector3Int otherIndex, out int size)
+        public bool GetNewGridShape(int index)
         {
             Clear();
             var stepX = 0;
@@ -213,38 +213,32 @@ namespace DefaultNamespace.Grid
 
             if (index != 4)
             {
-                if (_smallGridSize % 2 != 0)
+                if (SmallGridSize % 2 != 0)
                 {
-                    _smallGridSize -= 1;
-                    _minorMin += new Vector3Int(stepX, 0, stepZ);
+                    SmallGridSize -= 1;
+                    MinorMin += new Vector3Int(stepX, 0, stepZ);
                 }
                 else
                 {
-                    _smallGridSize /= 2;
-                    _minorMin += new Vector3Int(stepX * _smallGridSize, 0, stepZ * _smallGridSize);
+                    SmallGridSize /= 2;
+                    MinorMin += new Vector3Int(stepX * SmallGridSize, 0, stepZ * SmallGridSize);
                 }
-                _pastIndex.Push(_minorMin);
-                _pastSizes.Push(_smallGridSize);
+                _pastIndex.Push(MinorMin);
+                _pastSizes.Push(SmallGridSize);
             }
             
-            startIndex = _minorMin.z * SizeX + _minorMin.x;
-            size = _smallGridSize;
-
-            otherIndex = _minorMin;
-
-            DrawToGrid(_minorMin, _smallGridSize, 0.5f);
+            DrawToGrid(MinorMin, SmallGridSize, 0.5f);
            
-            return _smallGridSize != 1;
+            return SmallGridSize != 1;
         }
 
-        private Vector3Int DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
+        private void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
         {
             var numX = size;
             var numZ = size;
             var xCount = start.x;
             var zCount = start.z;
-            var finalX = 0;
-
+            
             for (int z = 0; z < numZ; z++)
             {
                 for (int x = 0; x < numX; x++)
@@ -271,13 +265,10 @@ namespace DefaultNamespace.Grid
                 
                     xCount++;
                 }
-
-                finalX = xCount -1;
+                
                 xCount = start.x;
                 zCount++;
             }
-
-            return new Vector3Int(finalX, 0, zCount);
         }
     }
 }

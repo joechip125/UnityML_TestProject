@@ -323,13 +323,12 @@ namespace MBaske.Sensors.Grid
             
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (i <= 399)
+                
+                if (m_Values[channel][i] > 0)
                 {
-                    if (m_Values[channel][i] > 0)
-                    {
-                        retInt++;
-                    }
+                    retInt++;
                 }
+                
             }
 
             return retInt;

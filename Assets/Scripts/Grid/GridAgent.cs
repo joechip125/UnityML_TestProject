@@ -107,9 +107,11 @@ public class GridAgent : Agent
     {
         var action = actions.DiscreteActions[0];
         
-        var notLast = _pathChannel.GetNewGridShape(action, out var startIndex, out var endIndex, out var size);
-
-        var hits = _sensorComp.GridBuffer.ReadFromGrid(endIndex, size, 0);
+        var notLast = _pathChannel.GetNewGridShape(action);
+        var size = _pathChannel.SmallGridSize;
+        var theIndex = _pathChannel.MinorMin;
+        var startIndex = theIndex.z * size + theIndex.x;
+        var hits = _sensorComp.GridBuffer.ReadFromGrid(_pathChannel.MinorMin, _pathChannel.SmallGridSize, 0);
         
         if (!notLast)
         {
