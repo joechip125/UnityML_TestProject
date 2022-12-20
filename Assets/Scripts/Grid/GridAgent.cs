@@ -94,6 +94,7 @@ public class GridAgent : Agent
             if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1.5f))
             {
                 var relative = owner.InverseTransformPoint(cellPos);
+                Debug.Log(relative);
                 positions.positions.Enqueue(relative);
             }
         }
@@ -106,7 +107,7 @@ public class GridAgent : Agent
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         if(_pathChannel.SmallGridSize > 10)
-            actionMask.SetActionEnabled(0, 4, false);
+            actionMask.SetActionEnabled(0, Revert, false);
     }
     
     public override void OnActionReceived(ActionBuffers actions)
@@ -133,11 +134,11 @@ public class GridAgent : Agent
         }
         else
         {
-            if (hits > 0 && size < 20)
+            if (hits > 0)
             {
                 AddReward(1.0f);
             }
-            else if(hits <= 0)
+            else
             {
                 AddReward(-1.0f);
             }
