@@ -103,7 +103,7 @@ public class GridAgent : Agent
         }
         _taskComplete = true;
         _taskAssigned = false;
-        SetReward(1.0f);
+        AddReward(1.0f);
         EndEpisode();
     }
     
@@ -131,7 +131,7 @@ public class GridAgent : Agent
             }
             else
             {
-                SetReward(-1.0f);
+                AddReward(-1.0f);
                 EndEpisode();
             }
         }
