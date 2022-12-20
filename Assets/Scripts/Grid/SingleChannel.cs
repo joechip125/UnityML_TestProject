@@ -207,7 +207,7 @@ namespace DefaultNamespace.Grid
                     stepZ = 1;
                     break;
                 case 4:
-                    RevertMinorGrid();
+                   // RevertMinorGrid();
                     break;
             }
 
@@ -223,8 +223,8 @@ namespace DefaultNamespace.Grid
                     SmallGridSize /= 2;
                     MinorMin += new Vector3Int(stepX * SmallGridSize, 0, stepZ * SmallGridSize);
                 }
-                _pastIndex.Push(MinorMin);
-                _pastSizes.Push(SmallGridSize);
+                //_pastIndex.Push(MinorMin);
+                //_pastSizes.Push(SmallGridSize);
             }
             
             DrawToGrid(MinorMin, SmallGridSize, 0.5f);
