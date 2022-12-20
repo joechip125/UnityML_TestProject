@@ -75,7 +75,7 @@ public class GridAgent : Agent
         }
         
         _pathChannel.Clear();
-        //_pathChannel.ResetMinorGrid();
+        _pathChannel.ResetMinorGrid();
 
         if (_taskAssigned)
         {
@@ -136,11 +136,11 @@ public class GridAgent : Agent
         {
             if (hits > 0)
             {
-                //AddReward(0.1f);
+                SetReward(1f);
             }
             else
             {
-                //AddReward(-1.0f);
+                SetReward(-1.0f);
             }
         }
     }
