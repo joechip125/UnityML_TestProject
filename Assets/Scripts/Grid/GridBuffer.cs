@@ -278,6 +278,63 @@ namespace MBaske.Sensors.Grid
             return m_Values[channel][index];
         }
 
+        
+        public int ReadFromGrid(Vector3Int start, int size, int channel)
+        {
+            var numX = size;
+            var numZ = size;
+            var xCount = start.x;
+            var zCount = start.z;
+            var hitCount = 0;
+
+            for (int z = 0; z < numZ; z++)
+            {
+                for (int x = 0; x < numX; x++)
+                {
+                    if (xCount < 0 || xCount >= SizeX)
+                    {
+                        xCount++;
+                        continue;
+                    }
+
+                    if (zCount < 0 || zCount >= SizeZ)
+                    {
+                        break;
+                    }
+
+                    var single = zCount * SizeX + xCount;
+                    if (m_Values[channel][single] > 0)
+                    {
+                        hitCount++;
+                    }
+                    
+                    xCount++;
+                }
+                xCount = start.x;
+                zCount++;
+            }
+
+            return hitCount;
+        }
+        
+        public int ReadSection(int startIndex, int endIndex, int channel)
+        {
+            var retInt = 0;
+            
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                if (i <= 399)
+                {
+                    if (m_Values[channel][i] > 0)
+                    {
+                        retInt++;
+                    }
+                }
+            }
+
+            return retInt;
+        }
+        
         public bool ReadAll(int index, out float hitChannel, out float channelValue)
         {
             var outBool = false;

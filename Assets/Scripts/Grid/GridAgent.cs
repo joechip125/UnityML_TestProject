@@ -23,7 +23,8 @@ public class GridAgent : Agent
     private const int One = 1;
     private const int Two = 2;
     private const int Three = 3;
-    
+    private const int Revert = 4;
+
     private bool _mIsTraining;
     
     private bool _mIsActive;
@@ -74,6 +75,7 @@ public class GridAgent : Agent
         }
         
         _pathChannel.Clear();
+        //_pathChannel.ResetMinorGrid();
 
         if (_taskAssigned)
         {
@@ -89,7 +91,7 @@ public class GridAgent : Agent
         var cellPos = _sensorComp.GetCellPosition(hitIndex);
         if (!positions.positions.Contains(cellPos))
         {
-            if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1))
+            if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1.5f))
             {
                 var relative = owner.InverseTransformPoint(cellPos);
                 positions.positions.Enqueue(relative);
@@ -97,30 +99,43 @@ public class GridAgent : Agent
         }
         _taskComplete = true;
         _taskAssigned = false;
-        SetReward(1.0f);
+        AddReward(1.0f);
         EndEpisode();
     }
     
     public override void OnActionReceived(ActionBuffers actions)
     {
         var action = actions.DiscreteActions[0];
-        if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
-        {
-            ResetMap?.Invoke();
-        }
         
-        if(!_pathChannel.GetNewGridShape(action, out var theIndex))
+        var notLast = _pathChannel.GetNewGridShape(action, out var startIndex, out var endIndex, out var size);
+
+        var hits = _sensorComp.GridBuffer.ReadFromGrid(endIndex, size, 0);
+        
+        if (!notLast)
         {
-            if (_sensorComp.GridBuffer.Read(0, theIndex) > 0)
+            if (_sensorComp.GridBuffer.Read(0, startIndex) > 0)
             {
-                TaskComplete(theIndex);
+                TaskComplete(startIndex);
             }
             else
             {
                 AddReward(-1.0f);
-                _pathChannel.ResetMinorGrid();
+                EndEpisode();
             }
         }
+        else
+        {
+            if (hits > 0)
+            {
+                AddReward(1.0f);
+            }
+            else
+            {
+                AddReward(-1.0f);
+            }
+        }
+
+
     }
 
     private bool TryGetTask()
@@ -134,20 +149,21 @@ public class GridAgent : Agent
     
     private void FixedUpdate()
     {
+        if (stepDuration > 0)
+        {
+            _mStepTime += Time.fixedDeltaTime;
+            _mIsActive = _mStepTime >= stepDuration;
+        }
+
         if (_taskComplete && !_taskAssigned)
         {
             TryGetTask();
         }
-        
+
         if (_mIsActive && _taskAssigned)
         {
             _mStepTime = 0;
             RequestDecision();
-        }
-        else if (stepDuration > 0)
-        {
-            _mStepTime += Time.fixedDeltaTime;
-            _mIsActive = _mStepTime >= stepDuration;
         }
     }
     
@@ -170,6 +186,10 @@ public class GridAgent : Agent
         if (Input.GetKey(KeyCode.Alpha3))
         {
             discreteActionsOut[0] = Three;
+        }
+        if (Input.GetKey(KeyCode.Alpha4))
+        {
+            discreteActionsOut[0] = Revert;
         }
     }
 }

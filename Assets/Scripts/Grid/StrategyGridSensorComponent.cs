@@ -171,8 +171,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
     public Vector3 GetCellPosition(int cellIndex)
     {
-        Debug.Log(BoxOverlapChecker.GetCellLocalPosition(cellIndex));
-       return BoxOverlapChecker.GetCellGlobalPosition(cellIndex);
+        return BoxOverlapChecker.GetCellGlobalPosition(cellIndex);
     }
     
     void OnDrawGizmos()

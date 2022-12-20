@@ -53,6 +53,8 @@ namespace DefaultNamespace.Grid
         private float[] m_Values;
         private int _smallGridSize;
         private Vector3Int _minorMin;
+        private Stack<Vector3Int> _pastIndex = new();
+        private Stack<int> _pastSizes = new();
 
         //public HashSet<Vector2> m_GridPositions;
         
@@ -172,9 +174,19 @@ namespace DefaultNamespace.Grid
         {
             _smallGridSize = SizeX;
             _minorMin = Vector3Int.zero;
+            _pastIndex.Clear();
+            _pastSizes.Clear();
+        }
+
+        private void RevertMinorGrid()
+        {
+            if (_pastIndex.Count <= 0) return;
+            
+            _minorMin = _pastIndex.Pop();
+            _smallGridSize = _pastSizes.Pop();
         }
         
-        public bool GetNewGridShape(int index, out int startIndex)
+        public bool GetNewGridShape(int index, out int startIndex, out Vector3Int otherIndex, out int size)
         {
             Clear();
             var stepX = 0;
@@ -194,8 +206,12 @@ namespace DefaultNamespace.Grid
                     stepX = 1;
                     stepZ = 1;
                     break;
+                case 4:
+                    RevertMinorGrid();
+                    break;
             }
 
+            
             if (_smallGridSize % 2 != 0)
             {
                 _smallGridSize -= 1;
@@ -204,21 +220,29 @@ namespace DefaultNamespace.Grid
             else
             {
                 _smallGridSize /= 2;
-                _minorMin += new Vector3Int(stepX *  _smallGridSize, 0, stepZ * _smallGridSize);
+                _minorMin += new Vector3Int(stepX * _smallGridSize, 0, stepZ * _smallGridSize);
             }
             
+            _pastIndex.Push(_minorMin);
+            _pastSizes.Push(_smallGridSize);
+
             startIndex = _minorMin.z * SizeX + _minorMin.x;
-            
+            size = _smallGridSize;
+
+            otherIndex = _minorMin;
+
             DrawToGrid(_minorMin, _smallGridSize, 0.5f);
+           
             return _smallGridSize != 1;
         }
 
-        private void DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
+        private Vector3Int DrawToGrid(Vector3Int start, int size, float drawValue, bool setOrAdd = false)
         {
             var numX = size;
             var numZ = size;
             var xCount = start.x;
             var zCount = start.z;
+            var finalX = 0;
 
             for (int z = 0; z < numZ; z++)
             {
@@ -246,9 +270,13 @@ namespace DefaultNamespace.Grid
                 
                     xCount++;
                 }
+
+                finalX = xCount -1;
                 xCount = start.x;
                 zCount++;
             }
+
+            return new Vector3Int(finalX, 0, zCount);
         }
     }
 }

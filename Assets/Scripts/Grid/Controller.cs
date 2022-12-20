@@ -35,7 +35,7 @@ namespace DefaultNamespace
     public class Controller : MonoBehaviour
     {
         private float maxDistance = 12;
-        private List<UnitMovement> _units = new ();
+        [SerializeField]private List<UnitMovement> _units = new ();
        
         public GridAgent agent;
         public SpawnArea spawnArea;
@@ -60,8 +60,8 @@ namespace DefaultNamespace
         {
             var units = FindObjectsOfType<UnitMovement>()
                 .Where(x => 
-                    Vector3.Distance(x.transform.localPosition, 
-                  transform.localPosition) < maxDistance).ToList();
+                    Vector3.Distance(x.transform.position, 
+                  transform.position) < maxDistance).ToList();
 
             foreach (var u in units)
             {

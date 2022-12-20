@@ -108,10 +108,9 @@ public class SpawnArea : MonoBehaviour
         {
             t.ClearAllCollect();
 
-            if (counter != 0)
-            {
-                t.SpawnSetAmount(_collections[counter].collectTypesList);
-            }
+            
+            t.SpawnSetAmount(_collections[counter].collectTypesList);
+            
 
             counter++;
         }
@@ -135,18 +134,7 @@ public class SpawnArea : MonoBehaviour
             counter++;
         }
     }
-
-    public bool CheckTile(int tileChoice)
-    {
-        if (tileChoice == _rightChoice)
-        {
-            tiles[tileChoice].CollectValue++;
-            return true;
-        }
-
-        tiles[tileChoice].CollectValue--;
-        return false;
-    }
+    
 
     public Vector3 GetLocationAtTile(IntVector2 tileCoords)
     {
@@ -154,20 +142,6 @@ public class SpawnArea : MonoBehaviour
             .transform.localPosition;
     }
     
-    public bool CheckTile(IntVector2 tileChoice)
-    {
-        if (tileChoice == _theRightChoice)
-        {
-            Debug.Log($"Right{tileChoice} {_numRight++}");
-            //tiles.Single(x => x.coordinates == tileChoice).CollectValue++;
-            return true;
-        }
-        Debug.Log($"Wrong{tileChoice} {_numWrong++}");
-        //tiles.Single(x => x.coordinates == tileChoice).CollectValue--;
-        return false;
-    }
-    
-
     void SpawnAreas(int numX, int numZ)
     {
         Vector3 spawnLoc = transform.localPosition;
@@ -184,13 +158,13 @@ public class SpawnArea : MonoBehaviour
 
             spawnLoc += new Vector3(10,0,0);
         }
-        SpawnWalls(numX, numZ);
     }
 
     private void SpawnWalls(int numX, int numZ)
     {
         var min = tiles[0].GetTileLocation(TileLocations.Min);
         var max = tiles[^1].GetTileLocation(TileLocations.Max);
+        
         var center = (max - new Vector3(Mathf.Abs(min.x), 0,Mathf.Abs(min.z))) / 2;
         //var rot = Quaternion.LookRotation( center - new Vector3(1, 5, numZ * 10), Vector3.up);
         
