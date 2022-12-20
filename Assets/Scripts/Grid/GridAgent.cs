@@ -125,11 +125,11 @@ public class GridAgent : Agent
         }
         else
         {
-            if (hits > 0)
+            if (hits > 0 && size < 20)
             {
                 AddReward(1.0f);
             }
-            else
+            else if(hits <= 0)
             {
                 AddReward(-1.0f);
             }

@@ -192,6 +192,7 @@ namespace DefaultNamespace.Grid
             var stepX = 0;
             var stepZ = 0;
         
+            Debug.Log($"before {_smallGridSize}");
             switch (index)
             {
                 case 0:
@@ -211,20 +212,23 @@ namespace DefaultNamespace.Grid
                     break;
             }
 
-            
-            if (_smallGridSize % 2 != 0)
+            if (index != 4)
             {
-                _smallGridSize -= 1;
-                _minorMin += new Vector3Int(stepX, 0, stepZ);
+                if (_smallGridSize % 2 != 0)
+                {
+                    _smallGridSize -= 1;
+                    _minorMin += new Vector3Int(stepX, 0, stepZ);
+                }
+                else
+                {
+                    _smallGridSize /= 2;
+                    _minorMin += new Vector3Int(stepX * _smallGridSize, 0, stepZ * _smallGridSize);
+                }
             }
-            else
-            {
-                _smallGridSize /= 2;
-                _minorMin += new Vector3Int(stepX * _smallGridSize, 0, stepZ * _smallGridSize);
-            }
-            
             _pastIndex.Push(_minorMin);
             _pastSizes.Push(_smallGridSize);
+            
+            Debug.Log($"during {_smallGridSize}");
 
             startIndex = _minorMin.z * SizeX + _minorMin.x;
             size = _smallGridSize;
