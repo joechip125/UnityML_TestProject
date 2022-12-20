@@ -17,6 +17,7 @@ public class GridAgent : Agent
     public event Action ResetMap;
     
     public PositionStore positions;
+    [SerializeField] public Transform owner;
     
     private const int Zero = 0;
     private const int One = 1;
@@ -90,7 +91,8 @@ public class GridAgent : Agent
         {
             if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1))
             {
-                positions.positions.Enqueue(cellPos);
+                var relative = owner.InverseTransformPoint(cellPos);
+                positions.positions.Enqueue(relative);
             }
         }
         _taskComplete = true;
@@ -102,6 +104,10 @@ public class GridAgent : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         var action = actions.DiscreteActions[0];
+        if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
+        {
+            ResetMap?.Invoke();
+        }
         
         if(!_pathChannel.GetNewGridShape(action, out var theIndex))
         {
@@ -111,8 +117,8 @@ public class GridAgent : Agent
             }
             else
             {
-                SetReward(-1);
-                EndEpisode();
+                AddReward(-1.0f);
+                _pathChannel.ResetMinorGrid();
             }
         }
     }

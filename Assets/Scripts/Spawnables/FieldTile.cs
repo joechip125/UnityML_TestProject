@@ -29,6 +29,7 @@ public class FieldTile : MonoBehaviour
     private TextMeshProUGUI _text;
     public IntVector2 coordinates;
     private float _collectValue;
+    public Transform owner;
 
     public GameObject spawnCollect;
     public GameObject spawnPoison;
@@ -61,6 +62,7 @@ public class FieldTile : MonoBehaviour
     private void Awake()
     {
         var extents = GetComponent<MeshCollider>().bounds.extents;
+        var extent = transform.localPosition;
         range = Mathf.Min(extents.x, extents.z) - 1;
         _text = GetComponentInChildren<TextMeshProUGUI>();
     }
@@ -137,7 +139,7 @@ public class FieldTile : MonoBehaviour
         tempLoc.Clear();
         var unique = false;
         
-        for (int i = 0; i < numberLocations; i++)
+        for (var i = 0; i < numberLocations; i++)
         {
             while (!unique)
             {

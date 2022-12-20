@@ -177,6 +177,7 @@ public class SpawnArea : MonoBehaviour
             {
                 var temp = Instantiate(spawnPrototype, spawnLoc + new Vector3(0,0, z * 10), 
                     quaternion.identity, transform).GetComponent<FieldTile>();
+                temp.owner = transform;
                 tiles.Add(temp);
                 temp.coordinates = new IntVector2(x, z);
             }
