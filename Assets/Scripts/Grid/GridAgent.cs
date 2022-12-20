@@ -120,7 +120,7 @@ public class GridAgent : Agent
             else
             {
                 AddReward(-1.0f);
-                EndEpisode();
+               // EndEpisode();
             }
         }
         else
