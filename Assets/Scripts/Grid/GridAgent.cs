@@ -42,6 +42,8 @@ public class GridAgent : Agent
     private int _tasksCompleted;
     
     private SingleChannel _pathChannel;
+
+    private int _revertThreshold;
     
     private void Start()
     {
@@ -76,6 +78,7 @@ public class GridAgent : Agent
         
         _pathChannel.Clear();
         _pathChannel.ResetMinorGrid();
+        _revertThreshold = 10;
 
         if (_taskAssigned)
         {
@@ -106,7 +109,7 @@ public class GridAgent : Agent
     
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        if(_pathChannel.SmallGridSize > 10)
+        if(_pathChannel.SmallGridSize > _revertThreshold)
             actionMask.SetActionEnabled(0, Revert, false);
     }
     
@@ -137,6 +140,7 @@ public class GridAgent : Agent
             if (hits > 0)
             {
                 SetReward(1f);
+                _revertThreshold = size;
             }
             else
             {
