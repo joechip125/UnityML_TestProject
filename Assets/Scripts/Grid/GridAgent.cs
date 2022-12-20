@@ -128,8 +128,8 @@ public class GridAgent : Agent
             }
             else
             {
-                SetReward(-1.0f);
-                EndEpisode();
+                AddReward(-1.0f);
+                //EndEpisode();
             }
         }
         else
@@ -140,7 +140,7 @@ public class GridAgent : Agent
             }
             else
             {
-                AddReward(-1f);
+                AddReward(-1.0f);
             }
         }
     }
