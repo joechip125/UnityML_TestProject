@@ -139,12 +139,12 @@ public class GridAgent : Agent
         {
             if (hits > 0)
             {
-                //SetReward(1f);
+                AddReward(0.1f);
                 //_revertThreshold = size;
             }
             else
             {
-                //SetReward(-1.0f);
+                AddReward(-0.1f);
             }
         }
     }
