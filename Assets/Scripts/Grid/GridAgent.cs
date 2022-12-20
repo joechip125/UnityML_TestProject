@@ -100,7 +100,7 @@ public class GridAgent : Agent
         }
         _taskComplete = true;
         _taskAssigned = false;
-        AddReward(1.0f);
+        SetReward(1.0f);
         EndEpisode();
     }
     
@@ -136,11 +136,11 @@ public class GridAgent : Agent
         {
             if (hits > 0)
             {
-                AddReward(1.0f);
+                AddReward(0.1f);
             }
             else
             {
-                AddReward(-1.0f);
+                AddReward(-0.1f);
             }
         }
     }
