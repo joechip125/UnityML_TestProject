@@ -46,6 +46,7 @@ public class GridAgentSearch : Agent
     private List<int> _possibleDirections = new();
 
     [SerializeField] private TensorVis tensorVis;
+    private float _rewardDecrement = 0.25f;
 
     public event Action<GridBuffer> UpdateTensorVis;
 
@@ -123,21 +124,33 @@ public class GridAgentSearch : Agent
         _mStepTime = 0;
     }
 
-    private void CheckIndex()
+    private bool CheckIndex(bool rewardAgent)
     {
+        float visitValue = _pathChannel.Read( _currentIndex);
+
+        _pathChannel.Write(_currentIndex,
+            Mathf.Min(1, visitValue + _rewardDecrement));
+
         var buffer = _sensorComp.GridBuffer;
-        var value = buffer.Read(3, _currentIndex);
+        var maskValue = buffer.Read(3, _currentIndex);
         var otherVal = buffer.Read(0, _currentIndex);
         buffer.Write(3, _currentIndex, 0);
-        AddReward(value);
+        
+        if (rewardAgent)
+        {
+            var total = Mathf.Clamp(maskValue  + (0.5f - visitValue), -1, 1);
+            AddReward(total);
+        }
         
         UpdateTensorVis?.Invoke(_sensorComp.GridBuffer);
 
         if (otherVal > 0.5f)
         {
             var index = _currentIndex.y * _gridSize.x + _currentIndex.x;
+            _sensorComp.ClearMaskChannel();
             TaskComplete(index);
         }
+        return visitValue == 1;
     }
 
     private void TaskComplete(int hitIndex)
@@ -179,6 +192,7 @@ public class GridAgentSearch : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        var done = false;
         if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
@@ -190,11 +204,17 @@ public class GridAgentSearch : Agent
         {
             _currentIndex += _directions[action];
             _pathChannel.Write(_currentIndex, 1.0f);
-            CheckIndex();
+            done = CheckIndex(true);
         }
         else
         {
             AddReward(-1.0f);
+            done = CheckIndex(false);
+        }
+
+        if (done)
+        {
+            EndEpisode();
         }
     }
 
