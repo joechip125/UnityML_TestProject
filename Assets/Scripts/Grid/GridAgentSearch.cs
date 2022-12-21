@@ -127,12 +127,13 @@ public class GridAgentSearch : Agent
     {
         var buffer = _sensorComp.GridBuffer;
         var value = buffer.Read(3, _currentIndex);
+        var otherVal = buffer.Read(0, _currentIndex);
         buffer.Write(3, _currentIndex, 0);
         AddReward(value);
         
         UpdateTensorVis?.Invoke(_sensorComp.GridBuffer);
 
-        if (value == 1)
+        if (otherVal > 0.5f)
         {
             var index = _currentIndex.y * _gridSize.x + _currentIndex.x;
             TaskComplete(index);
@@ -190,9 +191,6 @@ public class GridAgentSearch : Agent
         {
             AddReward(-1.0f);
         }
-        
-        CheckIndex();
-        
     }
 
     private bool TryGetTask()
