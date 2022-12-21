@@ -97,7 +97,6 @@ public class GridAgentDivide : Agent
             if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1.5f))
             {
                 var relative = owner.InverseTransformPoint(cellPos);
-                Debug.Log(relative);
                 positions.positions.Enqueue(relative);
             }
         }

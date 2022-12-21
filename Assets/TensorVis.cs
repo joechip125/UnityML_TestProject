@@ -32,6 +32,8 @@ public class TensorVis : MonoBehaviour
     private bool _isActive;
     private bool _buttonPressed;
 
+    private GridBuffer _buffer = new GridBuffer(1, 20, 20);
+
     void InitCellLocalPositions()
     {
         _cellCenterOffset = new Vector3((gridSize.x - 1f) / 2, 0, (gridSize.z - 1f) / 2);
@@ -247,6 +249,19 @@ public class TensorVis : MonoBehaviour
         _smallGridSize = gridSize.x;
         _currentCenter = transform.position;
         DrawGrid();
+        _buffer.MaskSelection(2, new Vector2Int(5,5), 0.3f, 0);
+        DrawSomething(0);
+        var xVal = 125 % 20;
+        var zVal = (125 - xVal) / 20;
+    }
+
+    private void DrawSomething(int channel)
+    {
+        for (int i = 0; i < tilesList.Count; i++)
+        {
+            var value = _buffer.Read(channel, i);
+            tilesList[i].SetTileNum(value);
+        }
     }
 
     private void SortAll()
@@ -329,7 +344,7 @@ public class TensorVis : MonoBehaviour
 
     private void FixedUpdate()
     {
-      //  UpdateTensorVis();
+        //UpdateTensorVis();
         if (_buttonPressed)
         {
             _stepTime += Time.fixedDeltaTime;

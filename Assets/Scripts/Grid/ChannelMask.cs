@@ -38,7 +38,7 @@ namespace Grid
             _channel[z * _sizeX + x] = value;
         }
 
-        private void AddMask(int x, int z)
+        private void AddMask(Vector2Int index, int maskExtent)
         {
             
         }

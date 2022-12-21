@@ -11,9 +11,9 @@ using UnityEngine.Profiling;
 
 public class CustomGridSensor : ISensor, IDisposable
 {
-    private ObservationType m_ObservationType = ObservationType.Default;
+    private ObservationType _mObservationType = ObservationType.Default;
 
-    string m_Name;
+    string _mName;
     
     private List<ChannelLabel> _labels = new();
 
@@ -45,7 +45,7 @@ public class CustomGridSensor : ISensor, IDisposable
         List<ChannelLabel> labels,
         SingleChannel externChannel)
     {
-        m_Name = name;
+        _mName = name;
         CompressionType = compression;
         
         _externalChannel = externChannel;
@@ -55,7 +55,7 @@ public class CustomGridSensor : ISensor, IDisposable
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
         m_NumCells = m_GridBuffer.SizeZ * m_GridBuffer.SizeX;
-        m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, m_ObservationType);
+        m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, _mObservationType);
         
         HandleCompressionType();
 
@@ -117,7 +117,7 @@ public class CustomGridSensor : ISensor, IDisposable
     /// <inheritdoc/>
     public string GetName()
     {
-        return m_Name;
+        return _mName;
     }
     
     public CompressionSpec GetCompressionSpec()
@@ -183,6 +183,14 @@ public class CustomGridSensor : ISensor, IDisposable
             if (!ReferenceEquals(detectedObject, null) && detectedObject.CompareTag(_labels[i].Name))
             {
                 m_GridBuffer.Write(i, cellIndex,1);
+                if (_labels[i].maskThis)
+                {
+                    var xVal = cellIndex % 20;
+                    var zVal = (cellIndex - xVal) / 20;
+                
+                    var index = new Vector2Int(xVal, zVal);
+                    m_GridBuffer.MaskSelection(3, index, 0.5f, _labels[i].maskChannel);
+                }
             }
         }
         Profiler.EndSample();

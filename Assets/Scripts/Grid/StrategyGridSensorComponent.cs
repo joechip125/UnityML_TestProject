@@ -190,7 +190,7 @@ public class StrategyGridSensorComponent : SensorComponent
             var cellPosition = BoxOverlapChecker.GetCellGlobalPosition(i);
             var debugRayColor = Color.white;
 
-            if (_mGridBuffer.ReadAll(i, out var channel, out var value))
+            if (_mGridBuffer.ReadAllChannelsAtIndex(i, out var channel, out var value))
             {
                 debugRayColor =channelLabels[(int) channel].Color;
             }

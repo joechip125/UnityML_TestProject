@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.Serialization;
 
 namespace MBaske.Sensors.Grid
 {
@@ -21,10 +22,16 @@ namespace MBaske.Sensors.Grid
         [Tooltip("Color used for debugging / visualization.")]
         public Color Color;
 
+        public bool maskThis;
+
+        public int maskChannel;
+        
         public ChannelLabel(string name, Color color)
         {
             Name = name;
             Color = color;
+            maskThis = false;
+            maskChannel = 0;
         }
 
         /// <summary>

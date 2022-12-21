@@ -270,7 +270,6 @@ namespace MBaske.Sensors.Grid
         public virtual float Read(int channel, int x, int z)
         {
             return m_Values[channel][z * SizeX + x];
-            //return m_Values[channel][x * SizeZ + z];
         }
         
         public virtual float Read(int channel, int index)
@@ -278,6 +277,56 @@ namespace MBaske.Sensors.Grid
             return m_Values[channel][index];
         }
 
+        public virtual void MaskSelection(int size, Vector2Int index, float value, int channel, bool addOrReplace = true)
+        {
+            
+            var start = index - new Vector2Int(size, size);
+            var end = index + new Vector2Int(size + 1, size + 1);
+            var numX = end.x - start.x;
+            var numZ = end.y - start.y;
+            var xCount = start.x;
+            var zCount = start.y;
+            
+            m_Values[channel][index.y * SizeX + index.x] = 1.0f;
+
+            for (int z = 0; z < numZ; z++)
+            {
+                for (int x = 0; x < numX; x++)
+                {
+                    if (xCount < 0 || xCount >= SizeX)
+                    {
+                        xCount++;
+                        continue;
+                    }
+
+                    if (zCount < 0 || zCount >= SizeZ)
+                    {
+                        break;
+                    }
+
+                    var newValue = value /  Vector2Int.Distance(index, new Vector2Int(xCount, zCount));
+                    var fc = (float)Math.Round(newValue * 100f) / 100f;
+                    
+                  
+                    var theIndex = zCount * SizeX + xCount;
+                    var indexValue = m_Values[channel][theIndex];
+
+                    if (addOrReplace)
+                    {
+                        m_Values[channel][theIndex] = Mathf.Clamp(indexValue + fc, 0, 1);
+                    }
+                    else
+                    {
+                        m_Values[channel][theIndex] = Mathf.Clamp(value, 0, 1);
+                    }
+                    
+                    xCount++;
+                }
+                xCount = start.x;
+                zCount++;
+            }
+        }
+        
         
         public int ReadFromGrid(Vector3Int start, int size, int channel)
         {
@@ -334,7 +383,7 @@ namespace MBaske.Sensors.Grid
             return retInt;
         }
         
-        public bool ReadAll(int index, out float hitChannel, out float channelValue)
+        public bool ReadAllChannelsAtIndex(int index, out float hitChannel, out float channelValue)
         {
             var outBool = false;
             hitChannel = 0;
