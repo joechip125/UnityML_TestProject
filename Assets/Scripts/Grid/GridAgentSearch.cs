@@ -160,7 +160,7 @@ public class GridAgentSearch : Agent
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         _possibleDirections.Clear();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 4; i++)
         {
             var nextIndex = _currentIndex + _directions[i];
             var possible = _pathChannel.Contains(nextIndex);
