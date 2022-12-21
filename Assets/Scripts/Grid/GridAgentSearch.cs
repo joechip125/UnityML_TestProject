@@ -84,7 +84,7 @@ public class GridAgentSearch : Agent
     private void WriteMask()
     {
         var mask = _sensorComp.MaskChannel;
-        var count = mask.SizeX * mask.SizeZ;
+        var count = _gridSize.x * _gridSize.z;
         _sensorComp.GridBuffer.ClearChannel(3);
 
         for (int i = 0; i < count; i++)
@@ -111,9 +111,6 @@ public class GridAgentSearch : Agent
             ResetMap?.Invoke();
         }
 
-
-        tensorVis.Buffer ??= _sensorComp.GridBuffer;
-
         _pathChannel.Clear();
 
 
@@ -123,10 +120,21 @@ public class GridAgentSearch : Agent
         }
 
         _mStepTime = 0;
-
-        WriteMask();
     }
 
+    private void CheckIndex()
+    {
+        var buffer = _sensorComp.GridBuffer;
+        var value = buffer.Read(3, _currentIndex);
+        buffer.Write(3, _currentIndex, 0);
+        AddReward(value);
+
+        if (value == 1)
+        {
+            var index = _currentIndex.y * _gridSize.x + _currentIndex.x;
+            TaskComplete(index);
+        }
+    }
 
     private void TaskComplete(int hitIndex)
     {
@@ -164,20 +172,21 @@ public class GridAgentSearch : Agent
         var nextIndex = _currentIndex + _directions[action];
         _pathChannel.Write(nextIndex, 1.0f);
         
+        CheckIndex();
+        
     }
 
     private bool TryGetTask()
     {
         if (positions.positions.Count > 3) return false;
-        _pathChannel.ResetMinorGrid();
         _taskComplete = false;
         _taskAssigned = true;
+        WriteMask();
         return true;
     }
 
     private void FixedUpdate()
     {
-        WriteMask();
         if (stepDuration > 0)
         {
             _mStepTime += Time.fixedDeltaTime;

@@ -155,6 +155,11 @@ public class StrategyGridSensorComponent : SensorComponent
         }
     }
 
+    public void ClearMaskChannel()
+    {
+        MaskChannel.Clear();
+    }
+    
     private void OnMaskedObjectDetected(int cellIndex, int channel)
     {
         var xVal = cellIndex % gridSize.z;
