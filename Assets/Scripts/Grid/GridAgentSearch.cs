@@ -113,11 +113,11 @@ public class GridAgentSearch : Agent
         }
 
         _pathChannel.Clear();
-
+        _currentIndex = Vector2Int.zero;
 
         if (_taskAssigned)
         {
-            _currentIndex = Vector2Int.zero;
+           // _currentIndex = Vector2Int.zero;
         }
 
         _mStepTime = 0;
@@ -179,6 +179,11 @@ public class GridAgentSearch : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
+        {
+            ResetMap?.Invoke();
+        }
+        
         var action = actions.DiscreteActions[0];
         
         if (_possibleDirections.Contains(action))
