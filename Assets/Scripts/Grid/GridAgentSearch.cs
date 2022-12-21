@@ -4,47 +4,44 @@ using System.Collections.Generic;
 using System.Linq;
 using DefaultNamespace;
 using DefaultNamespace.Grid;
-using Grid;
-using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
-
-public class GridAgent : Agent
-{ 
+public class GridAgentSearch : Agent
+{
     public event Action ResetMap;
-    
+
     public PositionStore positions;
     [SerializeField] public Transform owner;
-    
-    private const int Zero = 0;
-    private const int One = 1;
-    private const int Two = 2;
-    private const int Three = 3;
-    private const int Revert = 4;
+
+    private const int Up = 0;
+    private const int Down = 1;
+    private const int Right = 2;
+    private const int Left = 3;
+    private const int Stay = 4;
 
     private bool _mIsTraining;
-    
+
     private bool _mIsActive;
     private bool _taskComplete;
     private bool _taskAssigned;
-    
-    [SerializeField]
-    [Range(0, 2f)] 
-    private float stepDuration = 2f;
+
+    [SerializeField] [Range(0, 2f)] private float stepDuration = 2f;
     private float _mStepTime;
 
     private StrategyGridSensorComponent _sensorComp;
     private Vector3Int _gridSize = new Vector3Int(20, 1, 20);
 
     private int _tasksCompleted;
-    
-    private SingleChannel _pathChannel;
 
-    private int _revertThreshold;
+    private SingleChannel _pathChannel;
     
+    private Vector2Int[] _directions;
+
+    private Vector2Int _currentIndex;
+
     private void Start()
     {
         ResetMap?.Invoke();
@@ -57,38 +54,47 @@ public class GridAgent : Agent
         _gridSize = _sensorComp.gridSize;
         _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
         _sensorComp.ExternalChannel = _pathChannel;
-        
+
         _taskComplete = true;
         _taskAssigned = false;
-        
+
         _mIsTraining = Academy.Instance.IsCommunicatorOn;
+
+        _directions = new[]
+        {
+            Vector2Int.up,
+            Vector2Int.down,
+            Vector2Int.right,
+            Vector2Int.left,
+        };
     }
-    
-    
+
+
     public override void CollectObservations(VectorSensor sensor)
     {
     }
-    
+
     public override void OnEpisodeBegin()
     {
         if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
         }
-        
+
         _pathChannel.Clear();
         _pathChannel.ResetMinorGrid();
-        _revertThreshold = 10;
+        
+        
 
         if (_taskAssigned)
         {
-            _pathChannel.ResetMinorGrid();
+            _currentIndex = Vector2Int.zero;
         }
 
         _mStepTime = 0;
     }
 
-    
+
     private void TaskComplete(int hitIndex)
     {
         var cellPos = _sensorComp.GetCellPosition(hitIndex);
@@ -101,52 +107,36 @@ public class GridAgent : Agent
                 positions.positions.Enqueue(relative);
             }
         }
+
         _taskComplete = true;
         _taskAssigned = false;
         AddReward(1.0f);
         EndEpisode();
     }
-    
+
+    private void CheckIndex()
+    {
+        
+    }
+
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        if(_pathChannel.SmallGridSize > _revertThreshold)
-            actionMask.SetActionEnabled(0, Revert, false);
+        for (int i = 0; i < _directions.Length; i++)
+        {
+            var nextIndex = _currentIndex + _directions[i];
+            if (!_pathChannel.Contains(nextIndex))
+            {
+                actionMask.SetActionEnabled(0, i, false);
+            }
+        }
     }
-    
+
     public override void OnActionReceived(ActionBuffers actions)
     {
         var action = actions.DiscreteActions[0];
+        var nextIndex = _currentIndex + _directions[action];
+        _pathChannel.Write(nextIndex, 1.0f);
         
-        var notLast = _pathChannel.GetNewGridShape(action);
-        var size = _pathChannel.SmallGridSize;
-        var theIndex = _pathChannel.MinorMin;
-        var startIndex = theIndex.z * size + theIndex.x;
-        var hits = _sensorComp.GridBuffer.ReadFromGrid(_pathChannel.MinorMin, _pathChannel.SmallGridSize, 0);
-        
-        if (!notLast)
-        {
-            if (_sensorComp.GridBuffer.Read(0, startIndex) > 0)
-            {
-                TaskComplete(startIndex);
-            }
-            else
-            {
-                AddReward(-1.0f);
-                EndEpisode();
-            }
-        }
-        else
-        {
-            if (hits > 0)
-            {
-                AddReward(1f);
-                //_revertThreshold = size;
-            }
-            else
-            {
-                AddReward(-1f);
-            }
-        }
     }
 
     private bool TryGetTask()
@@ -157,7 +147,7 @@ public class GridAgent : Agent
         _taskAssigned = true;
         return true;
     }
-    
+
     private void FixedUpdate()
     {
         if (stepDuration > 0)
@@ -177,30 +167,29 @@ public class GridAgent : Agent
             RequestDecision();
         }
     }
-    
+
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
 
-        if (Input.GetKey(KeyCode.Alpha0))
+        if (Input.GetKey(KeyCode.W))
         {
-            discreteActionsOut[0] = Zero;
+            discreteActionsOut[0] = Up;
         }
-        if (Input.GetKey(KeyCode.Alpha1))
+
+        if (Input.GetKey(KeyCode.S))
         {
-            discreteActionsOut[0] = One;
+            discreteActionsOut[0] = Down;
         }
-        if (Input.GetKey(KeyCode.Alpha2))
+
+        if (Input.GetKey(KeyCode.D))
         {
-            discreteActionsOut[0] = Two;
+            discreteActionsOut[0] = Right;
         }
-        if (Input.GetKey(KeyCode.Alpha3))
+
+        if (Input.GetKey(KeyCode.A))
         {
-            discreteActionsOut[0] = Three;
-        }
-        if (Input.GetKey(KeyCode.Alpha4))
-        {
-            discreteActionsOut[0] = Revert;
+            discreteActionsOut[0] = Left;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace DefaultNamespace
         private float maxDistance = 12;
         [SerializeField]private List<UnitMovement> _units = new ();
        
-        public GridAgent agent;
+        public GridAgentDivide agent;
         public SpawnArea spawnArea;
         public GameObject Collector;
         private PositionStore _positionStore;
