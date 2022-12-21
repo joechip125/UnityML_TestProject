@@ -307,27 +307,23 @@ namespace MBaske.Sensors.Grid
             {
                 for (int x = 0; x < numX; x++)
                 {
-                    if (xCount < 0 || xCount >= SizeX)
+                    if (xCount < 0 )
                     {
                         xCount++;
                         continue;
                     }
 
-                    if (zCount < 0 || zCount >= SizeZ)
-                    {
-                        break;
-                    }
+                    if (zCount < 0 || zCount >= SizeZ || xCount >= SizeX) break;
                     
-                    var newValue = value /  Vector2Int.Distance(index, new Vector2Int(xCount, zCount));
-                    var fc = (float)Math.Round(newValue * 100f) / 100f;
+                    var newValue = value / Vector2Int.Distance(index, new Vector2Int(xCount, zCount));
+                    var roundedValue = (float)Math.Round(newValue * 100f) / 100f;
                     
-                  
                     var theIndex = zCount * SizeX + xCount;
                     var indexValue = m_Values[channel][theIndex];
 
                     if (addOrReplace)
                     {
-                        m_Values[channel][theIndex] = Mathf.Clamp(indexValue + fc, 0, 1);
+                        m_Values[channel][theIndex] = Mathf.Clamp(indexValue + roundedValue, 0, 1);
                     }
                     else
                     {
