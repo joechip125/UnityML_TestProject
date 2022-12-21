@@ -128,6 +128,8 @@ public class GridAgentSearch : Agent
         var value = buffer.Read(3, _currentIndex);
         buffer.Write(3, _currentIndex, 0);
         AddReward(value);
+        
+        UpdateTensorVis?.Invoke(_sensorComp.GridBuffer);
 
         if (value == 1)
         {
