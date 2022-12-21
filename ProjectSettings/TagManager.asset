@@ -11,6 +11,7 @@ TagManager:
   - Poison
   - Collector
   - Visited
+  - Mask
   layers:
   - Default
   - TransparentFX

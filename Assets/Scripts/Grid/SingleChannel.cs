@@ -56,7 +56,7 @@ namespace DefaultNamespace.Grid
         private Stack<Vector3Int> _pastIndex = new();
         private Stack<int> _pastSizes = new();
 
-        //public HashSet<Vector2> m_GridPositions;
+        
         
         public SingleChannel(int sizeX, int sizeZ, int channelIndex)
         {

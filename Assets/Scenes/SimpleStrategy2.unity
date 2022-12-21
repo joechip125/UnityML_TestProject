@@ -540,7 +540,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _units: []
-  agent: {fileID: 1936667396}
+  agent: {fileID: 1936667398}
   spawnArea: {fileID: 800677293}
   Collector: {fileID: 1159859452}
 --- !u!114 &800677293 stripped
@@ -688,6 +688,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4108373170441605168, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
   m_PrefabInstance: {fileID: 1872281558}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1449521889 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1421784487987889682, guid: 1dcad4633ed005942bd3d77719fbef97, type: 3}
+  m_PrefabInstance: {fileID: 6863313143051224869}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62e64410c0c0e7948aeacb830c1a4e9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1692298724
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,7 +723,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1692298724}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -51.8, y: 0, z: -10.59}
+  m_LocalPosition: {x: -20.8, y: 0, z: 4.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -864,8 +875,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1936667394}
   - component: {fileID: 1936667397}
-  - component: {fileID: 1936667396}
   - component: {fileID: 1936667395}
+  - component: {fileID: 1936667398}
   m_Layer: 0
   m_Name: GridAgent
   m_TagString: Untagged
@@ -881,7 +892,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1936667393}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.13, y: 0.5, z: 5.04}
+  m_LocalPosition: {x: 5.22, y: 0.5, z: 5.04}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -918,6 +929,10 @@ MonoBehaviour:
     Color: {r: 0.66139144, g: 0.06664292, b: 0.6792453, a: 0}
     maskThis: 0
     maskChannel: 0
+  - Name: Mask
+    Color: {r: 1, g: 1, b: 1, a: 0}
+    maskThis: 0
+    maskChannel: 0
   cellScale: {x: 1, y: 0.01, z: 1}
   gridSize: {x: 20, y: 1, z: 20}
   colliderMask:
@@ -929,24 +944,6 @@ MonoBehaviour:
   compressionType: 1
   observationStacks: 5
   totalNumberChannels: 4
---- !u!114 &1936667396
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936667393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38c743fcb8d3c3f418b25e93619ce928, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
-  owner: {fileID: 800677294}
-  stepDuration: 0.08
 --- !u!114 &1936667397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -977,6 +974,25 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &1936667398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936667393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 387f1784fb860c345a15d0eb5264b059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  owner: {fileID: 800677294}
+  stepDuration: 2
+  tensorVis: {fileID: 1449521889}
 --- !u!1001 &2794602674773761348
 PrefabInstance:
   m_ObjectHideFlags: 0

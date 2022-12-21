@@ -319,12 +319,12 @@ public class TensorVis : MonoBehaviour
         return hitTags;
     }
 
-    public void OnExternalUpdate(SingleChannel channel)
+    public void OnExternalUpdate(GridBuffer channel)
     {
         ClearTensorVis();
         for (int i = 0; i < tilesList.Count; i++)
         {
-            var value = channel.Read(i);
+            var value = channel.Read(3,i);
             tilesList[i].SetTileNum(value);
         }
     }

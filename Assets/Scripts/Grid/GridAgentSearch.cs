@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DefaultNamespace;
 using DefaultNamespace.Grid;
+using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -45,7 +46,7 @@ public class GridAgentSearch : Agent
 
     [SerializeField] private TensorVis tensorVis;
 
-    public event Action<SingleChannel> UpdateTensorVis;
+    public event Action<GridBuffer> UpdateTensorVis;
 
     private void Start()
     {
@@ -80,23 +81,41 @@ public class GridAgentSearch : Agent
     }
 
 
+    private void WriteMask()
+    {
+        var mask = _sensorComp.MaskChannel;
+        var count = mask.SizeX * mask.SizeZ;
+        _sensorComp.GridBuffer.ClearChannel(3);
+
+        for (int i = 0; i < count; i++)
+        {
+            var xVal = i % mask.SizeZ;
+            var zVal = (i - xVal) / mask.SizeZ;
+            
+            if (mask.Read(i) > 0)
+            {
+                _sensorComp.GridBuffer.MaskSelection(3, new Vector2Int(xVal, zVal), 0.3f, 3);
+            }
+        }
+        UpdateTensorVis?.Invoke(_sensorComp.GridBuffer);
+    }
+
     public override void CollectObservations(VectorSensor sensor)
     {
     }
 
     public override void OnEpisodeBegin()
     {
-        
-        UpdateTensorVis?.Invoke(_sensorComp.MaskChannel);
         if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
         }
 
+
         tensorVis.Buffer ??= _sensorComp.GridBuffer;
 
         _pathChannel.Clear();
-        
+
 
         if (_taskAssigned)
         {
@@ -104,6 +123,8 @@ public class GridAgentSearch : Agent
         }
 
         _mStepTime = 0;
+
+        WriteMask();
     }
 
 
@@ -156,6 +177,7 @@ public class GridAgentSearch : Agent
 
     private void FixedUpdate()
     {
+        WriteMask();
         if (stepDuration > 0)
         {
             _mStepTime += Time.fixedDeltaTime;
