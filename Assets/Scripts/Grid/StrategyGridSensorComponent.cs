@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ public class StrategyGridSensorComponent : SensorComponent
     private ColorGridBuffer _mGridBuffer;
     
     public SingleChannel ExternalChannel;
+
+    public SingleChannel MaskChannel;
     
     public GridBuffer.Shape GridShape
     {
@@ -116,6 +119,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
         _mGridBuffer = new ColorGridBuffer(totalNumberChannels, gridSize.x, gridSize.z);
         gridShape = new GridBuffer.Shape(totalNumberChannels, gridSize.x, gridSize.z);
+        MaskChannel = new SingleChannel(gridSize.x, gridSize.z, 3);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
         _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ChannelLabels, ExternalChannel);
@@ -130,6 +134,7 @@ public class StrategyGridSensorComponent : SensorComponent
     
         // Only one sensor needs to reference the boxOverlapChecker, so that it gets updated exactly once
         _mSensors[0].m_BoxOverlapChecker = BoxOverlapChecker;
+        _mSensors[0].MaskObjectDetected += OnMaskedObjectDetected;
         foreach (var sensor in _mSensors)
         {
             BoxOverlapChecker.RegisterSensor(sensor);
@@ -147,6 +152,17 @@ public class StrategyGridSensorComponent : SensorComponent
         else
         {
             return _mSensors.ToArray();
+        }
+    }
+
+    private void OnMaskedObjectDetected(int cellIndex, int channel)
+    {
+        var xVal = cellIndex % gridSize.z;
+        var zVal = (cellIndex - xVal) / gridSize.z;
+        
+        if (MaskChannel.Read(xVal, zVal) < 1)
+        {
+            MaskChannel.Write(xVal, zVal, 1);
         }
     }
     
@@ -192,7 +208,7 @@ public class StrategyGridSensorComponent : SensorComponent
 
             if (_mGridBuffer.ReadAllChannelsAtIndex(i, out var channel, out var value))
             {
-                debugRayColor =channelLabels[(int) channel].Color;
+                debugRayColor = channelLabels[channel].Color;
             }
             
             Gizmos.color = new Color(debugRayColor.r, debugRayColor.g, debugRayColor.b, .5f);

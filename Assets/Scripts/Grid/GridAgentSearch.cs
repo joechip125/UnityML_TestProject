@@ -7,6 +7,7 @@ using DefaultNamespace.Grid;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridAgentSearch : Agent
@@ -42,6 +43,10 @@ public class GridAgentSearch : Agent
 
     private Vector2Int _currentIndex;
 
+    [SerializeField] private TensorVis tensorVis;
+
+    public event Action<SingleChannel> UpdateTensorVis;
+
     private void Start()
     {
         ResetMap?.Invoke();
@@ -51,13 +56,18 @@ public class GridAgentSearch : Agent
     {
         _sensorComp = GetComponent<StrategyGridSensorComponent>();
 
+        UpdateTensorVis += tensorVis.OnExternalUpdate;
+
         _gridSize = _sensorComp.gridSize;
         _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
         _sensorComp.ExternalChannel = _pathChannel;
-
+        _currentIndex = Vector2Int.zero;
         _taskComplete = true;
         _taskAssigned = false;
 
+        tensorVis.Buffer = _sensorComp.GridBuffer;
+        tensorVis.displayChannel = 3;
+        
         _mIsTraining = Academy.Instance.IsCommunicatorOn;
 
         _directions = new[]
@@ -76,14 +86,16 @@ public class GridAgentSearch : Agent
 
     public override void OnEpisodeBegin()
     {
+        
+        UpdateTensorVis?.Invoke(_sensorComp.MaskChannel);
         if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
         }
 
+        tensorVis.Buffer ??= _sensorComp.GridBuffer;
+
         _pathChannel.Clear();
-        _pathChannel.ResetMinorGrid();
-        
         
 
         if (_taskAssigned)
@@ -103,7 +115,6 @@ public class GridAgentSearch : Agent
             if (!positions.positions.Any(x => Vector3.Distance(x, cellPos) < 1.5f))
             {
                 var relative = owner.InverseTransformPoint(cellPos);
-                Debug.Log(relative);
                 positions.positions.Enqueue(relative);
             }
         }
@@ -113,12 +124,7 @@ public class GridAgentSearch : Agent
         AddReward(1.0f);
         EndEpisode();
     }
-
-    private void CheckIndex()
-    {
-        
-    }
-
+    
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
         for (int i = 0; i < _directions.Length; i++)
@@ -191,5 +197,10 @@ public class GridAgentSearch : Agent
         {
             discreteActionsOut[0] = Left;
         }
+    }
+
+    public void OnMaskedObjectDetected(int cellIndex, int channel)
+    {
+        
     }
 }

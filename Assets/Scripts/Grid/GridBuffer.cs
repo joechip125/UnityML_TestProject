@@ -167,6 +167,11 @@ namespace MBaske.Sensors.Grid
             //IsDirty = false;
         }
 
+        public virtual void Clear(int excludeChannel)
+        {
+            ClearChannels(0, NumChannels, excludeChannel);
+        }
+
         /// <summary>
         /// Clears grid values of specified channels by setting them to 0.
         /// <param name="start">The first channel's index</param>
@@ -179,12 +184,21 @@ namespace MBaske.Sensors.Grid
                 ClearChannel(start + i);
             }
         }
+        
+        public virtual void ClearChannels(int start, int length, int excludeChanel)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                if(i != excludeChanel)
+                    ClearChannel(start + i);
+            }
+        }
 
         public int CountLayer(int channel, float minValue)
         {
             return m_Values[channel].Count(x => x > minValue);
         }
-        
+
         public void GetQuadrant()
         {}
 
@@ -224,7 +238,7 @@ namespace MBaske.Sensors.Grid
         {
             Write(channel, pos.x, pos.y, value);
         }
-        
+
         public virtual void Write(int channel, int index, float value)
         {
             m_Values[channel][index] = value;
@@ -271,7 +285,7 @@ namespace MBaske.Sensors.Grid
         {
             return m_Values[channel][z * SizeX + x];
         }
-        
+
         public virtual float Read(int channel, int index)
         {
             return m_Values[channel][index];
@@ -303,7 +317,7 @@ namespace MBaske.Sensors.Grid
                     {
                         break;
                     }
-
+                    
                     var newValue = value /  Vector2Int.Distance(index, new Vector2Int(xCount, zCount));
                     var fc = (float)Math.Round(newValue * 100f) / 100f;
                     
@@ -326,8 +340,8 @@ namespace MBaske.Sensors.Grid
                 zCount++;
             }
         }
-        
-        
+
+
         public int ReadFromGrid(Vector3Int start, int size, int channel)
         {
             var numX = size;
@@ -365,7 +379,7 @@ namespace MBaske.Sensors.Grid
 
             return hitCount;
         }
-        
+
         public int ReadSection(int startIndex, int endIndex, int channel)
         {
             var retInt = 0;
@@ -382,8 +396,8 @@ namespace MBaske.Sensors.Grid
 
             return retInt;
         }
-        
-        public bool ReadAllChannelsAtIndex(int index, out float hitChannel, out float channelValue)
+
+        public bool ReadAllChannelsAtIndex(int index, out int hitChannel, out float channelValue)
         {
             var outBool = false;
             hitChannel = 0;
@@ -391,7 +405,7 @@ namespace MBaske.Sensors.Grid
             for (int i = 0; i < NumChannels; i++)
             {
                 channelValue = m_Values[i][index];
-                if (channelValue == 0) continue;
+                if (channelValue == 0 || i == 3) continue;
                 
                 outBool = true;
                 hitChannel = i;
@@ -399,7 +413,7 @@ namespace MBaske.Sensors.Grid
 
             return outBool;
         }
-        
+
         /// <summary>
         /// Reads a float value from a specified grid cell.
         /// </summary>

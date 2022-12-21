@@ -64,6 +64,11 @@ namespace MBaske.Sensors.Grid
             base.Clear();
             ClearColors();
         }
+        public override void Clear(int excludeChannel)
+        {
+            base.Clear(excludeChannel);
+            ClearColors();
+        }
 
         /// <summary>
         /// Clears grid values of a specified layer by setting them to 0. Sets layer pixels to black.

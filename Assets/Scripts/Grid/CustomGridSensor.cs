@@ -38,6 +38,8 @@ public class CustomGridSensor : ISensor, IDisposable
     
     Vector3 m_CellCenterOffset;
     
+    public event Action<int, int> MaskObjectDetected;
+    
     public CustomGridSensor(
         string name,
         SensorCompressionType compression,
@@ -86,7 +88,7 @@ public class CustomGridSensor : ISensor, IDisposable
     
     public void ResetGridBuffer()
     {
-        m_GridBuffer.Clear();
+        m_GridBuffer.Clear(3);
         
         if (_externalChannel != null)
         {
@@ -185,17 +187,13 @@ public class CustomGridSensor : ISensor, IDisposable
                 m_GridBuffer.Write(i, cellIndex,1);
                 if (_labels[i].maskThis)
                 {
-                    var xVal = cellIndex % 20;
-                    var zVal = (cellIndex - xVal) / 20;
-                
-                    var index = new Vector2Int(xVal, zVal);
-                    m_GridBuffer.MaskSelection(3, index, 0.5f, _labels[i].maskChannel);
+                    MaskObjectDetected?.Invoke(cellIndex, i);
                 }
             }
         }
         Profiler.EndSample();
     }
-
+    
     /// <inheritdoc/>
     public ObservationSpec GetObservationSpec()
     {
