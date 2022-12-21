@@ -43,6 +43,7 @@ public class GridAgentSearch : Agent
     private Vector2Int[] _directions;
 
     private Vector2Int _currentIndex;
+    private List<int> _possibleDirections = new();
 
     [SerializeField] private TensorVis tensorVis;
 
@@ -158,21 +159,37 @@ public class GridAgentSearch : Agent
     
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        for (int i = 0; i < _directions.Length; i++)
+        _possibleDirections.Clear();
+        for (int i = 0; i < 5; i++)
         {
             var nextIndex = _currentIndex + _directions[i];
-            if (!_pathChannel.Contains(nextIndex))
+            var possible = _pathChannel.Contains(nextIndex);
+            if (possible)
             {
-                actionMask.SetActionEnabled(0, i, false);
+                _possibleDirections.Add(i);
             }
+            
+            //if (!_pathChannel.Contains(nextIndex))
+            //{
+            //    actionMask.SetActionEnabled(0, i, false);
+            //}
         }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         var action = actions.DiscreteActions[0];
-        var nextIndex = _currentIndex + _directions[action];
-        _pathChannel.Write(nextIndex, 1.0f);
+        
+        if (_possibleDirections.Contains(action))
+        {
+            _currentIndex += _directions[action];
+            _pathChannel.Write(_currentIndex, 1.0f);
+            CheckIndex();
+        }
+        else
+        {
+            AddReward(-1.0f);
+        }
         
         CheckIndex();
         
