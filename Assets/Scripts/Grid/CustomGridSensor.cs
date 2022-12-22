@@ -212,9 +212,9 @@ public class CustomGridSensor : ISensor, IDisposable
         {
             for (int x = 0; x < w; x++)
             {
-                for (int y = 0; y < h; y++)
+                for (int z = 0; z < h; z++)
                 {
-                    writer[y, x, c] = m_GridBuffer.Read(c, x, y);
+                    writer[z, x, c] = m_GridBuffer.Read(c, x, z);
                     numWritten++;
                 }
             }

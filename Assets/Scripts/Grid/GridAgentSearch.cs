@@ -271,9 +271,4 @@ public class GridAgentSearch : Agent
             discreteActionsOut[0] = Left;
         }
     }
-
-    public void OnMaskedObjectDetected(int cellIndex, int channel)
-    {
-        
-    }
 }
