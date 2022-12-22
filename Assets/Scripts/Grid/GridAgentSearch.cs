@@ -45,7 +45,7 @@ public class GridAgentSearch : Agent
     private Vector2Int _currentIndex;
     private List<int> _possibleDirections = new();
 
-    [SerializeField] private TensorVis tensorVis;
+   // [SerializeField] private TensorVis tensorVis;
     private float _rewardDecrement = 0.02f;
 
     public event Action<GridBuffer> UpdateTensorVis;
@@ -59,7 +59,7 @@ public class GridAgentSearch : Agent
     {
         _sensorComp = GetComponent<StrategyGridSensorComponent>();
 
-        UpdateTensorVis += tensorVis.OnExternalUpdate;
+        //UpdateTensorVis += tensorVis.OnExternalUpdate;
 
         _gridSize = _sensorComp.gridSize;
         _pathChannel = new SingleChannel(_gridSize.x, _gridSize.z, 2);
@@ -68,8 +68,8 @@ public class GridAgentSearch : Agent
         _taskComplete = true;
         _taskAssigned = false;
 
-        tensorVis.Buffer = _sensorComp.GridBuffer;
-        tensorVis.displayChannel = 3;
+        //tensorVis.Buffer = _sensorComp.GridBuffer;
+        //tensorVis.displayChannel = 3;
         
         _mIsTraining = Academy.Instance.IsCommunicatorOn;
 
@@ -103,7 +103,7 @@ public class GridAgentSearch : Agent
             
             if (mask.Read(i) > 0)
             {
-                _sensorComp.GridBuffer.MaskSelection(3, new Vector2Int(xVal, zVal), 0.3f, 3);
+                _sensorComp.GridBuffer.MaskSelection(5, new Vector2Int(xVal, zVal), 0.25f, 3);
             }
         }
         UpdateTensorVis?.Invoke(_sensorComp.GridBuffer);
@@ -115,6 +115,7 @@ public class GridAgentSearch : Agent
 
     public override void OnEpisodeBegin()
     {
+        _sensorComp.ClearMaskChannel();
         if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
         {
             ResetMap?.Invoke();
@@ -147,8 +148,7 @@ public class GridAgentSearch : Agent
         
         if (rewardAgent)
         {
-            var total = Mathf.Clamp(maskValue  - roundedValue, -1, 1);
-            Debug.Log($"visit {visitValue}, mask {maskValue}  total {total} ");
+            var total = Mathf.Clamp(maskValue + (0.1f - roundedValue), -1, 1);
             AddReward(total);
         }
         
@@ -202,6 +202,7 @@ public class GridAgentSearch : Agent
             //{
             //    actionMask.SetActionEnabled(0, i, false);
             //}
+         
         }
     }
 
