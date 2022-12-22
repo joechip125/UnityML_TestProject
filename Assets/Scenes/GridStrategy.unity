@@ -942,7 +942,7 @@ MonoBehaviour:
   initialColliderBufferSize: 4
   showGizmos: 1
   compressionType: 1
-  observationStacks: 5
+  observationStacks: 1
   totalNumberChannels: 4
 --- !u!114 &1936667397
 MonoBehaviour:

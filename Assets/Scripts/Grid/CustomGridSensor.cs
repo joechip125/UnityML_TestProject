@@ -37,6 +37,8 @@ public class CustomGridSensor : ISensor, IDisposable
     int m_NumCells;
     
     Vector3 m_CellCenterOffset;
+
+    public SingleChannel MaskChannel;
     
     public event Action<int, int> MaskObjectDetected;
     
@@ -45,7 +47,8 @@ public class CustomGridSensor : ISensor, IDisposable
         SensorCompressionType compression,
         ColorGridBuffer gridBuffer,
         List<ChannelLabel> labels,
-        SingleChannel externChannel)
+        SingleChannel externChannel,
+        SingleChannel maskChannel)
     {
         _mName = name;
         CompressionType = compression;
@@ -53,11 +56,14 @@ public class CustomGridSensor : ISensor, IDisposable
         _externalChannel = externChannel;
         
         _labels = labels;
-        
+
+
         gridBuffer.GetShape().Validate();
         m_GridBuffer = gridBuffer;
         m_NumCells = m_GridBuffer.SizeZ * m_GridBuffer.SizeX;
         m_ObservationSpec = ObservationSpec.Visual(m_GridBuffer.SizeZ, m_GridBuffer.SizeX, m_GridBuffer.NumChannels, _mObservationType);
+
+        MaskChannel = maskChannel;
         
         HandleCompressionType();
 
@@ -187,7 +193,13 @@ public class CustomGridSensor : ISensor, IDisposable
                 m_GridBuffer.Write(i, cellIndex,1);
                 if (_labels[i].maskThis)
                 {
-                    MaskObjectDetected?.Invoke(cellIndex, i);
+                    var xVal = cellIndex % m_GridBuffer.SizeZ;
+                    var zVal = (cellIndex - xVal) / m_GridBuffer.SizeZ;
+                    
+                    if (MaskChannel.Read(xVal, zVal) < 1)
+                    {
+                        MaskChannel.Write(xVal, zVal, 1);
+                    }
                 }
             }
         }

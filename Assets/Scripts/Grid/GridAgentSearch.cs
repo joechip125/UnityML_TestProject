@@ -46,7 +46,7 @@ public class GridAgentSearch : Agent
     private List<int> _possibleDirections = new();
 
     [SerializeField] private TensorVis tensorVis;
-    private float _rewardDecrement = 0.25f;
+    private float _rewardDecrement = 0.02f;
 
     public event Action<GridBuffer> UpdateTensorVis;
 
@@ -82,10 +82,17 @@ public class GridAgentSearch : Agent
         };
     }
 
+    private void TryWriteMask()
+    {
+        if (_sensorComp.TryGetMaskChannel() == null) return;
+        WriteMask();
+        _taskComplete = false;
+        _taskAssigned = true;
+    }
 
     private void WriteMask()
     {
-        var mask = _sensorComp.MaskChannel;
+        var mask = _sensorComp.GetMaskChannel();
         var count = _gridSize.x * _gridSize.z;
         _sensorComp.GridBuffer.ClearChannel(3);
 
@@ -126,19 +133,22 @@ public class GridAgentSearch : Agent
 
     private bool CheckIndex(bool rewardAgent)
     {
-        float visitValue = _pathChannel.Read( _currentIndex);
+        var visitValue = _pathChannel.Read( _currentIndex);
+        var roundedValue = (float)Math.Round(visitValue * 100f) / 100f;
 
         _pathChannel.Write(_currentIndex,
-            Mathf.Min(1, visitValue + _rewardDecrement));
+            Mathf.Min(1, roundedValue + _rewardDecrement));
 
         var buffer = _sensorComp.GridBuffer;
         var maskValue = buffer.Read(3, _currentIndex);
         var otherVal = buffer.Read(0, _currentIndex);
         buffer.Write(3, _currentIndex, 0);
         
+        
         if (rewardAgent)
         {
-            var total = Mathf.Clamp(maskValue  + (0.5f - visitValue), -1, 1);
+            var total = Mathf.Clamp(maskValue  - roundedValue, -1, 1);
+            Debug.Log($"visit {visitValue}, mask {maskValue}  total {total} ");
             AddReward(total);
         }
         
@@ -150,11 +160,16 @@ public class GridAgentSearch : Agent
             _sensorComp.ClearMaskChannel();
             TaskComplete(index);
         }
-        return visitValue == 1;
+        return visitValue > 0.09f;
     }
 
     private void TaskComplete(int hitIndex)
     {
+        if (_sensorComp.GridBuffer.CountLayer(0, 0) < 1)
+        {
+            ResetMap?.Invoke();
+        }
+        
         var cellPos = _sensorComp.GetCellPosition(hitIndex);
         if (!positions.positions.Contains(cellPos))
         {
@@ -203,7 +218,6 @@ public class GridAgentSearch : Agent
         if (_possibleDirections.Contains(action))
         {
             _currentIndex += _directions[action];
-            _pathChannel.Write(_currentIndex, 1.0f);
             done = CheckIndex(true);
         }
         else
@@ -221,9 +235,8 @@ public class GridAgentSearch : Agent
     private bool TryGetTask()
     {
         if (positions.positions.Count > 3) return false;
-        _taskComplete = false;
-        _taskAssigned = true;
-        WriteMask();
+        
+        TryWriteMask();
         return true;
     }
 

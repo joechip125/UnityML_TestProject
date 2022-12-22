@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MBaske.Sensors.Grid;
 using Unity.MLAgents;
 using UnityEngine;
@@ -56,6 +57,11 @@ namespace DefaultNamespace.Grid
         private Stack<Vector3Int> _pastIndex = new();
         private Stack<int> _pastSizes = new();
 
+
+        public int CountChannel()
+        {
+            return m_Values.Count(x => x > 0);
+        }
         
         
         public SingleChannel(int sizeX, int sizeZ, int channelIndex)

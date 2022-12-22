@@ -122,7 +122,7 @@ public class StrategyGridSensorComponent : SensorComponent
         MaskChannel = new SingleChannel(gridSize.x, gridSize.z, 3);
         
         // debug data is positive int value and will trigger data validation exception if SensorCompressionType is not None.
-        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ChannelLabels, ExternalChannel);
+        _mDebugSensor = new CustomGridSensor("DebugGridSensor", SensorCompressionType.None, _mGridBuffer, ChannelLabels, ExternalChannel, MaskChannel);
         BoxOverlapChecker.RegisterDebugSensor(_mDebugSensor);
     
         _mSensors = GetGridSensors().ToList();
@@ -134,7 +134,7 @@ public class StrategyGridSensorComponent : SensorComponent
     
         // Only one sensor needs to reference the boxOverlapChecker, so that it gets updated exactly once
         _mSensors[0].m_BoxOverlapChecker = BoxOverlapChecker;
-        _mSensors[0].MaskObjectDetected += OnMaskedObjectDetected;
+      
         foreach (var sensor in _mSensors)
         {
             BoxOverlapChecker.RegisterSensor(sensor);
@@ -159,14 +159,25 @@ public class StrategyGridSensorComponent : SensorComponent
     {
         MaskChannel.Clear();
     }
+
+    public SingleChannel TryGetMaskChannel()
+    {
+        return MaskChannel.CountChannel() > 0 ? GetMaskChannel() : null;
+    }
+    
+    public SingleChannel GetMaskChannel()
+    {
+        return MaskChannel;
+    }
     
     private void OnMaskedObjectDetected(int cellIndex, int channel)
     {
         var xVal = cellIndex % gridSize.z;
         var zVal = (cellIndex - xVal) / gridSize.z;
-        
+
         if (MaskChannel.Read(xVal, zVal) < 1)
         {
+            
             MaskChannel.Write(xVal, zVal, 1);
         }
     }
@@ -174,7 +185,7 @@ public class StrategyGridSensorComponent : SensorComponent
     protected virtual CustomGridSensor[] GetGridSensors()
     {
         List<CustomGridSensor> sensorList = new List<CustomGridSensor>();
-        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ChannelLabels, ExternalChannel);
+        var sensor = new CustomGridSensor(sensorName, compressionType, _mGridBuffer, ChannelLabels, ExternalChannel, MaskChannel);
         sensorList.Add(sensor);
         return sensorList.ToArray();
     }
