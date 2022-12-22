@@ -216,8 +216,8 @@ public class CustomGridSensor : ISensor, IDisposable
     public int Write(ObservationWriter writer)
     {
         int numWritten = 0;
-        int w = m_GridBuffer.SizeZ;
-        int h = m_GridBuffer.SizeX;
+        int w = m_GridBuffer.SizeX;
+        int h = m_GridBuffer.SizeZ;
         int n = m_GridBuffer.NumChannels;
     
         for (int c = 0; c < n; c++)
