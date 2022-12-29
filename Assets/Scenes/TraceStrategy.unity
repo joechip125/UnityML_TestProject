@@ -122,7 +122,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 60f4481c69d09bd4ca76f68cf8c2897c, type: 2}
 --- !u!1 &132543744
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,7 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca920e939f3663640a4e02c813c15eea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPrototype: {fileID: 4108373170441605168, guid: 3e9d9014f5d81d3439173ff5ecbcda90, type: 3}
+  spawnPrototype: {fileID: 858658091625549333, guid: 353f9f37d7fbf77419544d809efd029f, type: 3}
 --- !u!1 &282376525
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,7 +251,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!64 &282376526
 MeshCollider:
@@ -628,6 +628,36 @@ MonoBehaviour:
   - {x: -69.53999, y: 0, z: 163.98999}
   - {x: -69.53999, y: 0, z: 167.59}
   - {x: -69.53999, y: 0, z: 171.19}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
+  - {x: -69.53999, y: 0, z: 174.79}
   - {x: -69.53999, y: 0, z: 174.79}
   numberDots: 10
   placePos: {x: 18.98, y: 0, z: 0}

@@ -51,19 +51,15 @@ public class TraceTest : MonoBehaviour
 
     public bool GetFreeLocation(out Vector3 relativePosition)
     {
-        var tempColl = ThePositions
-            .Where(x => !x.Occupied).ToArray();
+        relativePosition = Vector3.zero;
 
-        relativePosition = positions[0];
-
-        if (tempColl.Length > 0)
+        for (var i = 0; i < occupied.Count; i++)
         {
-            relativePosition = tempColl[0].RelativePosition;
+            if (occupied[i]) continue;
+            relativePosition = positions[i];
             return true;
         }
         
-        relativePosition = Vector3.zero;
-        relativePosition = positions[0];
         return false;
     }
     
@@ -125,20 +121,24 @@ public class TraceTest : MonoBehaviour
 
     private void ScanAreas()
     {
-        foreach (var p in positions)
+        Collider[] colliders = new Collider[30];
+        
+        for (int i = 0; i < positions.Count; i++)
         {
-            var aHit = Physics.SphereCast(p, placeSphereRadius, Vector3.right, out var hits);
+            var numHits = Physics.OverlapSphereNonAlloc(positions[i], placeSphereRadius, colliders);
+            var someHit = false;
+            for (int j = 0; j < numHits; j++)
+            {
+                if (colliders[j].CompareTag("Collector"))
+                {
+                    someHit = true;
+                }
+            }
+            Gizmos.color = someHit ? Color.green : Color.red;
+         //  ThePositions[i].Occupied = someHit;
+           occupied[i] = someHit;
             
-            if (aHit)
-            {
-                Debug.Log("a hit");
-                Gizmos.color = hits.collider.CompareTag("Collector") ? Color.green : Color.red;
-            }
-            else
-            {
-                Gizmos.color = Color.red;
-            }
-            Gizmos.DrawWireSphere(p, placeSphereRadius);
+            Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
         }
     }
     
@@ -166,7 +166,6 @@ public class TraceTest : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(center, t);
-           //Gizmos.DrawWireSphere(t, placeSphereRadius);
         }
         ScanAreas();
     }
