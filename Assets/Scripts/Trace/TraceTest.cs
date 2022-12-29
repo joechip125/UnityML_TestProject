@@ -135,8 +135,7 @@ public class TraceTest : MonoBehaviour
                 }
             }
             Gizmos.color = someHit ? Color.green : Color.red;
-         //  ThePositions[i].Occupied = someHit;
-           occupied[i] = someHit;
+            occupied[i] = someHit;
             
             Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
         }
