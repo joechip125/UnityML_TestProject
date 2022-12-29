@@ -9,18 +9,12 @@ public class TraceTest : MonoBehaviour
     [SerializeField, HideInInspector] private List<Vector3> traceLocations = new();
     [SerializeField, Range(0, 10)] private int numberDots;
     [SerializeField] private Vector3 placePos;
-    [SerializeField] private List<Vector3> directions = new();
+    [SerializeField] private List<Vector3> positions = new();
     [SerializeField] private float placeSphereRadius = 1.5f;
     private int _currentDots;
     private bool _flip;
     private Vector3 _currentPos;
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
+    
     void Update()
     {
         if (Input.GetKey(KeyCode.D))
@@ -84,11 +78,14 @@ public class TraceTest : MonoBehaviour
 
     private void GetDirections(int numbers, int start, int increment)
     {
-        directions.Clear();
+        positions.Clear();
+
+        var startDir = transform.position + GetDirectionFromRotation(start) * 12;
 
         for (int i = 0; i < numbers; i++)
         {
-           directions.Add(GetDirectionFromRotation(start + increment * i));
+            
+            positions.Add(startDir + new Vector3(0,0, i * -increment));
         }
     }
     
@@ -97,13 +94,10 @@ public class TraceTest : MonoBehaviour
         if (_currentDots != numberDots)
         {
             ChangeDots();
+            GetDirections(numberDots, 45, 2);
         }
-
-
+        
         var center = transform.position;
-        Gizmos.DrawRay(center, GetDirectionFromRotation(45));
-        Gizmos.DrawRay(center, GetDirectionFromRotation(90));
-        Gizmos.DrawRay(center, GetDirectionFromRotation(120));
         
         if (Vector3.Distance(_currentPos, center) > 0.1f)
         {
@@ -113,15 +107,12 @@ public class TraceTest : MonoBehaviour
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(center, 3.0f);
         
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube( center + placePos, new Vector3(4,4, 4 * numberDots));
-
-
-        //foreach (var t in traceLocations)
-        //{
-        //    Gizmos.color = Color.green;
-        //    Gizmos.DrawLine(center, t);
-        //    Gizmos.DrawWireSphere(t, placeSphereRadius);
-        //}
+        var pos = transform.position;
+        foreach (var t in positions)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(center, t);
+            Gizmos.DrawWireSphere(t, placeSphereRadius);
+        }
     }
 }
