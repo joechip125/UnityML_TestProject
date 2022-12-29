@@ -54,6 +54,8 @@ public class TraceTest : MonoBehaviour
         var tempColl = ThePositions
             .Where(x => !x.Occupied).ToArray();
 
+        relativePosition = positions[0];
+
         if (tempColl.Length > 0)
         {
             relativePosition = tempColl[0].RelativePosition;
@@ -61,6 +63,7 @@ public class TraceTest : MonoBehaviour
         }
         
         relativePosition = Vector3.zero;
+        relativePosition = positions[0];
         return false;
     }
     
@@ -124,10 +127,11 @@ public class TraceTest : MonoBehaviour
     {
         foreach (var p in positions)
         {
-            var aHit = Physics.SphereCast(p, placeSphereRadius, Vector3.up, out var hits);
-
+            var aHit = Physics.SphereCast(p, placeSphereRadius, Vector3.right, out var hits);
+            
             if (aHit)
             {
+                Debug.Log("a hit");
                 Gizmos.color = hits.collider.CompareTag("Collector") ? Color.green : Color.red;
             }
             else
