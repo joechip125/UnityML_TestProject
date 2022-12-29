@@ -9,6 +9,7 @@ public class TraceTest : MonoBehaviour
     [SerializeField, HideInInspector] private List<Vector3> traceLocations = new();
     [SerializeField, Range(0, 10)] private int numberDots;
     [SerializeField] private Vector3 placePos;
+    [SerializeField] private List<Vector3> directions = new();
     [SerializeField] private float placeSphereRadius = 1.5f;
     private int _currentDots;
     private bool _flip;
@@ -81,6 +82,16 @@ public class TraceTest : MonoBehaviour
                 * Vector3.forward;
     }
 
+    private void GetDirections(int numbers, int start, int increment)
+    {
+        directions.Clear();
+
+        for (int i = 0; i < numbers; i++)
+        {
+           directions.Add(GetDirectionFromRotation(start + increment * i));
+        }
+    }
+    
     private void OnDrawGizmos()
     {
         if (_currentDots != numberDots)
@@ -90,8 +101,9 @@ public class TraceTest : MonoBehaviour
 
 
         var center = transform.position;
-        Gizmos.DrawRay(center, GetDirectionFromRotation(34));
-        Gizmos.DrawRay(center, GetDirectionFromRotation(180));
+        Gizmos.DrawRay(center, GetDirectionFromRotation(45));
+        Gizmos.DrawRay(center, GetDirectionFromRotation(90));
+        Gizmos.DrawRay(center, GetDirectionFromRotation(120));
         
         if (Vector3.Distance(_currentPos, center) > 0.1f)
         {
