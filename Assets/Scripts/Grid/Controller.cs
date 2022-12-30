@@ -6,21 +6,6 @@ using UnityEngine;
 
 namespace DefaultNamespace
 {
-
-    [Serializable]
-    public class UnitValues
-    {
-        public UnitValues(Vector3 pos, Action<Vector3> callBack)
-        {
-            unitPos = pos;
-            CallBack = callBack;
-        }
-
-        public Vector3 unitPos;
-        public Action<Vector3> CallBack;
-    }
-    
-    
     [Serializable]
     public class PositionStore
     {

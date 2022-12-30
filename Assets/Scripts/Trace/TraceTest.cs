@@ -97,6 +97,11 @@ public class TraceTest : MonoBehaviour
         }
     }
 
+    private void GetUniquePositions()
+    {
+        
+    }
+
     private Vector3 GetDirectionFromRotation(float yRot)
     {
         return (transform.rotation 
