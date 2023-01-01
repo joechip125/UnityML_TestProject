@@ -34,9 +34,7 @@ public class TraceTest : MonoBehaviour
     public List<UnitPositions> ThePositions = new();
 
     private List<Vector3> _randPos = new();
-
-    private List<IUnitControlInterface> _unitControlInterfaces = new();
-
+    
      private float _moveSpeed = 5f;
      private float _rotateSpeed = 16f;
      private float _singleRotation;
@@ -266,8 +264,6 @@ public class TraceTest : MonoBehaviour
 
         if (_singleInteract)
         {
-            Debug.Log(_singleChoice);
-            Debug.Log(_singleRotation);
             var pos = GetPosition(_singleChoice);
             var dir = GetDirectionFromRotation(_singleRotation);
             Gizmos.color = Color.black;
