@@ -7,16 +7,17 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[Serializable]
 public class UnitPositions
 {
-    public bool Occupied = false;
-    public Vector3 RelativePosition;
+    public bool occupied = false;
+    public Vector3 relativePosition;
     public IUnitControlInterface UnitInterface;
 
     public UnitPositions(bool occupied, Vector3 relativePosition)
     {
-        Occupied = occupied;
-        RelativePosition = relativePosition;
+        this.occupied = occupied;
+        this.relativePosition = relativePosition;
     }
 }
 
@@ -91,10 +92,10 @@ public class TraceTest : MonoBehaviour
     {
         for (int i = 0; i < ThePositions.Count; i++)
         {
-            if (!ThePositions[i].Occupied)
+            if (!ThePositions[i].occupied)
             {
                 unitInterface?.MoveToLocation(positions[i]);
-                ThePositions[i].Occupied = true;
+                ThePositions[i].occupied = true;
                 ThePositions[i].UnitInterface = unitInterface;
                 break;
             }
@@ -184,7 +185,7 @@ public class TraceTest : MonoBehaviour
         {
             if (ThePositions.Count >= i)
             {
-                Gizmos.color = ThePositions[i].Occupied ? Color.green : Color.red;
+                Gizmos.color = ThePositions[i].occupied ? Color.green : Color.red;
                 Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
             }
         }
