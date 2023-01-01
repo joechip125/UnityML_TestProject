@@ -8,13 +8,16 @@ public class SpawnController : MonoBehaviour
     [SerializeField] private TraceTest traceTest;
     void Start()
     {
-        traceTest.GetFreeLocation(out var location);
-        spawnTile.SpawnUnit(location);
+        StartCoroutine(SpawnSome(5, 2));
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator SpawnSome(int spawnAmount, float spawnDelay)
     {
-        
+        for (int i = 0; i < spawnAmount; i++)
+        {
+            yield return new WaitForSeconds(spawnDelay);
+            traceTest.RegisterUnit(spawnTile.SpawnUnit());
+        }
     }
+    
 }

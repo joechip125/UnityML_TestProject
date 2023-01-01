@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Interfaces;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,6 +11,7 @@ public class UnitPositions
 {
     public bool Occupied = false;
     public Vector3 RelativePosition;
+    public IUnitControlInterface UnitInterface;
 
     public UnitPositions(bool occupied, Vector3 relativePosition)
     {
@@ -31,7 +34,14 @@ public class TraceTest : MonoBehaviour
     public List<UnitPositions> ThePositions = new();
 
     private List<Vector3> _randPos = new();
-    
+
+    private List<IUnitControlInterface> _unitControlInterfaces = new();
+
+    private void Awake()
+    {
+        SetUniquePositions(4);
+    }
+
     void Update()
     {
         if (Input.GetKey(KeyCode.D))
@@ -92,13 +102,20 @@ public class TraceTest : MonoBehaviour
         _currentDots = numberDots;
     }
 
-    private void MoveDots()
+    public void RegisterUnit(IUnitControlInterface unitInterface)
     {
-        foreach (var t in traceLocations)
+        for (int i = 0; i < ThePositions.Count; i++)
         {
-            
+            if (!ThePositions[i].Occupied)
+            {
+                unitInterface?.MoveToLocation(positions[i]);
+                ThePositions[i].Occupied = true;
+                ThePositions[i].UnitInterface = unitInterface;
+                break;
+            }
         }
     }
+
 
     private void SetUniquePositions(float range)
     {
@@ -114,7 +131,7 @@ public class TraceTest : MonoBehaviour
                 var location = center 
                                + new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
                 
-                if (_randPos.Any(x => Vector3.Distance(location, x) < placeSphereRadius)) continue;
+                if (_randPos.Any(x => Vector3.Distance(location, x) < placeSphereRadius * 2)) continue;
                 
                 _randPos.Add(location);
                 unique = true;
@@ -142,7 +159,8 @@ public class TraceTest : MonoBehaviour
         {
             occupied.Add(false);
             positions.Add(startDir + new Vector3(0,0, i * -increment));
-            ThePositions.Add(new UnitPositions(false, startDir + new Vector3(0,0, i * -increment)));
+            if(ThePositions.Count < i)
+                ThePositions.Add(new UnitPositions(false, startDir + new Vector3(0,0, i * -increment)));
         }
     }
 
@@ -171,28 +189,36 @@ public class TraceTest : MonoBehaviour
     
     private void OnDrawGizmos()
     {
+        var center = transform.position;
+        
         if (_currentDots != numberDots)
         {
             ChangeDots();
             GetDirections(numberDots, 45, 2);
         }
-        
-        var center = transform.position;
-        
-        if (Vector3.Distance(_currentPos, center) > 0.1f)
-        {
-            MoveDots();
-            
-        }
+
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(center, 2.0f);
+
+        for (int i = 0; i < ThePositions.Count; i++)
+        {
+            Gizmos.color = ThePositions[i].Occupied ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(traceLocations[i], placeSphereRadius);
+        }
         
-        var pos = transform.position;
         foreach (var t in positions)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(center, t);
         }
-        ScanAreas();
+
+        //if (Application.isPlaying)
+        //{
+        //    foreach (var r in _randPos)
+        //    {
+        //        Gizmos.DrawWireSphere(r, placeSphereRadius);
+        //    }
+        //}
+        
     }
 }
