@@ -31,7 +31,7 @@ public class SimpleUnit : MonoBehaviour, IUnitControlInterface
         Goal = newLocation;
     }
 
-    public void Attack(Vector3 newLocation)
+    public void Interact(Vector3 newLocation)
     {
         throw new NotImplementedException();
     }
