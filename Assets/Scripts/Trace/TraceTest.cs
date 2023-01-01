@@ -26,7 +26,6 @@ public class TraceTest : MonoBehaviour
     [SerializeField, Range(0, 10)] private int numberDots;
     [SerializeField] private Vector3 placePos;
     [SerializeField] private List<Vector3> positions = new();
-    [SerializeField] private List<bool> occupied = new();
     [SerializeField] private float placeSphereRadius = 1.5f;
     private int _currentDots;
     private bool _flip;
@@ -61,20 +60,6 @@ public class TraceTest : MonoBehaviour
             transform.position += new Vector3(0.5f * Time.deltaTime,0,0);
         }
     }
-
-    public bool GetFreeLocation(out Vector3 relativePosition)
-    {
-        relativePosition = Vector3.zero;
-
-        for (var i = 0; i < occupied.Count; i++)
-        {
-            if (occupied[i]) continue;
-            relativePosition = positions[i];
-            return true;
-        }
-        
-        return false;
-    }
     
     private void ChangeDots()
     {
@@ -86,7 +71,7 @@ public class TraceTest : MonoBehaviour
             for (int i = _currentDots; i < numberDots; i++)
             {
                 var addDir = (transform.right + new Vector3(0,0,numberDots * 0.3f)) * 12;
-                var addPos = aPos + addDir;
+                var addPos = center;
                 traceLocations.Add(addPos);
             }
         }
@@ -151,13 +136,10 @@ public class TraceTest : MonoBehaviour
     private void GetDirections(int numbers, int start, int increment)
     {
         positions.Clear();
-        occupied.Clear();
-
         var startDir = transform.position + GetDirectionFromRotation(start) * 12;
 
         for (int i = 0; i < numbers; i++)
         {
-            occupied.Add(false);
             positions.Add(startDir + new Vector3(0,0, i * -increment));
             if(ThePositions.Count < i)
                 ThePositions.Add(new UnitPositions(false, startDir + new Vector3(0,0, i * -increment)));
@@ -180,8 +162,6 @@ public class TraceTest : MonoBehaviour
                 }
             }
             Gizmos.color = someHit ? Color.green : Color.red;
-            occupied[i] = someHit;
-            
             Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
         }
     }
@@ -202,8 +182,11 @@ public class TraceTest : MonoBehaviour
 
         for (int i = 0; i < ThePositions.Count; i++)
         {
-            Gizmos.color = ThePositions[i].Occupied ? Color.green : Color.red;
-            Gizmos.DrawWireSphere(traceLocations[i], placeSphereRadius);
+            if (ThePositions.Count >= i)
+            {
+                Gizmos.color = ThePositions[i].Occupied ? Color.green : Color.red;
+                Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
+            }
         }
         
         foreach (var t in positions)
