@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class UnitPositions
 {
@@ -28,6 +29,8 @@ public class TraceTest : MonoBehaviour
     private bool _flip;
     private Vector3 _currentPos;
     public List<UnitPositions> ThePositions = new();
+
+    private List<Vector3> _randPos = new();
     
     void Update()
     {
@@ -97,9 +100,28 @@ public class TraceTest : MonoBehaviour
         }
     }
 
-    private void GetUniquePositions()
+    private void SetUniquePositions(float range)
     {
+        _randPos.Clear();
+        var center = transform.position;
         
+        var unique = false;
+        
+        for (var i = 0; i < numberDots; i++)
+        {
+            while (!unique)
+            {
+                var location = center 
+                               + new Vector3(Random.Range(-range, range), 0, Random.Range(-range, range));
+                
+                if (_randPos.Any(x => Vector3.Distance(location, x) < placeSphereRadius)) continue;
+                
+                _randPos.Add(location);
+                unique = true;
+            }
+
+            unique = false;
+        }
     }
 
     private Vector3 GetDirectionFromRotation(float yRot)
