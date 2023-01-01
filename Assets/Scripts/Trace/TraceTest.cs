@@ -37,28 +37,99 @@ public class TraceTest : MonoBehaviour
 
     private List<IUnitControlInterface> _unitControlInterfaces = new();
 
+     private float _moveSpeed = 5f;
+     private float _rotateSpeed = 10f;
+     private float _singleRotation;
+     private int _singleChoice = 0;
+
+     private bool _singleInteract = false;
+
     private void Awake()
     {
         SetUniquePositions(4);
     }
 
+    private Vector3 GetPosition(int index)
+    {
+        var startDir = transform.position + GetDirectionFromRotation(45) * 12;
+
+        return startDir + new Vector3(0, 0, index * -placeSphereRadius * 2);
+    }
+
     void Update()
     {
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            transform.position -= new Vector3(0, 0, 0.5f * Time.deltaTime);
+            _singleInteract = !_singleInteract;
         }
-        if (Input.GetKey(KeyCode.A))
+
+        if (!_singleInteract)
         {
-            transform.position += new Vector3(0, 0, 0.5f * Time.deltaTime);
+            if (Input.GetKey(KeyCode.D))
+            {
+                transform.position -= new Vector3(0, 0, _moveSpeed * Time.deltaTime);
+            }
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.position += new Vector3(0, 0, _moveSpeed * Time.deltaTime);
+            }
+
+            if (Input.GetKey(KeyCode.W))
+            {
+                transform.position += new Vector3(_moveSpeed * Time.deltaTime, 0, 0);
+            }
+
+            if (Input.GetKey(KeyCode.S))
+            {
+                transform.position -= new Vector3(_moveSpeed * Time.deltaTime, 0, 0);
+            }
+            UpdatePositions();
         }
-        if (Input.GetKey(KeyCode.W))
+        else
         {
-            transform.position += new Vector3(0.5f * Time.deltaTime,0,0);
+            if (Input.GetKey(KeyCode.A))
+            {
+                _singleRotation -= _rotateSpeed * Time.deltaTime;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                _singleRotation += _rotateSpeed * Time.deltaTime;
+            }
+
+            _singleRotation = Mathf.Clamp(_singleRotation, 45, 120);
+            
+            if (Input.anyKeyDown)
+            {
+                if (int.TryParse(Input.inputString, out var num))
+                {
+                    _singleChoice = num;
+                }
+
+                if (Input.GetKeyDown(KeyCode.H))
+                {
+                    LaunchUnit();
+                }
+            }
         }
-        if (Input.GetKey(KeyCode.S))
+    }
+
+    private void LaunchUnit()
+    {
+        if (ThePositions[_singleChoice].UnitInterface == null) return;
+        
+        var dir = GetDirectionFromRotation(_singleRotation);
+        var pos = GetPosition(_singleChoice) + dir * 12;
+        ThePositions[_singleChoice].UnitInterface.MoveToLocation(pos);
+    }
+
+    private void UpdatePositions()
+    {
+        for (int i = 0; i < ThePositions.Count; i++)
         {
-            transform.position += new Vector3(0.5f * Time.deltaTime,0,0);
+            if(ThePositions[i].UnitInterface == null) continue;
+            var pos = GetPosition(i);
+            ThePositions[i].UnitInterface.MoveToLocation(pos);
         }
     }
     
@@ -183,26 +254,24 @@ public class TraceTest : MonoBehaviour
 
         for (int i = 0; i < ThePositions.Count; i++)
         {
+            var pos = GetPosition(i);
             if (ThePositions.Count >= i)
             {
                 Gizmos.color = ThePositions[i].occupied ? Color.green : Color.red;
-                Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
+                Gizmos.DrawWireSphere(pos, placeSphereRadius);
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(center, pos);
             }
         }
-        
-        foreach (var t in positions)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(center, t);
-        }
 
-        //if (Application.isPlaying)
-        //{
-        //    foreach (var r in _randPos)
-        //    {
-        //        Gizmos.DrawWireSphere(r, placeSphereRadius);
-        //    }
-        //}
-        
+        if (_singleInteract)
+        {
+            Debug.Log(_singleChoice);
+            Debug.Log(_singleRotation);
+            var pos = GetPosition(_singleChoice);
+            var dir = GetDirectionFromRotation(_singleRotation);
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(pos, dir);
+        }
     }
 }
