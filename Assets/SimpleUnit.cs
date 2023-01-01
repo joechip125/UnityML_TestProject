@@ -20,14 +20,6 @@ public class SimpleUnit : MonoBehaviour, IUnitControlInterface
             _goal = value;
         }
     }
-
-    public void SetMoveEvent(Action<Vector3> moveAction)
-    {
-        moveAction += x =>
-        {
-            Goal = x;
-        };
-    }
     
     private void Awake()
     {
@@ -37,5 +29,10 @@ public class SimpleUnit : MonoBehaviour, IUnitControlInterface
     public void MoveToLocation(Vector3 newLocation)
     {
         Goal = newLocation;
+    }
+
+    public void Attack(Vector3 newLocation)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -38,7 +38,7 @@ public class TraceTest : MonoBehaviour
     private List<IUnitControlInterface> _unitControlInterfaces = new();
 
      private float _moveSpeed = 5f;
-     private float _rotateSpeed = 10f;
+     private float _rotateSpeed = 16f;
      private float _singleRotation;
      private int _singleChoice = 0;
 

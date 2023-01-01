@@ -114,6 +114,11 @@ public class UnitMovement : MonoBehaviour, IUnitControlInterface
         throw new NotImplementedException();
     }
 
+    public void Attack(Vector3 newLocation)
+    {
+        throw new NotImplementedException();
+    }
+
     public void AddVector(Vector3 addAmount)
     {
         throw new NotImplementedException();
