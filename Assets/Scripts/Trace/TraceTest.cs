@@ -50,8 +50,8 @@ public class TraceTest : MonoBehaviour
     private Vector3 GetPosition(int index)
     {
         var startDir = transform.position + GetDirectionFromRotation(45) * 12;
-
-        return startDir + new Vector3(0, 0, index * -placeSphereRadius * 2);
+     
+        return startDir + transform.forward * (index * -placeSphereRadius * 2);
     }
 
     void Update()
