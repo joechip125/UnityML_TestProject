@@ -23,15 +23,12 @@ public class UnitPositions
 
 public class TraceTest : MonoBehaviour
 {
-    [SerializeField, HideInInspector] private List<Vector3> traceLocations = new();
     [SerializeField, Range(0, 10)] private int numberDots;
-    [SerializeField] private Vector3 placePos;
-    [SerializeField] private List<Vector3> positions = new();
     [SerializeField] private float placeSphereRadius = 1.5f;
     private int _currentDots;
     private bool _flip;
     private Vector3 _currentPos;
-    public List<UnitPositions> ThePositions = new();
+    [SerializeField, HideInInspector]public List<UnitPositions> ThePositions = new();
 
     private List<Vector3> _randPos = new();
     
@@ -135,14 +132,10 @@ public class TraceTest : MonoBehaviour
     {
         if (numberDots > _currentDots)
         {
-            var center = transform.position;
-            var aPos = center + placePos;
-            
             for (int i = _currentDots; i < numberDots; i++)
             {
-                var addDir = (transform.right + new Vector3(0,0,numberDots * 0.3f)) * 12;
-                var addPos = center;
-                traceLocations.Add(addPos);
+                var aPos = GetPosition(i);
+                ThePositions.Add(new UnitPositions(false,aPos));
             }
         }
         
@@ -150,7 +143,7 @@ public class TraceTest : MonoBehaviour
         {
             for (int i = _currentDots; i > numberDots; i--)
             {
-                traceLocations.RemoveAt(traceLocations.Count() - 1);
+                ThePositions.RemoveAt(ThePositions.Count() - 1);
             }
         }
         
@@ -163,15 +156,14 @@ public class TraceTest : MonoBehaviour
         {
             if (!ThePositions[i].occupied)
             {
-                unitInterface?.MoveToLocation(positions[i]);
+                unitInterface?.MoveToLocation(GetPosition(i));
                 ThePositions[i].occupied = true;
                 ThePositions[i].UnitInterface = unitInterface;
                 break;
             }
         }
     }
-
-
+    
     private void SetUniquePositions(float range)
     {
         _randPos.Clear();
@@ -203,26 +195,14 @@ public class TraceTest : MonoBehaviour
                 * Vector3.forward;
     }
 
-    private void GetDirections(int numbers, int start, int increment)
-    {
-        positions.Clear();
-        var startDir = transform.position + GetDirectionFromRotation(start) * 12;
-
-        for (int i = 0; i < numbers; i++)
-        {
-            positions.Add(startDir + new Vector3(0,0, i * -increment));
-            if(ThePositions.Count < i)
-                ThePositions.Add(new UnitPositions(false, startDir + new Vector3(0,0, i * -increment)));
-        }
-    }
-
     private void ScanAreas()
     {
         Collider[] colliders = new Collider[30];
         
-        for (int i = 0; i < positions.Count; i++)
+        for (int i = 0; i < numberDots; i++)
         {
-            var numHits = Physics.OverlapSphereNonAlloc(positions[i], placeSphereRadius, colliders);
+            var pos = GetPosition(i);
+            var numHits = Physics.OverlapSphereNonAlloc(pos, placeSphereRadius, colliders);
             var someHit = false;
             for (int j = 0; j < numHits; j++)
             {
@@ -232,7 +212,7 @@ public class TraceTest : MonoBehaviour
                 }
             }
             Gizmos.color = someHit ? Color.green : Color.red;
-            Gizmos.DrawWireSphere(positions[i], placeSphereRadius);
+            Gizmos.DrawWireSphere(pos, placeSphereRadius);
         }
     }
     
@@ -240,26 +220,23 @@ public class TraceTest : MonoBehaviour
     private void OnDrawGizmos()
     {
         var center = transform.position;
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(center, 2.0f);
         
         if (_currentDots != numberDots)
         {
             ChangeDots();
-            GetDirections(numberDots, 45, 2);
         }
 
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(center, 2.0f);
-
-        for (int i = 0; i < ThePositions.Count; i++)
+        for (int i = 0; i < numberDots; i++)
         {
             var pos = GetPosition(i);
-            if (ThePositions.Count >= i)
-            {
-                Gizmos.color = ThePositions[i].occupied ? Color.green : Color.red;
-                Gizmos.DrawWireSphere(pos, placeSphereRadius);
-                Gizmos.color = Color.green;
-                Gizmos.DrawLine(center, pos);
-            }
+            
+            Gizmos.color = ThePositions[i].occupied ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(pos, placeSphereRadius);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(center, pos);
         }
 
         if (_singleInteract)
