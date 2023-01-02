@@ -36,8 +36,10 @@ public class TraceTest : MonoBehaviour
      private float _rotateSpeed = 16f;
      private float _singleRotation;
      private int _singleChoice = 0;
-
+    
      private bool _singleInteract = false;
+     [SerializeField] private float unitDistance = 12;
+     [SerializeField, HideInInspector] private List<Vector3> positions = new();
 
     private void Awake()
     {
@@ -46,9 +48,23 @@ public class TraceTest : MonoBehaviour
 
     private Vector3 GetPosition(int index)
     {
-        var startDir = transform.position + GetDirectionFromRotation(45) * 12;
-     
-        return startDir + transform.forward * (index * -placeSphereRadius * 2);
+        var transform1 = transform;
+        var middle = transform1.position + transform1.right * unitDistance;
+        var total = (placeSphereRadius * 2) * numberDots;
+        var forward = transform1.forward;
+        var single = total / numberDots;
+        var start =  middle + forward * (total / 2 -single / 2);
+
+        return start + forward * (index * -single);
+    }
+
+    private void SetPositions()
+    {
+        positions.Clear();
+        for (int i = 0; i < numberDots; i++)
+        {
+            
+        }
     }
 
     void Update()
