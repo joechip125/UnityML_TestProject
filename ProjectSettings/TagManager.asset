@@ -12,6 +12,7 @@ TagManager:
   - Collector
   - Visited
   - Mask
+  - Unit
   layers:
   - Default
   - TransparentFX
