@@ -50,7 +50,7 @@ public class TraceTest : MonoBehaviour
     {
         var transform1 = transform;
         var middle = transform1.position + transform1.right * unitDistance;
-        var total = (placeSphereRadius * 2) * numberDots;
+        var total = placeSphereRadius * 2 * numberDots;
         var forward = transform1.forward;
         var single = total / numberDots;
         var start =  middle + forward * (total / 2 -single / 2);
